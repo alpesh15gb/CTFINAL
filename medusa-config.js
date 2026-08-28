@@ -27,7 +27,7 @@ module.exports = {
       options: {
         serve: true,
         autoRebuild: false,
-        path: "app",
+        path: "/app",
         develop: {
           open: false,
         },
