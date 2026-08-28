@@ -28,6 +28,7 @@ module.exports = {
         serve: true,
         autoRebuild: false,
         path: "/app",
+        outDir: ".cache/admin",
         develop: {
           open: false,
         },
