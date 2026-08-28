@@ -23,11 +23,14 @@ module.exports = {
     },
     {
       resolve: `@medusajs/admin`,
+      /** @type {import('@medusajs/admin').PluginOptions} */
       options: {
+        serve: true,
+        autoRebuild: false,
+        path: "app",
         develop: {
           open: false,
         },
-        path: `/admin`,
       },
     },
   ],
