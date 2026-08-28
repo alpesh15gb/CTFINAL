@@ -44,6 +44,7 @@
     "tailwind-merge": "^2.5.2",
     "tailwindcss-animate": "^1.0.7",
     "three": "^0.167.1",
+    "typeorm": "0.3.22",
     "vaul": "^1.1.2",
     "zustand": "^4.5.5"
   },
