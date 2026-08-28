@@ -11,6 +11,8 @@ COPY medusa-config.js ./
 COPY data/ ./data/
 
 # Build the embedded Medusa v1 admin dashboard with the repo-pinned toolchain.
-RUN npx --no-install medusa-admin build
+RUN npx --no-install medusa-admin build \
+  && test -f /app/.cache/admin/index.html \
+  && test -f /app/.cache/admin-build-manifest.json
 
 CMD ["sh", "-c", "npx --no-install medusa migrations run && if [ -n \"$MEDUSA_ADMIN_EMAIL\" ] && [ -n \"$MEDUSA_ADMIN_PASSWORD\" ]; then npx --no-install medusa user -e \"$MEDUSA_ADMIN_EMAIL\" -p \"$MEDUSA_ADMIN_PASSWORD\" || true; fi && npx --no-install medusa start --host 0.0.0.0"]
