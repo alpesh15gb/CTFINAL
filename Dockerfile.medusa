@@ -10,7 +10,7 @@ RUN npm install --production=false
 COPY medusa-config.js ./
 COPY data/ ./data/
 
-# Build the Medusa v1 admin dashboard into the image for production startup.
-RUN npx --no-install medusa-admin build --deployment
+# Build the embedded Medusa v1 admin dashboard with the repo-pinned toolchain.
+RUN npx --no-install medusa-admin build
 
 CMD ["sh", "-c", "npx --no-install medusa migrations run && if [ -n \"$MEDUSA_ADMIN_EMAIL\" ] && [ -n \"$MEDUSA_ADMIN_PASSWORD\" ]; then npx --no-install medusa user -e \"$MEDUSA_ADMIN_EMAIL\" -p \"$MEDUSA_ADMIN_PASSWORD\" || true; fi && npx --no-install medusa start --host 0.0.0.0"]
