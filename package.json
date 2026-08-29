@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "import:sahibacar": "node scripts/import-sahibacar.js",
+    "import:neowheels": "node scripts/import-neowheels.js"
   },
   "dependencies": {
     "@medusajs/admin": "^7.1.18",
@@ -26,6 +28,7 @@
     "@radix-ui/react-tabs": "^1.1.0",
     "@react-three/drei": "^9.111.3",
     "@react-three/fiber": "^8.17.6",
+    "cheerio": "1.0.0",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "framer-motion": "^11.3.30",
