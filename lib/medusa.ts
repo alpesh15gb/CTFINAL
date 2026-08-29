@@ -304,7 +304,20 @@ export async function updateCustomer(payload: Record<string, unknown>) {
   return customer as StoreCustomer;
 }
 
-export async function listCustomerOrders() {
+export async function listCustomerOrders(): Promise<StoreOrder[]> {
   const response = await medusaClient.customers.listOrders({ limit: 50 } as any);
-  return (response.orders || []) as StoreOrder[];
+
+  return (response.orders || []).map((order): StoreOrder => ({
+    id: order.id,
+    display_id: order.display_id,
+    status: order.status,
+    fulfillment_status: order.fulfillment_status,
+    payment_status: order.payment_status,
+    total: order.total,
+    currency_code: order.currency_code,
+    created_at:
+      order.created_at instanceof Date
+        ? order.created_at.toISOString()
+        : String(order.created_at),
+  }));
 }

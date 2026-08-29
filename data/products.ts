@@ -1,6 +1,8 @@
-import { Product } from "@/types";
+import type { Product } from "@/types";
 
-export const products: Product[] = [
+type LegacyProduct = Omit<Product, "variantId" | "currencyCode">;
+
+export const products: LegacyProduct[] = [
   {
     id: "p1",
     slug: "forged-alloy-wheels-v01",
