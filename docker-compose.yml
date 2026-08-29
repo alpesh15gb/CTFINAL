@@ -8,12 +8,11 @@ services:
     env_file: .env.local
     environment:
       - NODE_ENV=production
-      - NEXT_PUBLIC_MEDUSA_BACKEND_URL=http://cartunez-medusa:9000
+      - MEDUSA_BACKEND_URL=http://cartunez-medusa:9000
     depends_on:
       medusa:
         condition: service_healthy
 
-  # Medusa PostgreSQL (port 5434 to avoid conflict with existing 5432/5433)
   medusa-db:
     image: postgres:16-alpine
     container_name: cartunez-medusa-db
@@ -32,7 +31,6 @@ services:
       timeout: 5s
       retries: 10
 
-  # Redis for Medusa
   medusa-redis:
     image: redis:7-alpine
     container_name: cartunez-medusa-redis
@@ -47,7 +45,6 @@ services:
       timeout: 5s
       retries: 10
 
-  # Medusa backend
   medusa:
     build:
       context: .
@@ -56,11 +53,12 @@ services:
     restart: unless-stopped
     ports:
       - "127.0.0.1:9000:9000"
+    env_file: .env.local
     environment:
       DATABASE_URL: postgres://medusa:medusa_secret_change_me@medusa-db:5432/medusa_cartunez
       REDIS_URL: redis://medusa-redis:6379
-      JWT_SECRET: change_this_to_a_long_random_string
-      COOKIE_SECRET: change_this_to_another_random_string
+      STORE_CORS: "http://localhost:3000,http://localhost:3015,http://cartunez.in,https://cartunez.in,http://www.cartunez.in,https://www.cartunez.in"
+      ADMIN_CORS: "http://localhost:3000,http://localhost:3015,http://cartunez.in,https://cartunez.in,http://www.cartunez.in,https://www.cartunez.in"
       PORT: 9000
     depends_on:
       medusa-db:
