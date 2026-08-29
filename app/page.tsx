@@ -11,12 +11,14 @@ import { DetailsStory } from "@/components/sections/DetailsStory";
 import { Testimonials } from "@/components/sections/Testimonials";
 import { InstagramReels } from "@/components/sections/InstagramReels";
 import { FinalCTA } from "@/components/sections/FinalCTA";
+import { BrandMarquee } from "@/components/sections/BrandMarquee";
 
 export default function Home() {
   return (
     <main className="relative overflow-hidden bg-background">
       {/* ACT 01 — Desire */}
       <Hero />
+      <BrandMarquee />
       {/* ACT 02 — Find your car */}
       <VehicleSelector />
       {/* ACT 03 — Transform it (cinematic scroll story) */}

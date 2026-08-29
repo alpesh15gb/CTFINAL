@@ -1,32 +1,30 @@
-"use client";
-
 import Link from "next/link";
 import Image from "next/image";
-import { Instagram, Youtube, ArrowUpRight, ArrowRight } from "lucide-react";
+import { ArrowRight, ArrowUpRight, Instagram, Youtube } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const footerLinks = [
   {
-    title: "Shop",
+    title: "Upgrade",
     links: [
-      { label: "All Products", href: "/shop" },
+      { label: "All products", href: "/shop" },
       { label: "Exterior", href: "/shop?category=exterior" },
       { label: "Interior", href: "/shop?category=interior" },
       { label: "Lighting", href: "/shop?category=lighting" },
-      { label: "Wheels", href: "/shop?category=wheels" },
       { label: "Performance", href: "/shop?category=performance" },
     ],
   },
   {
-    title: "Company",
+    title: "Discover",
     links: [
-      { label: "Builds", href: "/builds" },
-      { label: "Vehicle Fitment", href: "/#vehicle-selector" },
-      { label: "About", href: "/about" },
-      { label: "Contact", href: "/contact" },
+      { label: "Curated builds", href: "/builds" },
+      { label: "Vehicle fitment", href: "/#vehicle-selector" },
+      { label: "Our approach", href: "/about" },
+      { label: "Talk to an expert", href: "/contact" },
     ],
   },
   {
-    title: "Support",
+    title: "Ownership",
     links: [
       { label: "Shipping", href: "/shipping" },
       { label: "Returns", href: "/returns" },
@@ -38,79 +36,75 @@ const footerLinks = [
 
 export function Footer() {
   return (
-    <footer className="relative overflow-hidden border-t border-border bg-raised">
-      <div className="relative mx-auto max-w-[1600px] px-4 pt-16 md:px-8 md:pt-24">
-        {/* Top: brand statement / CTA */}
-        <div className="mb-16 flex flex-col items-start justify-between gap-8 md:flex-row md:items-center">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.25em] text-cyan">
-              Get Your Car Rolling In Style.
-            </p>
-            <p className="mt-2 max-w-md font-display text-3xl font-semibold uppercase leading-tight text-foreground md:text-4xl">
-              Built Around Your Ride.
+    <footer className="precision-grid relative overflow-hidden border-t border-border bg-[#020303]">
+      <div className="site-container relative pt-16 md:pt-24">
+        <div className="grid items-end gap-10 border-b border-border pb-14 lg:grid-cols-12 lg:pb-20">
+          <div className="lg:col-span-8">
+            <p className="technical-label">Performance, made personal</p>
+            <p className="mt-6 max-w-4xl font-display text-5xl font-bold uppercase leading-[0.84] tracking-tight text-foreground md:text-7xl">
+              Build something
+              <span className="display-outline block">unmistakably yours.</span>
             </p>
           </div>
-          <Link
-            href="/shop"
-            className="group inline-flex items-center gap-2 rounded-full bg-cyan px-6 py-3 text-sm font-semibold uppercase tracking-wider text-black transition-colors hover:bg-cyan-light"
-          >
-            Start Your Build
-            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-          </Link>
+          <div className="lg:col-span-4 lg:justify-self-end">
+            <Button asChild size="lg">
+              <Link href="/#vehicle-selector" className="gap-3">
+                Start with your car <ArrowRight className="h-4 w-4" aria-hidden="true" />
+              </Link>
+            </Button>
+          </div>
         </div>
 
-        {/* Middle: navigation */}
-        <div className="grid gap-12 border-t border-border pt-12 md:grid-cols-2 lg:grid-cols-5">
+        <div className="grid gap-12 py-14 md:grid-cols-2 lg:grid-cols-5 lg:py-20">
           <div className="lg:col-span-2">
-            <Link href="/" aria-label="Cartunez home">
+            <Link href="/" aria-label="Cartunez home" className="inline-flex min-h-11 items-center">
               <Image
                 src="/logo/cartunez-logo.png"
                 alt="Cartunez"
-                width={160}
-                height={56}
-                className="mb-6 h-12 w-auto object-contain"
+                width={180}
+                height={64}
+                className="h-12 w-auto object-contain"
               />
             </Link>
-            <p className="max-w-sm text-sm leading-relaxed text-silver-muted">
-              Premium accessories, styling and performance upgrades built around
-              your ride. Get your car rolling in style.
+            <p className="mt-6 max-w-sm text-sm leading-relaxed text-silver-muted">
+              Premium automotive upgrades, fitment guidance and considered builds for drivers who care about every detail.
             </p>
-            <div className="mt-6 flex items-center gap-4">
+            <div className="mt-7 flex items-center gap-3">
               <a
                 href="https://instagram.com/cartunez_hyd"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex h-10 w-10 items-center justify-center rounded-full border border-border text-silver transition-colors hover:border-cyan hover:text-cyan"
-                aria-label="Instagram"
+                className="flex h-11 w-11 items-center justify-center border border-border text-silver transition hover:border-cyan hover:text-cyan focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan"
+                aria-label="Cartunez on Instagram"
               >
-                <Instagram className="h-4 w-4" />
+                <Instagram className="h-4 w-4" aria-hidden="true" />
               </a>
               <a
                 href="https://youtube.com/cartunez"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex h-10 w-10 items-center justify-center rounded-full border border-border text-silver transition-colors hover:border-cyan hover:text-cyan"
-                aria-label="YouTube"
+                className="flex h-11 w-11 items-center justify-center border border-border text-silver transition hover:border-cyan hover:text-cyan focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan"
+                aria-label="Cartunez on YouTube"
               >
-                <Youtube className="h-4 w-4" />
+                <Youtube className="h-4 w-4" aria-hidden="true" />
               </a>
             </div>
           </div>
 
           {footerLinks.map((group) => (
             <div key={group.title}>
-              <h3 className="mb-4 text-xs font-semibold uppercase tracking-widest text-foreground">
+              <h3 className="font-mono text-[11px] font-bold uppercase tracking-[0.2em] text-foreground">
                 {group.title}
               </h3>
-              <ul className="space-y-3">
+              <ul className="mt-5 space-y-1">
                 {group.links.map((link) => (
                   <li key={link.label}>
                     <Link
                       href={link.href}
-                      className="group inline-flex items-center gap-1 text-sm text-silver-muted transition-colors hover:text-cyan"
+                      className="group inline-flex min-h-11 items-center gap-1.5 text-sm text-silver-muted transition-colors hover:text-cyan focus-visible:outline-none focus-visible:text-cyan"
                     >
                       {link.label}
-                      <ArrowUpRight className="h-3 w-3 opacity-0 transition-opacity group-hover:opacity-100" />
+                      <ArrowUpRight className="h-3.5 w-3.5 opacity-0 transition-opacity group-hover:opacity-100" aria-hidden="true" />
                     </Link>
                   </li>
                 ))}
@@ -119,27 +113,17 @@ export function Footer() {
           ))}
         </div>
 
-        <div className="mt-16 flex flex-col items-center justify-between gap-4 border-t border-border py-8 text-xs text-silver-muted md:flex-row">
-          <p>&copy; {new Date().getFullYear()} Cartunez. All rights reserved.</p>
-          <div className="flex gap-6">
-            <Link href="/privacy" className="hover:text-foreground">Privacy Policy</Link>
-            <Link href="/terms" className="hover:text-foreground">Terms of Service</Link>
+        <div className="flex flex-col gap-4 border-t border-border py-7 font-mono text-[10px] uppercase tracking-[0.14em] text-silver-muted md:flex-row md:items-center md:justify-between">
+          <p>&copy; {new Date().getFullYear()} Cartunez. Engineered in Hyderabad.</p>
+          <div className="flex flex-wrap gap-x-6 gap-y-2">
+            <Link href="/privacy" className="py-2 transition-colors hover:text-foreground">Privacy</Link>
+            <Link href="/terms" className="py-2 transition-colors hover:text-foreground">Terms</Link>
           </div>
         </div>
       </div>
 
-      {/* Bottom: huge cropped CARTUNEZ wordmark */}
-      <div className="pointer-events-none relative select-none overflow-hidden">
-        <div className="atmo-horizon absolute left-1/2 top-0 w-2/3 -translate-x-1/2" />
-        <span
-          className="block translate-y-[18%] whitespace-nowrap text-center font-display text-[19vw] font-bold uppercase leading-[0.8] tracking-tighter"
-          style={{
-            background: "linear-gradient(180deg, rgba(242,242,242,0.14) 0%, rgba(242,242,242,0.03) 60%, transparent 100%)",
-            WebkitBackgroundClip: "text",
-            backgroundClip: "text",
-            color: "transparent",
-          }}
-        >
+      <div className="pointer-events-none relative select-none overflow-hidden" aria-hidden="true">
+        <span className="display-outline block translate-y-[18%] whitespace-nowrap text-center font-display text-[19vw] font-bold uppercase leading-[0.78] tracking-[-0.055em] opacity-20">
           Cartunez
         </span>
       </div>

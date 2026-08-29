@@ -3,8 +3,8 @@
 import { useRef } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { motion, useScroll, useTransform } from "framer-motion";
-import { ArrowRight, ChevronDown, Wrench } from "lucide-react";
+import { motion, useInView, useScroll, useTransform } from "framer-motion";
+import { ArrowDown, ArrowRight, ShieldCheck, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 
@@ -18,153 +18,136 @@ const HeroCanvas = dynamic(
 
 function HeroFallback() {
   return (
-    <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-raised">
-      <div className="absolute inset-0 flex items-center justify-center">
-        <div className="h-16 w-16 animate-pulse rounded-full border-2 border-cyan/20" />
-      </div>
-    </div>
+    <div className="absolute inset-0 bg-[radial-gradient(circle_at_65%_45%,rgba(49,207,255,0.08),transparent_28rem)]" />
   );
 }
 
 export function Hero() {
-  const containerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLElement>(null);
   const reducedMotion = useReducedMotion();
-
+  const isInView = useInView(containerRef, { margin: "200px 0px" });
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ["start start", "end end"],
   });
 
-  // Title enters quickly, holds, and exits gently (never collapses to a thin strip)
-  const titleOpacity = useTransform(scrollYProgress, [0, 0.08, 0.8, 1], [0, 1, 1, 0]);
-  const titleY = useTransform(scrollYProgress, [0, 0.08, 1], [80, 0, -60]);
-  const titleScale = useTransform(scrollYProgress, [0, 0.08, 1], [0.9, 1, 0.98]);
-
-  const eyebrowOpacity = useTransform(scrollYProgress, [0, 0.06, 0.85, 1], [0, 1, 1, 0]);
-  const eyebrowY = useTransform(scrollYProgress, [0, 0.06], [20, 0]);
-
-  const copyOpacity = useTransform(scrollYProgress, [0.05, 0.14, 0.75, 0.95], [0, 1, 1, 0]);
-  const copyY = useTransform(scrollYProgress, [0.05, 0.14], [30, 0]);
-
-  // Overlay only darkens in the final moment as the next section enters
-  const overlayOpacity = useTransform(scrollYProgress, [0.9, 1], [0, 0.6]);
-  const ctaOpacity = useTransform(scrollYProgress, [0.06, 0.18, 0.75, 0.95], [0, 1, 1, 0]);
-
-  // Persistent atmospheric glow connecting hero to next section
-  const glowOpacity = useTransform(scrollYProgress, [0, 0.3, 1], [0.4, 0.6, 0.8]);
+  const contentY = useTransform(scrollYProgress, [0, 1], [0, -72]);
+  const contentOpacity = useTransform(scrollYProgress, [0, 0.76, 1], [1, 1, 0]);
+  const contentScale = useTransform(scrollYProgress, [0, 1], [1, 0.97]);
+  const panelX = useTransform(scrollYProgress, [0, 1], [0, 56]);
+  const panelOpacity = useTransform(scrollYProgress, [0, 0.7, 1], [1, 1, 0]);
+  const shadeOpacity = useTransform(scrollYProgress, [0.76, 1], [0, 0.82]);
 
   return (
-    <section ref={containerRef} className="relative h-[130vh]">
-      <div className="sticky top-0 h-screen w-full overflow-hidden bg-background">
-        {/* 3D Scene */}
-        <HeroCanvas scrollProgress={scrollYProgress} reducedMotion={reducedMotion} />
-
-        {/* Subtle atmospheric glow */}
-        <motion.div
-          style={{ opacity: reducedMotion ? 0.5 : glowOpacity }}
-          className="atmo-glow pointer-events-none absolute inset-0 z-10"
+    <section ref={containerRef} className="relative h-[145svh] min-h-[900px] bg-background">
+      <div className="sticky top-0 h-svh min-h-[680px] overflow-hidden bg-background">
+        <HeroCanvas
+          scrollProgress={scrollYProgress}
+          reducedMotion={reducedMotion}
+          active={isInView}
         />
 
-        {/* Dark gradient overlays for text legibility */}
-        <div className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-b from-background/60 via-transparent to-background/70" />
+        <div className="precision-grid pointer-events-none absolute inset-0 z-[1] opacity-70" />
+        <div className="noise-overlay pointer-events-none absolute inset-0 z-[2] opacity-[0.025]" />
+        <div className="pointer-events-none absolute inset-0 z-[3] bg-[radial-gradient(circle_at_66%_46%,transparent_0%,rgba(3,4,5,0.08)_26%,rgba(3,4,5,0.8)_78%)]" />
+        <div className="pointer-events-none absolute inset-0 z-[3] bg-gradient-to-b from-black/50 via-transparent to-background" />
         <motion.div
-          style={{ opacity: overlayOpacity }}
-          className="pointer-events-none absolute inset-0 z-10 bg-background"
+          style={{ opacity: shadeOpacity }}
+          className="pointer-events-none absolute inset-0 z-[4] bg-background"
         />
 
-        {/* Content */}
-        <div className="relative z-20 flex h-full flex-col justify-between px-4 md:px-8">
-          <div className="mx-auto flex w-full max-w-[1600px] flex-1 flex-col justify-center pt-20">
-            {/* Eyebrow */}
-            <motion.div
-              style={{ opacity: reducedMotion ? 1 : eyebrowOpacity, y: reducedMotion ? 0 : eyebrowY }}
-              className="mb-4 flex items-center gap-3"
-            >
-              <span className="h-px w-8 bg-cyan" />
-              <span className="text-xs font-semibold uppercase tracking-[0.25em] text-cyan">
-                Cartunez Performance Accessories
-              </span>
-            </motion.div>
+        <motion.div
+          style={{
+            y: reducedMotion ? 0 : contentY,
+            opacity: reducedMotion ? 1 : contentOpacity,
+            scale: reducedMotion ? 1 : contentScale,
+          }}
+          className="site-container relative z-10 flex h-full flex-col pb-7 pt-24 lg:pb-9 lg:pt-32"
+        >
+          <div className="flex items-center justify-between border-b border-white/[0.09] pb-4">
+            <span className="technical-label">Automotive performance / India</span>
+            <span className="hidden font-mono text-[9px] uppercase tracking-[0.2em] text-silver-muted md:block">
+              Bespoke fitment system / CYZ-01
+            </span>
+          </div>
 
-            {/* Headline */}
+          <div className="flex flex-1 flex-col justify-center py-8 lg:py-4">
             <motion.h1
-              style={{
-                opacity: titleOpacity,
-                y: reducedMotion ? 0 : titleY,
-                scale: reducedMotion ? 1 : titleScale,
-              }}
-              className="font-display text-[clamp(4rem,13vw,13rem)] font-bold uppercase leading-[0.85] tracking-tight text-foreground"
+              initial={reducedMotion ? false : { opacity: 0, y: 44 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.9, delay: 0.22, ease: [0.16, 1, 0.3, 1] }}
+              className="max-w-[1260px] font-display text-[clamp(4.5rem,12vw,12.5rem)] font-bold uppercase leading-[0.73] tracking-[-0.045em] text-foreground"
             >
-              <span className="block">Tune</span>
-              <span className="block text-silver">Your</span>
-              <span className="block text-transparent" style={{ WebkitTextStroke: "1.5px rgba(242,242,242,0.85)" }}>
-                Drive.
-              </span>
+              <span className="block">Built</span>
+              <span className="block pl-[8vw] text-silver">Beyond</span>
+              <span className="display-outline block">Factory.</span>
             </motion.h1>
 
-            {/* Supporting copy */}
-            <motion.p
-              style={{ opacity: reducedMotion ? 1 : copyOpacity, y: reducedMotion ? 0 : copyY }}
-              className="mt-6 max-w-md text-base leading-relaxed text-silver-muted md:text-lg"
-            >
-              Premium accessories, styling and performance upgrades built around
-              your ride.
-            </motion.p>
-
-            {/* CTAs */}
             <motion.div
-              style={{ opacity: reducedMotion ? 1 : ctaOpacity }}
-              className="mt-8 flex flex-wrap items-center gap-4"
+              initial={reducedMotion ? false : { opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.42, ease: [0.16, 1, 0.3, 1] }}
+              className="mt-8 flex max-w-2xl flex-col gap-7 md:ml-[8vw] md:mt-10 md:flex-row md:items-end"
             >
-              <Button asChild size="lg" className="bg-cyan text-black hover:bg-cyan-light">
-                <Link href="/shop" className="gap-2">
-                  Find Accessories
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
-              </Button>
-              <Button
-                asChild
-                variant="outline"
-                size="lg"
-                className="border-border bg-transparent text-foreground hover:border-cyan hover:text-cyan"
-              >
-                <Link href="/builds" className="gap-2">
-                  Explore Builds
-                </Link>
-              </Button>
+              <p className="max-w-md text-base leading-relaxed text-silver-muted md:text-lg">
+                Vehicle-specific accessories and performance upgrades, selected for exact fitment and finished to feel factory—only better.
+              </p>
+              <div className="flex shrink-0 flex-wrap gap-3">
+                <Button asChild size="lg">
+                  <Link href="/#vehicle-selector">
+                    Match my vehicle <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </Button>
+                <Button asChild variant="outline" size="lg">
+                  <Link href="/builds">View builds</Link>
+                </Button>
+              </div>
             </motion.div>
           </div>
 
-          {/* Bottom bar */}
-          <div className="mx-auto flex w-full max-w-[1600px] items-end justify-between pb-8">
-            <motion.div
-              style={{ opacity: reducedMotion ? 1 : ctaOpacity }}
-              className="hidden items-center gap-3 md:flex"
-            >
-              <div className="flex h-10 w-10 items-center justify-center rounded-full border border-border text-cyan">
-                <Wrench className="h-4 w-4" />
+          <div className="grid gap-3 border-t border-white/[0.09] pt-5 sm:grid-cols-3 lg:max-w-3xl">
+            {[
+              { icon: ShieldCheck, value: "98%", label: "Fitment accuracy" },
+              { icon: Sparkles, value: "12K+", label: "Cars transformed" },
+              { icon: ArrowRight, value: "2 YR", label: "Product warranty" },
+            ].map((item) => (
+              <div key={item.label} className="flex items-center gap-3 border-white/[0.08] sm:border-r sm:pr-5 last:border-r-0">
+                <item.icon className="h-4 w-4 text-cyan" aria-hidden="true" />
+                <div>
+                  <p className="font-display text-xl font-semibold leading-none text-foreground">{item.value}</p>
+                  <p className="mt-1 font-mono text-[8px] uppercase tracking-[0.16em] text-silver-muted">{item.label}</p>
+                </div>
               </div>
-              <div>
-                <p className="text-xs uppercase tracking-widest text-silver-muted">
-                  Fitment First
-                </p>
-                <p className="text-sm font-medium text-foreground">
-                  Parts matched to your car
-                </p>
-              </div>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 2.2, duration: 0.6 }}
-              className="flex flex-col items-center gap-2 text-silver-muted"
-            >
-              <span className="text-[10px] uppercase tracking-[0.2em]">Scroll to tune</span>
-              <ChevronDown className="h-4 w-4 animate-bounce" />
-            </motion.div>
+            ))}
           </div>
-        </div>
+        </motion.div>
+
+        <motion.aside
+          style={{
+            x: reducedMotion ? 0 : panelX,
+            opacity: reducedMotion ? 1 : panelOpacity,
+          }}
+          className="glass-panel absolute bottom-10 right-10 z-20 hidden w-64 rounded-sm p-5 xl:block"
+        >
+          <div className="flex items-center justify-between font-mono text-[8px] uppercase tracking-[0.18em] text-silver-muted">
+            <span>Live fitment engine</span>
+            <span className="h-1.5 w-1.5 rounded-full bg-cyan shadow-[0_0_12px_var(--cyan)]" />
+          </div>
+          <div className="my-5 h-px bg-border" />
+          <p className="font-display text-3xl font-semibold uppercase leading-none text-foreground">Precision first.</p>
+          <p className="mt-3 text-sm leading-relaxed text-silver-muted">
+            Select your exact make, model, year and variant before you shop.
+          </p>
+        </motion.aside>
+
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.85, duration: 0.6 }}
+          className="absolute bottom-8 right-5 z-20 flex items-center gap-3 font-mono text-[8px] uppercase tracking-[0.2em] text-silver-muted lg:right-10 xl:hidden"
+        >
+          Scroll to explore <ArrowDown className="h-4 w-4 animate-bounce text-cyan motion-reduce:animate-none" />
+        </motion.div>
       </div>
     </section>
   );

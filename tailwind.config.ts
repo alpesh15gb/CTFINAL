@@ -52,17 +52,21 @@ const config: Config = {
   			},
   			ring: 'var(--ring)'
   		},
-  		fontFamily: {
-  			display: [
-  				'var(--font-display)',
-  				'sans-serif'
-  			],
-  			sans: [
-  				'var(--font-sans)',
-  				'system-ui',
-  				'sans-serif'
-  			]
-  		},
+        fontFamily: {
+          display: [
+            'var(--font-display)',
+            'sans-serif'
+          ],
+          sans: [
+            'var(--font-sans)',
+            'system-ui',
+            'sans-serif'
+          ],
+          mono: [
+            'var(--font-mono)',
+            'monospace'
+          ]
+        },
   		borderRadius: {
   			sm: 'var(--radius-sm)',
   			md: 'var(--radius-md)',

@@ -1,0 +1,7 @@
+.git
+.next
+node_modules
+*.tsbuildinfo
+npm-debug.log*
+scripts/screenshots
+nginx/certs
