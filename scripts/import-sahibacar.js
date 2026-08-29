@@ -31,18 +31,36 @@ function mapCategory(product) {
   const title = String(product.title || "").toLowerCase();
   const haystack = `${type} ${tags} ${title}`;
 
+  // Prefer the product's primary identity over bundled features in long titles.
+  // For example, an Android stereo bundled with a reverse camera is still a
+  // stereo, while a "360 Camera Kit for Android Car Stereo" is a camera kit.
+  if (
+    /camera\s*kit|360\s*[°º]?\s*camera\s*kit|reverse\s*camera\s*kit|rear\s*camera\s*kit/.test(
+      title
+    )
+  ) {
+    return "Reverse Cameras";
+  }
+  if (
+    /android(?:\s+car)?\s+stereo|car\s+stereo|infotainment|wireless\s+carplay|android\s+auto/.test(
+      title
+    )
+  ) {
+    return "Android Stereos";
+  }
+
   const rules = [
     ["Car Speakers", /speaker|component|coaxial/],
     ["Car Amplifiers", /amplifier|\bamp\b/],
     ["Car Subwoofers", /subwoofer|woofer/],
     ["Sound Damping", /damping|deadening/],
     ["Dash Cameras", /dash\s*cam|dashcam/],
+    ["Android Stereos", /android|stereo|carplay|infotainment/],
     ["Reverse Cameras", /reverse\s*camera|rear\s*camera|camera/],
     ["Ambient Lighting", /ambient\s*(light|lighting)/],
     ["Headlights", /head\s*light|headlamp/],
     ["Tail Lights", /tail\s*light|taillight/],
     ["LED Lights", /fog\s*light|led\s*light|indicator|reflector/],
-    ["Android Stereos", /android|stereo|carplay|infotainment/],
     ["Wiring Harnesses", /harness/],
     ["Car Grills", /grill|grille/],
     ["Car Spoilers", /spoiler/],
@@ -143,11 +161,20 @@ async function main() {
   if (args.dryRun) {
     let ready = 0;
     for (const sourceProduct of rawProducts) {
-      const images = await verifiedImages(sourceProduct, args.skipImageCheck);
       const variants = (sourceProduct.variants || []).filter(
         (variant) => rupeesToPaise(variant.price) > 0
       );
-      if (!images.length || !variants.length) continue;
+      if (!variants.length) {
+        console.log(`[SKIP] no priced variants: ${sourceProduct.title}`);
+        continue;
+      }
+
+      const images = await verifiedImages(sourceProduct, args.skipImageCheck);
+      if (!images.length) {
+        console.log(`[SKIP] no verified source images: ${sourceProduct.title}`);
+        continue;
+      }
+
       ready += 1;
       console.log(
         `[OK] ${sourceProduct.title} | ${mapCategory(sourceProduct)} | ${variants.length} variants | ${images.length}/${(sourceProduct.images || []).length} images | ₹${sourceProduct.variants[0]?.price || "0"}`
