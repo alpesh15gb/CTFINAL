@@ -23,26 +23,25 @@ const CATEGORY_NAME = "Wheels";
 const CATEGORY_HANDLE = "wheels";
 const REQUEST_DELAY_MS = 300;
 
-const STOREFRONT_VEHICLES = [
+// These are the vehicles currently exposed by the Cartunez storefront selector.
+// Compatibility is added only when Neo's own model-match page lists the exact
+// Neo catalog URL. We do not infer an "exact" fit merely from PCD equality.
+const NEO_MODEL_MATCHES = [
   {
-    make: "hyundai",
-    model: "creta",
-    slugs: ["hyundai-creta-2026-sxo", "hyundai-creta-2025-sx"],
+    neoCarSlug: "hyundai-creta",
+    storefrontSlugs: ["hyundai-creta-2026-sxo", "hyundai-creta-2025-sx"],
   },
   {
-    make: "kia",
-    model: "seltos",
-    slugs: ["kia-seltos-2026-gtxplus"],
+    neoCarSlug: "kia-seltos",
+    storefrontSlugs: ["kia-seltos-2026-gtxplus"],
   },
   {
-    make: "tata",
-    model: "harrier",
-    slugs: ["tata-harrier-2026-xzaplus"],
+    neoCarSlug: "tata-harrier",
+    storefrontSlugs: ["tata-harrier-2026-xzaplus"],
   },
   {
-    make: "mahindra",
-    model: "xuv700",
-    slugs: ["mahindra-xuv700-2026-ax7l"],
+    neoCarSlug: "mahindra-xuv-700",
+    storefrontSlugs: ["mahindra-xuv700-2026-ax7l"],
   },
 ];
 
@@ -90,6 +89,41 @@ function variantCardText($, anchor) {
   return compact($(anchor).parent().text());
 }
 
+function canonicalCatalogPath(value) {
+  try {
+    const pathname = new URL(value, BASE_URL).pathname.replace(/\/+$/, "");
+    return /^\/catalog\/[^/]+\/[^/]+$/i.test(pathname) ? pathname.toLowerCase() : "";
+  } catch (_) {
+    return "";
+  }
+}
+
+async function buildOfficialModelMatchIndex() {
+  const index = new Map();
+
+  for (const match of NEO_MODEL_MATCHES) {
+    const url = `${BASE_URL}/car/${match.neoCarSlug}`;
+    try {
+      const html = await fetchText(url);
+      const $ = cheerio.load(html);
+      let found = 0;
+      $('a[href*="/catalog/"]').each((_, element) => {
+        const path = canonicalCatalogPath($(element).attr("href") || "");
+        if (!path) return;
+        if (!index.has(path)) index.set(path, new Set());
+        match.storefrontSlugs.forEach((slug) => index.get(path).add(slug));
+        found += 1;
+      });
+      console.log(`Neo model match ${match.neoCarSlug}: ${found} exact wheel links`);
+    } catch (error) {
+      console.warn(`Neo model match unavailable ${url}: ${error.message}`);
+    }
+    await sleep(REQUEST_DELAY_MS);
+  }
+
+  return index;
+}
+
 async function getDesignSlugs() {
   const candidates = ["/catalog/product", "/product"];
   for (const path of candidates) {
@@ -132,8 +166,7 @@ async function getVariantCards(designSlug) {
             new RegExp(`/catalog/${designSlug}/([^/?#]+)$`, "i")
           );
           if (!match) return;
-          const text = variantCardText($, element);
-          const money = parseMoney(text);
+          const money = parseMoney(variantCardText($, element));
           const previous = variants.get(url) || {};
           variants.set(url, {
             url,
@@ -166,44 +199,66 @@ function parseCompatibleCars($) {
   return cars;
 }
 
-function mapOfficialCompatibility(cars) {
+function mapDetailPageCompatibility(cars) {
   const mapped = new Set();
   for (const car of cars) {
     const normalized = slugify(`${car.slug} ${car.label}`).replace(/-/g, " ");
-    for (const vehicle of STOREFRONT_VEHICLES) {
-      const makeMatches = normalized.includes(vehicle.make);
-      const modelCompact = vehicle.model.replace(/[^a-z0-9]/g, "");
+    for (const match of NEO_MODEL_MATCHES) {
+      const target = match.neoCarSlug.replace(/-/g, " ");
+      const targetCompact = target.replace(/[^a-z0-9]/g, "");
       const normalizedCompact = normalized.replace(/[^a-z0-9]/g, "");
-      const modelMatches = normalizedCompact.includes(modelCompact);
-      if (makeMatches && modelMatches) {
-        vehicle.slugs.forEach((slug) => mapped.add(slug));
+      if (normalizedCompact.includes(targetCompact)) {
+        match.storefrontSlugs.forEach((slug) => mapped.add(slug));
       }
     }
   }
   return [...mapped];
 }
 
-async function parseVariantPage(designSlug, card, skipImageCheck) {
+async function parseVariantPage(
+  designSlug,
+  card,
+  skipImageCheck,
+  officialModelMatchIndex
+) {
   const html = await fetchText(card.url);
   const $ = cheerio.load(html);
   const title = compact($("h1").first().text());
   const bodyText = compact($("body").text());
 
   const design = labelFromHeading($, "Design") || designSlug.replace(/-/g, " ");
-  const size = labelFromHeading($, "Size") || (title.match(/^(\d+(?:\.\d+)?x\d+(?:\.\d+)?)/i)?.[1] || "");
-  const rawPcd = labelFromHeading($, "PCD") || (title.match(/\b([456]\s*x\s*[\d.]+(?:\s*x\s*[\d.]+)?)\b/i)?.[1] || "");
+  const size =
+    labelFromHeading($, "Size") ||
+    (title.match(/^(\d+(?:\.\d+)?x\d+(?:\.\d+)?)/i)?.[1] || "");
+  const rawPcd =
+    labelFromHeading($, "PCD") ||
+    (title.match(/\b([456]\s*x\s*[\d.]+(?:\s*x\s*[\d.]+)?)\b/i)?.[1] || "");
   const finish = labelFromHeading($, "Finish") || "";
   const pcd = normalizePcd(rawPcd);
   const offset = extractSpec(bodyText, "OFFSET");
   const centerBore = extractSpec(bodyText, "BORE\\s*SIZE");
   const compatibleCars = parseCompatibleCars($);
-  const compatibility = mapOfficialCompatibility(compatibleCars);
+
+  const detailCompatibility = mapDetailPageCompatibility(compatibleCars);
+  const officialPath = canonicalCatalogPath(card.url);
+  const modelMatchCompatibility = officialPath && officialModelMatchIndex.has(officialPath)
+    ? [...officialModelMatchIndex.get(officialPath)]
+    : [];
+  const compatibility = [...new Set([...modelMatchCompatibility, ...detailCompatibility])];
+  const compatibilityBasis = modelMatchCompatibility.length
+    ? "neo_official_model_match_page"
+    : detailCompatibility.length
+      ? "neo_official_product_page"
+      : "none";
 
   const imageCandidates = [];
   $("img").each((_, image) => {
     const src = $(image).attr("src") || $(image).attr("data-src") || "";
     const alt = compact($(image).attr("alt"));
-    if (/Upload\/product/i.test(src) || (title && alt.toLowerCase() === title.toLowerCase())) {
+    if (
+      /Upload\/product/i.test(src) ||
+      (title && alt.toLowerCase() === title.toLowerCase())
+    ) {
       const absolute = absoluteUrl(src, BASE_URL);
       if (absolute) imageCandidates.push(absolute);
     }
@@ -215,7 +270,9 @@ async function parseVariantPage(designSlug, card, skipImageCheck) {
 
   const description =
     compact($("meta[name='description']").attr("content")) ||
-    `${title}. Neo Wheels alloy wheel with ${size || "listed"} size and ${pcd.display || rawPcd || "listed"} PCD.`;
+    `${title}. Neo Wheels alloy wheel with ${size || "listed"} size and ${
+      pcd.display || rawPcd || "listed"
+    } PCD.`;
 
   return {
     ...card,
@@ -228,6 +285,7 @@ async function parseVariantPage(designSlug, card, skipImageCheck) {
     centerBore,
     compatibleCars,
     compatibility,
+    compatibilityBasis,
     images,
     description: stripHtml(description).slice(0, 4000),
   };
@@ -245,6 +303,7 @@ function featureList(wheel) {
 }
 
 async function collectWheels(limit, skipImageCheck) {
+  const officialModelMatchIndex = await buildOfficialModelMatchIndex();
   const designs = await getDesignSlugs();
   console.log(`Discovered ${designs.length} Neo wheel designs`);
   const wheels = [];
@@ -260,7 +319,8 @@ async function collectWheels(limit, skipImageCheck) {
         const wheel = await parseVariantPage(
           designSlug,
           card,
-          skipImageCheck
+          skipImageCheck,
+          officialModelMatchIndex
         );
         if (!wheel.title || !wheel.pcd.patterns.length) {
           console.log(`[SKIP] incomplete PCD specification: ${card.url}`);
@@ -296,7 +356,11 @@ async function main() {
   if (args.dryRun) {
     for (const wheel of wheels) {
       console.log(
-        `[OK] ${wheel.title} | PCD ${wheel.pcd.display} | offset ${wheel.offset || "n/a"} | bore ${wheel.centerBore || "n/a"} | ₹${wheel.salePrice} | cars ${wheel.compatibleCars.length} | images ${wheel.images.length}`
+        `[OK] ${wheel.title} | PCD ${wheel.pcd.display} | offset ${
+          wheel.offset || "n/a"
+        } | bore ${wheel.centerBore || "n/a"} | ₹${wheel.salePrice} | compatibility ${
+          wheel.compatibility.length
+        } (${wheel.compatibilityBasis}) | images ${wheel.images.length}`
       );
     }
     return;
@@ -312,7 +376,8 @@ async function main() {
     {
       name: CATEGORY_NAME,
       handle: CATEGORY_HANDLE,
-      description: "Neo Wheels alloy wheels with exact PCD and fitment specifications.",
+      description:
+        "Neo Wheels alloy wheels with exact PCD and fitment specifications.",
     },
     false
   );
@@ -346,7 +411,7 @@ async function main() {
         neo_compatible_cars: wheel.compatibleCars.map((car) => car.label),
         neo_compatible_car_slugs: wheel.compatibleCars.map((car) => car.slug),
         compatibility: wheel.compatibility,
-        compatibility_basis: "neo_official_model_match",
+        compatibility_basis: wheel.compatibilityBasis,
         features,
         in_stock: true,
         mrp: rupeesToPaise(wheel.mrp || wheel.salePrice),
@@ -442,7 +507,9 @@ async function main() {
       else updatedVariants += 1;
 
       console.log(
-        `[${result.created ? "CREATE" : "UPDATE"}] ${wheel.title} | PCD ${wheel.pcd.display} | ₹${wheel.salePrice} | ${wheel.compatibility.length} storefront vehicle matches`
+        `[${result.created ? "CREATE" : "UPDATE"}] ${wheel.title} | PCD ${
+          wheel.pcd.display
+        } | ₹${wheel.salePrice} | ${wheel.compatibility.length} official storefront matches`
       );
     } catch (error) {
       errors += 1;
