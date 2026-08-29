@@ -24,8 +24,8 @@ const CATEGORY_HANDLE = "wheels";
 const REQUEST_DELAY_MS = 300;
 
 // These are the vehicles currently exposed by the Cartunez storefront selector.
-// Compatibility is added only when Neo's own model-match page lists the exact
-// Neo catalog URL. We do not infer an "exact" fit merely from PCD equality.
+// Compatibility is added only when Neo's own model-match/detail pages list the
+// exact wheel. We do not infer an "exact" fit merely from PCD equality.
 const NEO_MODEL_MATCHES = [
   {
     neoCarSlug: "hyundai-creta",
@@ -89,10 +89,29 @@ function variantCardText($, anchor) {
   return compact($(anchor).parent().text());
 }
 
-function canonicalCatalogPath(value) {
+// Neo currently serves wheel detail URLs as /<design>/<spec>, while some
+// catalog pages still expose /catalog/<design>/<spec>. Normalize both forms to
+// one stable design/spec key so model-match pages and product pages can join.
+function canonicalWheelKey(value) {
   try {
     const pathname = new URL(value, BASE_URL).pathname.replace(/\/+$/, "");
-    return /^\/catalog\/[^/]+\/[^/]+$/i.test(pathname) ? pathname.toLowerCase() : "";
+    const parts = pathname.split("/").filter(Boolean);
+    if (parts[0] && parts[0].toLowerCase() === "catalog") parts.shift();
+    if (parts.length !== 2) return "";
+
+    const [design, variant] = parts.map((part) => part.toLowerCase());
+    const reserved = new Set([
+      "car",
+      "product",
+      "catalog",
+      "blog",
+      "stock",
+      "about-us",
+      "contact-us",
+    ]);
+    if (reserved.has(design)) return "";
+    if (!/^[a-z0-9-]+$/.test(design) || !/^[a-z0-9-]+$/.test(variant)) return "";
+    return `${design}/${variant}`;
   } catch (_) {
     return "";
   }
@@ -107,13 +126,21 @@ async function buildOfficialModelMatchIndex() {
       const html = await fetchText(url);
       const $ = cheerio.load(html);
       let found = 0;
-      $('a[href*="/catalog/"]').each((_, element) => {
-        const path = canonicalCatalogPath($(element).attr("href") || "");
-        if (!path) return;
-        if (!index.has(path)) index.set(path, new Set());
-        match.storefrontSlugs.forEach((slug) => index.get(path).add(slug));
+
+      $("a[href]").each((_, element) => {
+        const title = compact($(element).text());
+        // Product links on Neo's model-match pages are titled like
+        // "16x6.5 Pulse 5x114.3 BM". This avoids treating nav links as wheels.
+        if (!/^\d+(?:\.\d+)?x\d+(?:\.\d+)?\b/i.test(title)) return;
+        if (!/\b[456]\s*x\s*[\d.]+/i.test(title)) return;
+
+        const key = canonicalWheelKey($(element).attr("href") || "");
+        if (!key) return;
+        if (!index.has(key)) index.set(key, new Set());
+        match.storefrontSlugs.forEach((slug) => index.get(key).add(slug));
         found += 1;
       });
+
       console.log(`Neo model match ${match.neoCarSlug}: ${found} exact wheel links`);
     } catch (error) {
       console.warn(`Neo model match unavailable ${url}: ${error.message}`);
@@ -161,16 +188,17 @@ async function getVariantCards(designSlug) {
           const href = $(element).attr("href") || "";
           const url = absoluteUrl(href, BASE_URL);
           if (!url) return;
-          const pathname = new URL(url).pathname;
-          const match = pathname.match(
-            new RegExp(`/catalog/${designSlug}/([^/?#]+)$`, "i")
-          );
-          if (!match) return;
+
+          const key = canonicalWheelKey(url);
+          if (!key) return;
+          const [linkDesign, variantSlug] = key.split("/");
+          if (linkDesign !== designSlug.toLowerCase()) return;
+
           const money = parseMoney(variantCardText($, element));
-          const previous = variants.get(url) || {};
-          variants.set(url, {
+          const previous = variants.get(key) || {};
+          variants.set(key, {
             url,
-            variantSlug: match[1],
+            variantSlug,
             salePrice: money.salePrice || previous.salePrice || 0,
             mrp: money.mrp || previous.mrp || 0,
           });
@@ -240,9 +268,9 @@ async function parseVariantPage(
   const compatibleCars = parseCompatibleCars($);
 
   const detailCompatibility = mapDetailPageCompatibility(compatibleCars);
-  const officialPath = canonicalCatalogPath(card.url);
-  const modelMatchCompatibility = officialPath && officialModelMatchIndex.has(officialPath)
-    ? [...officialModelMatchIndex.get(officialPath)]
+  const officialKey = canonicalWheelKey(card.url);
+  const modelMatchCompatibility = officialKey && officialModelMatchIndex.has(officialKey)
+    ? [...officialModelMatchIndex.get(officialKey)]
     : [];
   const compatibility = [...new Set([...modelMatchCompatibility, ...detailCompatibility])];
   const compatibilityBasis = modelMatchCompatibility.length
