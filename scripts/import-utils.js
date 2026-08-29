@@ -162,6 +162,16 @@ async function ensureIndiaRegion(container, dryRun = false) {
     return { id: "dry_run_india_region", name: "India", currency_code: "inr" };
   }
 
+  // This mirrors the provider preparation used by the previous working
+  // Cartunez Medusa v1 seed before attaching providers to a new region.
+  const manager = container.resolve("manager");
+  await manager.query(
+    "UPDATE payment_provider SET is_installed = true WHERE id = 'manual'"
+  );
+  await manager.query(
+    "UPDATE fulfillment_provider SET is_installed = true WHERE id = 'manual'"
+  );
+
   console.log("Creating India / INR region...");
   return regionService.create({
     name: "India",
