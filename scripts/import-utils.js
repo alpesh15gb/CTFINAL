@@ -107,12 +107,10 @@ async function fetchJson(url) {
 function looksLikeImageBytes(buffer) {
   if (!buffer || buffer.length < 12) return false;
 
-  // JPEG: FF D8 FF
   if (buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff) {
     return true;
   }
 
-  // PNG: 89 50 4E 47 0D 0A 1A 0A
   if (
     buffer[0] === 0x89 &&
     buffer[1] === 0x50 &&
@@ -126,11 +124,9 @@ function looksLikeImageBytes(buffer) {
     return true;
   }
 
-  // GIF87a / GIF89a
   const ascii6 = buffer.subarray(0, 6).toString("ascii");
   if (ascii6 === "GIF87a" || ascii6 === "GIF89a") return true;
 
-  // WEBP: RIFF....WEBP
   if (
     buffer.subarray(0, 4).toString("ascii") === "RIFF" &&
     buffer.subarray(8, 12).toString("ascii") === "WEBP"
@@ -167,8 +163,6 @@ async function validateImageUrl(url, skipImageCheck = false) {
       return true;
     }
 
-    // Neo serves some valid product images from extensionless/odd paths with a
-    // non-image MIME header. Inspect the first bytes instead of rejecting them.
     const bytes = Buffer.from(await response.arrayBuffer());
     return looksLikeImageBytes(bytes);
   } catch (_) {
@@ -208,8 +202,6 @@ async function ensureIndiaRegion(container, dryRun = false) {
     return { id: "dry_run_india_region", name: "India", currency_code: "inr" };
   }
 
-  // This mirrors the provider preparation used by the previous working
-  // Cartunez Medusa v1 seed before attaching providers to a new region.
   const manager = container.resolve("manager");
   await manager.query(
     "UPDATE payment_provider SET is_installed = true WHERE id = 'manual'"
@@ -229,6 +221,47 @@ async function ensureIndiaRegion(container, dryRun = false) {
   });
 }
 
+async function resolveSalesChannel(container) {
+  const manager = container.resolve("manager");
+
+  const defaultRows = await manager.query(
+    `SELECT sc.id, sc.name
+     FROM store s
+     JOIN sales_channel sc ON sc.id = s.default_sales_channel_id
+     WHERE sc.deleted_at IS NULL
+     LIMIT 1`
+  );
+  if (defaultRows.length) return defaultRows[0];
+
+  const activeRows = await manager.query(
+    `SELECT id, name
+     FROM sales_channel
+     WHERE deleted_at IS NULL
+       AND is_disabled = false
+     ORDER BY created_at ASC
+     LIMIT 1`
+  );
+  if (activeRows.length) {
+    await manager.query(
+      "UPDATE store SET default_sales_channel_id = $1, updated_at = NOW()",
+      [activeRows[0].id]
+    );
+    return activeRows[0];
+  }
+
+  const salesChannelService = container.resolve("salesChannelService");
+  const created = await salesChannelService.create({
+    name: "Default Sales Channel",
+    description: "Default Cartunez sales channel",
+    is_disabled: false,
+  });
+  await manager.query(
+    "UPDATE store SET default_sales_channel_id = $1, updated_at = NOW()",
+    [created.id]
+  );
+  return created;
+}
+
 async function getCommerceContext(container, dryRun = false) {
   const region = await ensureIndiaRegion(container, dryRun);
   if (dryRun) {
@@ -238,11 +271,11 @@ async function getCommerceContext(container, dryRun = false) {
       shippingProfile: { id: "dry_run_shipping_profile" },
     };
   }
-  const salesChannelService = container.resolve("salesChannelService");
+
   const shippingProfileService = container.resolve("shippingProfileService");
   return {
     region,
-    salesChannel: await salesChannelService.retrieveDefault(),
+    salesChannel: await resolveSalesChannel(container),
     shippingProfile: await shippingProfileService.retrieveDefault(),
   };
 }
