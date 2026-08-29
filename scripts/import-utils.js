@@ -5,12 +5,7 @@ const USER_AGENT =
   "Mozilla/5.0 (compatible; CartunezCatalogImporter/1.0; +https://cartunez.in)";
 
 function parseArgs(argv = process.argv.slice(2)) {
-  const options = {
-    dryRun: false,
-    limit: Infinity,
-    skipImageCheck: false,
-  };
-
+  const options = { dryRun: false, limit: Infinity, skipImageCheck: false };
   for (let i = 0; i < argv.length; i += 1) {
     const arg = argv[i];
     if (arg === "--dry-run") options.dryRun = true;
@@ -21,7 +16,6 @@ function parseArgs(argv = process.argv.slice(2)) {
       i += 1;
     }
   }
-
   return options;
 }
 
@@ -118,9 +112,7 @@ async function validateImageUrl(url, skipImageCheck = false) {
     const head = await fetchWithTimeout(url, { method: "HEAD" }, 12000);
     const type = head.headers.get("content-type") || "";
     if (head.ok && type.toLowerCase().startsWith("image/")) return true;
-  } catch (_) {
-    // Some CDNs reject HEAD. Fall back to a tiny ranged GET below.
-  }
+  } catch (_) {}
 
   try {
     const response = await fetchWithTimeout(
@@ -139,14 +131,12 @@ async function validateImageUrl(url, skipImageCheck = false) {
 }
 
 async function validateImageUrls(urls, options = {}) {
-  const max = options.max || 8;
-  const unique = [...new Set((urls || []).filter(Boolean))].slice(0, max);
+  const unique = [...new Set((urls || []).filter(Boolean))];
+  const max = Number.isFinite(options.max) ? options.max : unique.length;
   const valid = [];
-
-  for (const url of unique) {
+  for (const url of unique.slice(0, max)) {
     if (await validateImageUrl(url, options.skipImageCheck)) valid.push(url);
   }
-
   return valid;
 }
 
@@ -167,22 +157,20 @@ async function ensureIndiaRegion(container, dryRun = false) {
   let region = regions.find(
     (item) => String(item.currency_code || "").toLowerCase() === "inr"
   );
-
   if (region) return region;
   if (dryRun) {
     return { id: "dry_run_india_region", name: "India", currency_code: "inr" };
   }
 
   console.log("Creating India / INR region...");
-  region = await regionService.create({
+  return regionService.create({
     name: "India",
-    currency_code: "inr",
+    currency_code: "INR",
     tax_rate: 0,
     payment_providers: ["manual"],
     fulfillment_providers: ["manual"],
     countries: ["in"],
   });
-  return region;
 }
 
 async function getCommerceContext(container, dryRun = false) {
@@ -194,13 +182,13 @@ async function getCommerceContext(container, dryRun = false) {
       shippingProfile: { id: "dry_run_shipping_profile" },
     };
   }
-
   const salesChannelService = container.resolve("salesChannelService");
   const shippingProfileService = container.resolve("shippingProfileService");
-  const salesChannel = await salesChannelService.retrieveDefault();
-  const shippingProfile = await shippingProfileService.retrieveDefault();
-
-  return { region, salesChannel, shippingProfile };
+  return {
+    region,
+    salesChannel: await salesChannelService.retrieveDefault(),
+    shippingProfile: await shippingProfileService.retrieveDefault(),
+  };
 }
 
 async function getOrCreateCategory(
@@ -216,7 +204,6 @@ async function getOrCreateCategory(
   );
   if (rows.length) return rows[0];
   if (dryRun) return { id: `dry_run_${handle}`, name, handle };
-
   return productCategoryService.create({
     name,
     handle,
@@ -231,6 +218,16 @@ async function findProductByHandle(productService, handle) {
   return products && products.length ? products[0] : null;
 }
 
+function normalizeProductMedia(data) {
+  const normalized = { ...data };
+  if (Array.isArray(normalized.images)) {
+    normalized.images = normalized.images
+      .map((image) => (typeof image === "string" ? { url: image } : image))
+      .filter((image) => image && image.url);
+  }
+  return normalized;
+}
+
 async function createOrUpdateProduct({
   container,
   dryRun,
@@ -240,21 +237,25 @@ async function createOrUpdateProduct({
 }) {
   const productService = container.resolve("productService");
   const existing = await findProductByHandle(productService, handle);
-
   if (dryRun) {
     return {
       product: existing || { id: `dry_run_${handle}`, handle, options: [] },
       created: !existing,
     };
   }
-
   if (!existing) {
-    const product = await productService.create(createData);
-    return { product, created: true };
+    return {
+      product: await productService.create(normalizeProductMedia(createData)),
+      created: true,
+    };
   }
-
-  const product = await productService.update(existing.id, updateData);
-  return { product, created: false };
+  return {
+    product: await productService.update(
+      existing.id,
+      normalizeProductMedia(updateData)
+    ),
+    created: false,
+  };
 }
 
 async function getProductOptionMap(container, productId) {
@@ -275,6 +276,8 @@ async function upsertVariant({
   updateData,
   dryRun,
 }) {
+  if (dryRun) return { created: true, variant: createData };
+
   const productService = container.resolve("productService");
   const productVariantService = container.resolve("productVariantService");
   const product = await productService.retrieve(productId, { relations: ["variants"] });
@@ -282,15 +285,12 @@ async function upsertVariant({
     (variant) => String(variant.metadata?.source_variant_id || "") === String(sourceVariantId)
   );
 
-  if (dryRun) return { created: !existing, variant: existing || createData };
-
   if (existing) {
     return {
       created: false,
       variant: await productVariantService.update(existing.id, updateData),
     };
   }
-
   return {
     created: true,
     variant: await productVariantService.create(productId, createData),
@@ -304,7 +304,6 @@ function normalizePcd(rawValue) {
     .replace(/×/g, "x");
   const match = raw.match(/^(\d+)x([\d.]+)(?:x([\d.]+))?$/);
   if (!match) return { display: rawValue || "", patterns: [] };
-
   const holes = match[1];
   const patterns = [`${holes}x${match[2]}`];
   if (match[3]) patterns.push(`${holes}x${match[3]}`);
