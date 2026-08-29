@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { Heart, ShoppingBag, Star, Check, ArrowRight } from "lucide-react";
+import { ArrowUpRight, Check, Heart, ShoppingBag, Star } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Product } from "@/types";
 import { useVehicle } from "@/hooks/useVehicle";
@@ -23,163 +23,175 @@ export function ProductCard({ product, featured = false, wide = false }: Product
   const { addItem } = useCart();
   const [added, setAdded] = useState(false);
   const [wishlisted, setWishlisted] = useState(false);
+  const addedTimer = useRef<ReturnType<typeof setTimeout>>();
+
+  useEffect(() => {
+    return () => {
+      if (addedTimer.current) clearTimeout(addedTimer.current);
+    };
+  }, []);
 
   const fits = selected ? product.compatibility.includes(selected.slug) : null;
   const discount = product.originalPrice
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
     : null;
 
-  const handleAdd = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const handleAdd = () => {
+    if (!product.inStock) return;
+
     addItem(product);
     setAdded(true);
-    setTimeout(() => setAdded(false), 1800);
+    if (addedTimer.current) clearTimeout(addedTimer.current);
+    addedTimer.current = setTimeout(() => setAdded(false), 1800);
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
+    <motion.article
+      initial={{ opacity: 0, y: 24 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-50px" }}
-      transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+      viewport={{ once: true, margin: "-60px" }}
       className={cn(
-        "group relative flex flex-col overflow-hidden rounded-lg border border-border bg-raised transition-colors hover:border-cyan/40",
+        "premium-card edge-highlight group flex h-full flex-col overflow-hidden rounded-sm",
         wide && "md:flex-row"
       )}
     >
-      {/* Image */}
-      <Link
-        href={`/products/${product.slug}`}
-        className={cn(
-          "relative block overflow-hidden bg-surface",
-          featured ? "aspect-[4/3]" : "aspect-square",
-          wide && "md:w-1/2"
-        )}
-      >
-        <Image
-          src={product.images[0]}
-          alt={product.name}
-          fill
-          sizes={featured ? "(max-width: 768px) 100vw, 50vw" : "(max-width: 768px) 50vw, 25vw"}
-          className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-raised/80 via-transparent to-transparent opacity-60" />
+      <div className={cn("relative shrink-0 overflow-hidden bg-surface", wide && "md:w-1/2")}>
+        <Link
+          href={`/products/${product.slug}`}
+          className={cn(
+            "relative block overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-cyan",
+            featured ? "aspect-[5/4] lg:aspect-[16/11]" : "aspect-[5/4]"
+          )}
+          aria-label={`View ${product.name}`}
+        >
+          <Image
+            src={product.images[0]}
+            alt={product.name}
+            fill
+            sizes={
+              featured
+                ? "(max-width: 1024px) 100vw, 50vw"
+                : "(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+            }
+            className="object-cover saturate-[0.82] transition duration-700 ease-out group-hover:scale-[1.035] group-hover:saturate-100"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/5 to-black/15" />
 
-        {/* Badges */}
-        <div className="absolute left-3 top-3 flex flex-wrap gap-2">
+          <div className="absolute inset-x-4 bottom-4 flex items-end justify-between gap-3">
+            <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-white/70">
+              CTZ / {product.id.slice(-4)}
+            </span>
+            <span className="flex h-11 w-11 items-center justify-center border border-white/20 bg-black/35 text-white backdrop-blur-md transition group-hover:border-cyan/60 group-hover:text-cyan">
+              <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
+            </span>
+          </div>
+        </Link>
+
+        <div className="pointer-events-none absolute left-4 top-4 z-10 flex max-w-[calc(100%-5rem)] flex-wrap gap-2">
           {product.badge && (
-            <Badge className="bg-red text-xs text-white hover:bg-red-light">
+            <Badge className="rounded-sm bg-foreground font-mono text-[10px] uppercase tracking-wider text-background hover:bg-foreground">
               {product.badge}
             </Badge>
           )}
           {discount && (
-            <Badge className="bg-cyan text-xs text-black hover:bg-cyan-light">
-              -{discount}%
+            <Badge className="rounded-sm bg-cyan font-mono text-[10px] uppercase tracking-wider text-black hover:bg-cyan">
+              Save {discount}%
             </Badge>
           )}
-          {fits === true && (
-            <Badge variant="outline" className="border-cyan/50 text-cyan">
-              Fits your car
-            </Badge>
-          )}
-          {fits === false && (
-            <Badge variant="outline" className="border-silver/30 text-silver-muted">
-              Check fitment
+          {fits !== null && (
+            <Badge
+              variant="outline"
+              className={cn(
+                "rounded-sm bg-black/45 font-mono text-[10px] uppercase tracking-wider backdrop-blur-md",
+                fits ? "border-cyan/50 text-cyan" : "border-white/20 text-white/70"
+              )}
+            >
+              {fits ? "Verified fit" : "Check fitment"}
             </Badge>
           )}
         </div>
 
-        {/* Wishlist */}
         <button
           type="button"
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            setWishlisted((w) => !w);
-          }}
-          aria-label={wishlisted ? "Remove from wishlist" : "Add to wishlist"}
+          onClick={() => setWishlisted((value) => !value)}
+          aria-label={wishlisted ? `Remove ${product.name} from wishlist` : `Add ${product.name} to wishlist`}
+          aria-pressed={wishlisted}
           className={cn(
-            "absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full border border-border bg-raised/80 text-silver backdrop-blur transition-all hover:border-cyan hover:text-cyan focus-visible:ring-2 focus-visible:ring-cyan focus-visible:ring-offset-2 focus-visible:ring-offset-raised",
-            wishlisted && "border-red text-red hover:border-red-light hover:text-red-light"
+            "absolute right-4 top-4 z-10 flex h-11 w-11 cursor-pointer items-center justify-center border border-white/20 bg-black/45 text-white backdrop-blur-md transition hover:border-cyan hover:text-cyan focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan",
+            wishlisted && "border-cyan bg-cyan text-black hover:text-black"
           )}
         >
-          <Heart className={cn("h-4 w-4", wishlisted && "fill-current")} />
+          <Heart className={cn("h-4 w-4", wishlisted && "fill-current")} aria-hidden="true" />
         </button>
+      </div>
 
-        {/* Hover CTA overlay */}
-        <div className="absolute inset-x-0 bottom-0 hidden translate-y-full items-center justify-between p-4 transition-transform duration-300 group-hover:translate-y-0 group-focus-within:translate-y-0 md:flex">
-          <Button
-            size="sm"
-            onClick={handleAdd}
+      <div className={cn("flex flex-1 flex-col p-5 md:p-6", wide && "md:justify-center md:p-8")}>
+        <div className="flex items-center justify-between gap-3">
+          <p className="font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-cyan">
+            {product.category}
+          </p>
+          <div className="flex items-center gap-1.5 font-mono text-[11px] text-silver-muted">
+            <Star className="h-3.5 w-3.5 fill-cyan text-cyan" aria-hidden="true" />
+            <span className="text-foreground">{product.rating}</span>
+            <span>/{product.reviewCount}</span>
+          </div>
+        </div>
+
+        <Link
+          href={`/products/${product.slug}`}
+          className="mt-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan"
+        >
+          <h3
             className={cn(
-              "gap-2 text-xs uppercase tracking-wider",
-              added ? "bg-green-600 text-white" : "bg-cyan text-black hover:bg-cyan-light"
+              "font-display text-2xl font-semibold uppercase leading-[0.95] tracking-tight text-foreground transition-colors group-hover:text-cyan",
+              featured && "md:text-4xl"
             )}
           >
-            {added ? <Check className="h-3.5 w-3.5" /> : <ShoppingBag className="h-3.5 w-3.5" />}
-            {added ? "Added" : "Quick Add"}
-          </Button>
-          <span className="text-xs font-medium uppercase tracking-wider text-foreground">
-            View Details <ArrowRight className="ml-1 inline h-3 w-3" />
-          </span>
-        </div>
-      </Link>
-
-      {/* Details */}
-      <div className={cn("flex flex-1 flex-col p-4", wide && "md:justify-center md:p-8")}>
-        <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-silver-muted">
-          {product.category}
-        </p>
-        <Link href={`/products/${product.slug}`}>
-          <h3 className="mt-1 font-display text-xl font-semibold uppercase leading-tight text-foreground transition-colors group-hover:text-cyan md:text-2xl">
             {product.name}
           </h3>
         </Link>
 
-        <div className="mt-2 flex items-center gap-2 text-xs text-silver-muted">
-          <Star className="h-3.5 w-3.5 fill-cyan text-cyan" />
-          <span className="text-foreground">{product.rating}</span>
-          <span>({product.reviewCount})</span>
-        </div>
-
-        <div className="mt-auto flex items-center justify-between pt-4">
-          <div className="flex items-baseline gap-2">
-            <span className="font-display text-xl font-semibold text-foreground">
-              {product.currency}
-              {product.price.toLocaleString("en-IN")}
-            </span>
-            {product.originalPrice && (
-              <span className="text-sm text-silver-muted line-through">
-                {product.currency}
-                {product.originalPrice.toLocaleString("en-IN")}
+        <div className="mt-auto flex items-end justify-between gap-4 pt-7">
+          <div>
+            <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-silver-muted">
+              Price / INR
+            </p>
+            <div className="mt-1 flex flex-wrap items-baseline gap-x-2">
+              <span className="font-display text-2xl font-semibold text-foreground">
+                {product.currency}{product.price.toLocaleString("en-IN")}
               </span>
-            )}
+              {product.originalPrice && (
+                <span className="font-mono text-xs text-silver-muted line-through">
+                  {product.currency}{product.originalPrice.toLocaleString("en-IN")}
+                </span>
+              )}
+            </div>
           </div>
-          {product.inStock ? (
-            <span className="text-[10px] font-medium uppercase tracking-wider text-green-400">
-              In Stock
-            </span>
-          ) : (
-            <span className="text-[10px] font-medium uppercase tracking-wider text-silver-muted">
-              Out of Stock
-            </span>
-          )}
+          <span
+            className={cn(
+              "flex items-center gap-2 whitespace-nowrap font-mono text-[10px] uppercase tracking-wider",
+              product.inStock ? "text-green-400" : "text-silver-muted"
+            )}
+          >
+            <span
+              className={cn("h-1.5 w-1.5 rounded-full", product.inStock ? "bg-green-400" : "bg-silver-muted")}
+              aria-hidden="true"
+            />
+            {product.inStock ? "In stock" : "Sold out"}
+          </span>
         </div>
 
-        {/* Mobile Quick Add */}
         <Button
-          size="sm"
           onClick={handleAdd}
-          className={cn(
-            "mt-3 w-full gap-2 md:hidden",
-            added ? "bg-green-600 text-white" : "bg-cyan text-black hover:bg-cyan-light"
-          )}
+          disabled={!product.inStock}
+          variant={added ? "outline" : "default"}
+          className="mt-5 w-full justify-between"
+          aria-live="polite"
         >
-          {added ? <Check className="h-3.5 w-3.5" /> : <ShoppingBag className="h-3.5 w-3.5" />}
-          {added ? "Added" : "Quick Add"}
+          <span>{added ? "Added to garage" : product.inStock ? "Quick add" : "Unavailable"}</span>
+          {added ? <Check className="h-4 w-4" aria-hidden="true" /> : <ShoppingBag className="h-4 w-4" aria-hidden="true" />}
         </Button>
       </div>
-    </motion.div>
+    </motion.article>
   );
 }

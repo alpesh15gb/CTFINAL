@@ -4,151 +4,149 @@ import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
 import { usePathname } from "next/navigation";
-import { motion, useScroll, useMotionValueEvent } from "framer-motion";
-import {
-  Search,
-  User,
-  ShoppingBag,
-  Menu,
-  X,
-  ArrowRight,
-  Wrench,
-} from "lucide-react";
+import { motion, useMotionValueEvent, useScroll } from "framer-motion";
+import { ArrowRight, CarFront, Menu, Search, ShoppingBag, User, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/hooks/useCart";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet";
+import { Sheet, SheetClose, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { CartSheet } from "@/components/cart/CartSheet";
 
 const navLinks = [
   { label: "Shop", href: "/shop" },
-  { label: "Accessories", href: "/shop" },
   { label: "Builds", href: "/builds" },
+  { label: "Fitment", href: "/#vehicle-selector" },
   { label: "About", href: "/about" },
 ];
 
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const { scrollY } = useScroll();
   const pathname = usePathname();
+  const { scrollY } = useScroll();
   const { totalItems } = useCart();
   const cartCount = totalItems();
 
   useMotionValueEvent(scrollY, "change", (latest) => {
-    setScrolled(latest > 40);
+    const next = latest > 32;
+    setScrolled((current) => (current === next ? current : next));
   });
 
-  const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
+  const isActive = (href: string) => {
+    if (href.includes("#") || href.includes("?")) return false;
+    return pathname === href || (href !== "/" && pathname.startsWith(`${href}/`));
+  };
 
   return (
     <motion.header
-      initial={{ y: -100 }}
-      animate={{ y: 0 }}
-      transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1], delay: 1.6 }}
+      initial={{ y: -28, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ duration: 0.7, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
       className={cn(
-        "fixed top-0 left-0 right-0 z-50 transition-colors duration-300",
+        "fixed inset-x-0 top-0 z-50 border-b transition-all duration-500",
         scrolled
-          ? "border-b border-white/[0.06] bg-[rgba(5,6,7,0.8)] backdrop-blur-md backdrop-saturate-[1.2]"
-          : "bg-transparent"
+          ? "border-white/[0.09] bg-[rgba(3,4,5,0.88)] shadow-[0_18px_55px_rgba(0,0,0,0.28)] backdrop-blur-xl"
+          : "border-white/[0.06] bg-gradient-to-b from-black/70 to-transparent"
       )}
     >
-      <div className="mx-auto flex h-20 max-w-[1600px] items-center justify-between px-4 md:px-8">
-        {/* Logo */}
-        <Link href="/" className="relative z-10 flex items-center gap-3" aria-label="Cartunez home">
+      <div className="hidden h-7 border-b border-white/[0.06] bg-black/30 lg:block">
+        <div className="site-container flex h-full items-center justify-between font-mono text-[9px] uppercase tracking-[0.2em] text-silver-muted">
+          <span>Vehicle-specific upgrades / verified fitment</span>
+          <div className="flex items-center gap-6">
+            <span>India / INR</span>
+            <Link href="/contact" className="transition-colors hover:text-cyan">
+              Expert consultation
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      <div className="site-container flex h-[76px] items-center justify-between lg:h-20">
+        <Link href="/" className="relative z-10 flex min-h-11 items-center" aria-label="Cartunez home">
           <Image
             src="/logo/cartunez-logo.png"
             alt="Cartunez"
-            width={140}
-            height={48}
-            className="h-10 w-auto object-contain md:h-12"
+            width={156}
+            height={54}
+            className="h-10 w-auto object-contain lg:h-11"
             priority
           />
         </Link>
 
-        {/* Desktop Nav */}
-        <nav className="hidden items-center gap-10 md:flex" aria-label="Main navigation">
-          {navLinks.map((link) => (
+        <nav className="hidden items-center gap-9 lg:flex" aria-label="Main navigation">
+          {navLinks.map((link, index) => (
             <Link
               key={link.label}
               href={link.href}
+              aria-current={isActive(link.href) ? "page" : undefined}
               className={cn(
-                "group relative text-sm font-medium uppercase tracking-widest transition-colors",
+                "group relative flex min-h-11 items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.18em] transition-colors",
                 isActive(link.href) ? "text-cyan" : "text-silver hover:text-foreground"
               )}
             >
+              <span className="text-[8px] text-silver-muted/60">0{index + 1}</span>
               {link.label}
               <span
                 className={cn(
-                  "absolute -bottom-1 left-0 h-px bg-cyan transition-all duration-300",
-                  isActive(link.href) ? "w-full" : "w-0 group-hover:w-full"
+                  "absolute inset-x-0 bottom-0 h-px origin-left bg-cyan transition-transform duration-300",
+                  isActive(link.href) ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
                 )}
               />
             </Link>
           ))}
         </nav>
 
-        {/* Right Actions */}
-        <div className="flex items-center gap-2 md:gap-4">
+        <div className="flex items-center gap-1.5 md:gap-2">
           <Link
             href="/shop"
-            className="hidden items-center gap-2 rounded-md px-3 py-2 text-sm font-medium uppercase tracking-wider text-silver transition-colors hover:bg-surface hover:text-foreground lg:inline-flex"
-            aria-label="Search"
+            className="hidden h-11 w-11 items-center justify-center rounded-sm border border-transparent text-silver transition-all hover:border-border hover:bg-white/[0.04] hover:text-cyan md:flex"
+            aria-label="Search products"
           >
-            <Search className="h-4 w-4" />
+            <Search className="h-[18px] w-[18px]" />
           </Link>
 
           <Link
             href="/account"
-            className="hidden items-center gap-2 rounded-md px-3 py-2 text-sm font-medium uppercase tracking-wider text-silver transition-colors hover:bg-surface hover:text-foreground md:inline-flex"
+            className="hidden h-11 w-11 items-center justify-center rounded-sm border border-transparent text-silver transition-all hover:border-border hover:bg-white/[0.04] hover:text-cyan md:flex"
             aria-label="Account"
           >
-            <User className="h-4 w-4" />
+            <User className="h-[18px] w-[18px]" />
           </Link>
 
           <CartSheet>
             <button
               type="button"
-              className="relative flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium uppercase tracking-wider text-silver transition-colors hover:bg-surface hover:text-foreground"
-              aria-label="Cart"
+              className="relative flex h-11 w-11 cursor-pointer items-center justify-center rounded-sm border border-transparent text-silver transition-all hover:border-border hover:bg-white/[0.04] hover:text-cyan"
+              aria-label={`Cart with ${cartCount} item${cartCount === 1 ? "" : "s"}`}
             >
-              <ShoppingBag className="h-4 w-4" />
+              <ShoppingBag className="h-[18px] w-[18px]" />
               {cartCount > 0 && (
-                <span className="absolute -top-0.5 right-0 flex h-4 min-w-4 items-center justify-center rounded-full bg-cyan px-1 text-[10px] font-bold text-black">
+                <span className="absolute right-0.5 top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-cyan px-1 font-mono text-[8px] font-bold text-black">
                   {cartCount}
                 </span>
               )}
             </button>
           </CartSheet>
 
-          <Button
-            asChild
-            className="hidden bg-cyan text-black hover:bg-cyan-light md:inline-flex"
-          >
-            <Link href="/#vehicle-selector" className="gap-2">
-              <Wrench className="h-4 w-4" />
-              <span className="uppercase tracking-wider">Find Parts For Your Car</span>
+          <Button asChild className="ml-2 hidden xl:inline-flex">
+            <Link href="/#vehicle-selector">
+              Match my vehicle <ArrowRight className="h-4 w-4" />
             </Link>
           </Button>
 
-          {/* Mobile Menu */}
           <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-            <SheetTrigger asChild className="md:hidden">
-              <Button
-                variant="ghost"
-                size="icon"
-                aria-label="Open menu"
-                className="text-foreground hover:bg-surface"
-              >
-                <Menu className="h-6 w-6" />
+            <SheetTrigger asChild className="lg:hidden">
+              <Button variant="ghost" size="icon" aria-label="Open menu">
+                <Menu className="h-5 w-5" />
               </Button>
             </SheetTrigger>
             <SheetContent
               side="right"
-              className="w-full border-border/50 bg-raised/95 backdrop-blur-xl sm:max-w-md"
+              className="w-full border-border/70 bg-[rgba(5,7,9,0.97)] p-0 backdrop-blur-2xl sm:max-w-md"
             >
-              <div className="flex h-full flex-col">
-                <div className="flex items-center justify-between py-6">
+              <div className="precision-grid pointer-events-none absolute inset-0 opacity-60" />
+              <div className="relative flex h-full flex-col px-6">
+                <div className="flex h-24 items-center justify-between border-b border-border">
                   <Image
                     src="/logo/cartunez-logo.png"
                     alt="Cartunez"
@@ -157,43 +155,36 @@ export function Navbar() {
                     className="h-10 w-auto object-contain"
                   />
                   <SheetClose asChild>
-                    <Button variant="ghost" size="icon" aria-label="Close menu" className="text-foreground hover:bg-surface">
-                      <X className="h-6 w-6" />
+                    <Button variant="ghost" size="icon" aria-label="Close menu">
+                      <X className="h-5 w-5" />
                     </Button>
                   </SheetClose>
                 </div>
 
-                <nav className="flex flex-1 flex-col justify-center gap-2" aria-label="Mobile navigation">
-                  {navLinks.map((link, idx) => (
+                <nav className="flex flex-1 flex-col justify-center" aria-label="Mobile navigation">
+                  {navLinks.map((link, index) => (
                     <SheetClose key={link.label} asChild>
                       <Link
                         href={link.href}
-                        className="group flex items-center justify-between border-b border-border/50 py-5 text-3xl font-display uppercase tracking-tight text-foreground transition-colors hover:text-cyan"
+                        className="group flex min-h-16 items-center justify-between border-b border-border/70 py-4 font-display text-4xl font-semibold uppercase tracking-tight text-foreground transition-colors hover:text-cyan"
                       >
-                        <span className="text-silver-muted text-sm font-sans font-medium tracking-widest">
-                          {String(idx + 1).padStart(2, "0")}
-                        </span>
+                        <span className="font-mono text-[10px] tracking-widest text-silver-muted">0{index + 1}</span>
                         {link.label}
-                        <ArrowRight className="h-5 w-5 -translate-x-2 opacity-0 transition-all group-hover:translate-x-0 group-hover:opacity-100" />
+                        <ArrowRight className="h-5 w-5 text-silver-muted transition-transform group-hover:translate-x-1 group-hover:text-cyan" />
                       </Link>
                     </SheetClose>
                   ))}
                 </nav>
 
-                <div className="space-y-4 pb-8">
-                  <Button asChild className="w-full bg-cyan text-black hover:bg-cyan-light">
-                    <Link href="/#vehicle-selector" className="gap-2">
-                      <Wrench className="h-4 w-4" />
-                      Find Parts For Your Car
+                <div className="space-y-4 border-t border-border py-7">
+                  <Button asChild size="lg" className="w-full">
+                    <Link href="/#vehicle-selector">
+                      <CarFront className="h-4 w-4" /> Match my vehicle
                     </Link>
                   </Button>
-                  <div className="flex items-center justify-center gap-6 text-silver">
-                    <Link href="/account" className="flex items-center gap-2 text-sm uppercase tracking-wider hover:text-foreground">
-                      <User className="h-4 w-4" /> Account
-                    </Link>
-                    <Link href="/cart" className="flex items-center gap-2 text-sm uppercase tracking-wider hover:text-foreground">
-                      <ShoppingBag className="h-4 w-4" /> Cart ({cartCount})
-                    </Link>
+                  <div className="flex items-center justify-center gap-8 font-mono text-[10px] uppercase tracking-wider text-silver-muted">
+                    <Link href="/account" className="min-h-11 py-3 hover:text-cyan">Account</Link>
+                    <Link href="/cart" className="min-h-11 py-3 hover:text-cyan">Cart ({cartCount})</Link>
                   </div>
                 </div>
               </div>

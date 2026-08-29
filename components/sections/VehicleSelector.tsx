@@ -59,37 +59,35 @@ export function VehicleSelector() {
   return (
     <section
       id="vehicle-selector"
-      className="relative z-30 -mt-[18vh] border-t border-border bg-raised py-16 md:py-24"
+      className="relative z-30 overflow-hidden border-b border-border bg-background py-24 md:py-32 lg:py-40"
     >
-      <div className="atmo-glow pointer-events-none absolute inset-0" />
-      <div className="relative mx-auto max-w-[1600px] px-4 md:px-8">
+      <div className="precision-grid pointer-events-none absolute inset-0 opacity-50" />
+      <div className="pointer-events-none absolute left-0 top-1/3 h-96 w-96 -translate-x-1/2 rounded-full bg-cyan/[0.055] blur-[100px]" />
+      <div className="site-container relative">
         <motion.div
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: "-100px" }}
           variants={staggerContainer}
-          className="grid gap-12 lg:grid-cols-2"
+          className="grid items-start gap-14 lg:grid-cols-[0.8fr_1.2fr] lg:gap-20"
         >
           {/* Copy */}
           <div className="max-w-xl">
-            <motion.span
-              variants={fadeInUp}
-              className="mb-4 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.25em] text-cyan"
-            >
+            <motion.span variants={fadeInUp} className="technical-label mb-5">
               <CarFront className="h-4 w-4" />
-              Vehicle Fitment
+              01 / Vehicle fitment
             </motion.span>
             <motion.h2
               variants={fadeInUp}
-              className="font-display text-5xl font-bold uppercase leading-[0.9] tracking-tight text-foreground md:text-7xl"
+              className="font-display text-6xl font-bold uppercase leading-[0.82] tracking-[-0.035em] text-foreground md:text-8xl"
             >
-              Your Car.
+              One car.
               <br />
-              <span className="text-silver">Your Tune.</span>
+              <span className="display-outline">Zero guesswork.</span>
             </motion.h2>
             <motion.p
               variants={fadeInUp}
-              className="mt-6 text-lg leading-relaxed text-silver-muted"
+              className="mt-7 max-w-lg text-base leading-relaxed text-silver-muted md:text-lg"
             >
               Choose your vehicle and discover upgrades made for it. We&apos;ll filter
               products, builds and recommendations around your exact model.
@@ -98,12 +96,12 @@ export function VehicleSelector() {
             {selected && (
               <motion.div
                 variants={fadeInUp}
-                className="mt-8 rounded-lg border border-border bg-surface p-6"
+                className="premium-card edge-highlight mt-9 rounded-sm p-6"
               >
-                <p className="text-xs uppercase tracking-widest text-silver-muted">
+                <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-silver-muted">
                   Selected vehicle
                 </p>
-                <p className="mt-1 font-display text-2xl uppercase text-foreground">
+                <p className="mt-2 font-display text-3xl font-semibold uppercase text-foreground">
                   {selected.year} {selected.brand} {selected.model} {selected.variant}
                 </p>
                 <Button asChild className="mt-4 bg-cyan text-black hover:bg-cyan-light">
@@ -118,8 +116,9 @@ export function VehicleSelector() {
           {/* Selector */}
           <motion.div
             variants={staggerContainer}
-            className="space-y-8 rounded-xl border border-border bg-raised p-6 md:p-10"
+            className="glass-panel relative space-y-8 overflow-hidden rounded-sm p-6 md:p-10 lg:p-12"
           >
+            <div className="precision-grid pointer-events-none absolute inset-0 opacity-35" />
             {/* Brand */}
             <Step label="01" title="Brand">
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
@@ -183,17 +182,18 @@ export function VehicleSelector() {
               </div>
             </Step>
 
-            <motion.div variants={fadeInUp} className="pt-4">
-              <Button
-                asChild
-                disabled={!isComplete}
-                className="w-full bg-cyan text-black hover:bg-cyan-light disabled:opacity-40"
-              >
-                <Link href="/shop" className="gap-2">
-                  Find My Upgrades
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
-              </Button>
+            <motion.div variants={fadeInUp} className="relative pt-4">
+              {isComplete ? (
+                <Button asChild size="lg" className="w-full">
+                  <Link href="/shop">
+                    Find my upgrades <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </Button>
+              ) : (
+                <Button size="lg" disabled className="w-full">
+                  Complete vehicle selection
+                </Button>
+              )}
             </motion.div>
           </motion.div>
         </motion.div>
@@ -214,10 +214,10 @@ function Step({
   disabled?: boolean;
 }) {
   return (
-    <motion.div variants={fadeInUp} className={cn("space-y-3", disabled && "opacity-50")}>
+    <motion.div variants={fadeInUp} className={cn("relative space-y-3", disabled && "opacity-45")}>
       <div className="flex items-center gap-3">
-        <span className="text-xs font-bold text-cyan">{label}</span>
-        <span className="text-xs font-semibold uppercase tracking-widest text-foreground">
+        <span className="font-mono text-[9px] font-bold tracking-widest text-cyan">{label}</span>
+        <span className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-foreground">
           {title}
         </span>
       </div>
@@ -242,11 +242,12 @@ function OptionButton({
       type="button"
       disabled={disabled}
       onClick={onClick}
+      aria-pressed={active}
       className={cn(
-        "relative flex items-center justify-center gap-2 rounded-md border px-4 py-3 text-sm font-medium uppercase tracking-wider transition-all duration-200",
+        "relative flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-sm border px-4 py-3 font-mono text-[10px] font-bold uppercase tracking-[0.12em] transition-all duration-300",
         active
-          ? "border-cyan bg-cyan/10 text-cyan"
-          : "border-border bg-surface text-silver hover:border-silver hover:text-foreground",
+          ? "border-cyan bg-cyan/[0.11] text-cyan shadow-[inset_0_0_24px_rgba(49,207,255,0.05)]"
+          : "border-border bg-black/20 text-silver hover:border-silver/60 hover:bg-white/[0.035] hover:text-foreground",
         disabled && "cursor-not-allowed opacity-40 hover:border-border hover:text-silver"
       )}
     >

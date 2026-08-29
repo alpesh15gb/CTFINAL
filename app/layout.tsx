@@ -1,11 +1,10 @@
 import type { Metadata, Viewport } from "next";
-import { Barlow, Barlow_Condensed } from "next/font/google";
+import { Barlow, Barlow_Condensed, Space_Mono } from "next/font/google";
 import "./globals.css";
 import { SmoothScroll } from "@/components/layout/SmoothScroll";
-import { Loader } from "@/components/layout/Loader";
+import { MotionProvider } from "@/components/layout/MotionProvider";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
-import { CustomCursor } from "@/components/layout/CustomCursor";
 import { ScrollProgress } from "@/components/animations/ScrollProgress";
 
 const barlow = Barlow({
@@ -20,6 +19,13 @@ const barlowCondensed = Barlow_Condensed({
   variable: "--font-display",
   display: "swap",
   weight: ["400", "500", "600", "700"],
+});
+
+const spaceMono = Space_Mono({
+  subsets: ["latin"],
+  variable: "--font-mono",
+  display: "swap",
+  weight: ["400", "700"],
 });
 
 export const viewport: Viewport = {
@@ -58,17 +64,25 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${barlow.variable} ${barlowCondensed.variable}`} suppressHydrationWarning>
+    <html
+      lang="en"
+      className={`${barlow.variable} ${barlowCondensed.variable} ${spaceMono.variable}`}
+      suppressHydrationWarning
+    >
       <body className="min-h-screen bg-background font-sans text-foreground antialiased" suppressHydrationWarning>
-        <SmoothScroll>
-          <ScrollProgress />
-          <Loader>
-            <CustomCursor />
+        <a className="skip-link" href="#main-content">
+          Skip to content
+        </a>
+        <MotionProvider>
+          <SmoothScroll>
+            <ScrollProgress />
             <Navbar />
-            {children}
+            <div id="main-content" tabIndex={-1}>
+              {children}
+            </div>
             <Footer />
-          </Loader>
-        </SmoothScroll>
+          </SmoothScroll>
+        </MotionProvider>
       </body>
     </html>
   );

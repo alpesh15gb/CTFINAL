@@ -14,54 +14,53 @@ export function FeaturedProducts() {
   const featured = products[0];
   const secondary = products.slice(1, 5);
 
-  const heading = selected
-    ? `Upgrades for your ${selected.brand} ${selected.model}`
-    : "Engineered to fit.";
-
   return (
-    <section className="relative z-20 bg-background py-24 md:py-32">
-      <div className="mx-auto max-w-[1600px] px-4 md:px-8">
+    <section className="section-space precision-grid relative z-20 overflow-hidden bg-background">
+      <div className="absolute left-0 top-0 h-px w-full bg-gradient-to-r from-transparent via-cyan/35 to-transparent" />
+      <div className="site-container relative">
         <motion.div
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: "-100px" }}
           variants={staggerContainer}
-          className="mb-12 flex flex-col items-start justify-between gap-6 md:flex-row md:items-end"
+          className="mb-12 grid items-end gap-8 lg:mb-16 lg:grid-cols-12"
         >
-          <div className="max-w-2xl">
-            <motion.span
-              variants={fadeInUp}
-              className="mb-3 inline-block text-xs font-semibold uppercase tracking-[0.25em] text-cyan"
-            >
-              03 / Featured Products
-            </motion.span>
+          <div className="lg:col-span-8">
+            <motion.p variants={fadeInUp} className="technical-label">
+              03 / Curated performance
+            </motion.p>
             <motion.h2
               variants={fadeInUp}
-              className="font-display text-5xl font-bold uppercase leading-[0.9] tracking-tight text-foreground md:text-7xl"
+              className="mt-6 max-w-5xl font-display text-5xl font-bold uppercase leading-[0.84] tracking-[-0.035em] text-foreground sm:text-6xl md:text-8xl"
             >
-              {heading}
+              {selected ? (
+                <>
+                  Built for your
+                  <span className="display-outline block">{selected.brand} {selected.model}</span>
+                </>
+              ) : (
+                <>
+                  Parts with
+                  <span className="display-outline block">purpose.</span>
+                </>
+              )}
             </motion.h2>
-            <motion.p variants={fadeInUp} className="mt-4 text-lg text-silver-muted">
-              Hand-picked upgrades that transform the way your car looks, feels and drives.
-            </motion.p>
           </div>
 
-          <motion.div variants={fadeInUp}>
-            <Button
-              asChild
-              variant="outline"
-              className="border-border bg-transparent text-foreground hover:border-cyan hover:text-cyan"
-            >
-              <Link href="/shop" className="gap-2">
-                Shop All <ArrowRight className="h-4 w-4" />
+          <motion.div variants={fadeInUp} className="lg:col-span-4 lg:pb-2">
+            <p className="max-w-md text-base leading-relaxed text-silver-muted md:text-lg">
+              Considered upgrades for stance, sound, cabin and response—selected for finish, fit and everyday drivability.
+            </p>
+            <Button asChild variant="outline" className="mt-6">
+              <Link href="/shop" className="gap-3">
+                Explore all upgrades <ArrowRight className="h-4 w-4" aria-hidden="true" />
               </Link>
             </Button>
           </motion.div>
         </motion.div>
 
-        {/* Bento grid */}
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-          <div className="lg:col-span-2 lg:row-span-2">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 lg:gap-5">
+          <div className="md:col-span-2 lg:col-span-2 lg:row-span-2">
             <ProductCard product={featured} featured />
           </div>
           {secondary.map((product) => (

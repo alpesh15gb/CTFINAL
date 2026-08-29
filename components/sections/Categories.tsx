@@ -5,34 +5,47 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
 import { categories } from "@/data/categories";
-import { staggerContainer, fadeInUp } from "@/lib/animations";
+import { fadeInUp, staggerContainer } from "@/lib/animations";
 import { cn } from "@/lib/utils";
+
+const categoryLayout = [
+  "lg:col-span-7 lg:row-span-2",
+  "lg:col-span-5",
+  "lg:col-span-5",
+  "lg:col-span-3",
+  "lg:col-span-3",
+  "lg:col-span-3",
+  "lg:col-span-3",
+];
 
 export function Categories() {
   return (
-    <section className="relative z-20 bg-raised pt-24 pb-16 md:pt-32 md:pb-20">
-      <div className="mx-auto max-w-[1600px] px-4 md:px-8">
+    <section className="relative z-20 overflow-hidden border-y border-border bg-raised py-24 md:py-32 lg:py-40">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_85%_15%,rgba(49,207,255,0.055),transparent_28rem)]" />
+      <div className="site-container relative">
         <motion.div
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: "-100px" }}
           variants={staggerContainer}
-          className="mb-12 md:mb-16"
+          className="mb-12 grid gap-7 md:mb-16 lg:grid-cols-[1fr_0.55fr] lg:items-end"
         >
-          <motion.span
-            variants={fadeInUp}
-            className="mb-3 inline-block text-xs font-semibold uppercase tracking-[0.25em] text-cyan"
-          >
-            04 / Categories
-          </motion.span>
-          <motion.h2
-            variants={fadeInUp}
-            className="font-display text-5xl font-bold uppercase leading-[0.9] tracking-tight text-foreground md:text-7xl"
-          >
-            Choose
-            <br />
-            <span className="text-silver">Your Upgrade.</span>
-          </motion.h2>
+          <div>
+            <motion.span variants={fadeInUp} className="technical-label mb-5">
+              04 / Curated collections
+            </motion.span>
+            <motion.h2
+              variants={fadeInUp}
+              className="max-w-4xl font-display text-6xl font-bold uppercase leading-[0.8] tracking-[-0.04em] text-foreground md:text-8xl lg:text-9xl"
+            >
+              Upgrade by
+              <br />
+              <span className="display-outline">intent.</span>
+            </motion.h2>
+          </div>
+          <motion.p variants={fadeInUp} className="max-w-md text-base leading-relaxed text-silver-muted lg:pb-2">
+            From subtle factory-plus details to full performance transformations, every collection is selected around how you want your car to feel.
+          </motion.p>
         </motion.div>
 
         <motion.div
@@ -40,10 +53,10 @@ export function Categories() {
           whileInView="visible"
           viewport={{ once: true, margin: "-50px" }}
           variants={staggerContainer}
-          className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+          className="grid gap-4 sm:grid-cols-2 lg:auto-rows-[17rem] lg:grid-cols-12"
         >
-          {categories.map((category, idx) => (
-            <CategoryCard key={category.id} category={category} index={idx} />
+          {categories.map((category, index) => (
+            <CategoryCard key={category.id} category={category} index={index} />
           ))}
         </motion.div>
       </div>
@@ -58,47 +71,53 @@ function CategoryCard({
   category: (typeof categories)[number];
   index: number;
 }) {
-  const large = index === 0 || index === 4;
+  const featured = index === 0;
 
   return (
-    <motion.div
+    <motion.article
       variants={fadeInUp}
       className={cn(
-        "group relative overflow-hidden rounded-lg border border-border bg-surface",
-        large && "sm:col-span-2 lg:col-span-1"
+        "edge-highlight group relative min-h-[20rem] overflow-hidden rounded-sm border border-border bg-surface",
+        categoryLayout[index],
+        featured && "sm:col-span-2 lg:min-h-0"
       )}
     >
-      <Link href={`/shop?category=${category.slug}`} className="block">
-        <div className={cn("relative overflow-hidden", large ? "aspect-[16/10]" : "aspect-[4/3]")}>
-          <Image
-            src={category.image}
-            alt={category.name}
-            fill
-            sizes="(max-width: 768px) 100vw, 33vw"
-            className="object-cover transition-transform duration-700 ease-out group-hover:scale-110"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-raised via-raised/40 to-transparent" />
-        </div>
+      <Link href={`/shop?category=${category.slug}`} className="block h-full min-h-[20rem] focus-visible:outline-none lg:min-h-0">
+        <Image
+          src={category.image}
+          alt={category.name}
+          fill
+          sizes={featured ? "(max-width: 1024px) 100vw, 58vw" : "(max-width: 768px) 100vw, 35vw"}
+          className="object-cover saturate-[0.78] transition duration-1000 ease-out-expo group-hover:scale-[1.045] group-hover:saturate-100"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/35 to-black/5" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/35 via-transparent to-transparent" />
 
-        <div className="absolute inset-x-0 bottom-0 p-5 md:p-6">
-          <div className="flex items-end justify-between gap-4">
-            <div>
-              <span className="text-[10px] font-bold text-cyan">
-                {String(index + 1).padStart(2, "0")}
-              </span>
-              <h3 className="mt-1 font-display text-2xl font-semibold uppercase text-foreground md:text-3xl">
-                {category.name}
-              </h3>
-              <p className="mt-1 max-w-xs text-sm text-silver-muted opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-                {category.description}
-              </p>
-            </div>
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border text-foreground transition-all group-hover:border-cyan group-hover:bg-cyan group-hover:text-black">
+        <div className="absolute inset-0 flex flex-col justify-between p-5 md:p-7">
+          <div className="flex items-start justify-between">
+            <span className="font-mono text-[9px] font-bold tracking-[0.2em] text-cyan">
+              / {String(index + 1).padStart(2, "0")}
+            </span>
+            <span className="flex h-11 w-11 items-center justify-center rounded-sm border border-white/20 bg-black/25 text-foreground backdrop-blur-md transition-all duration-300 group-hover:border-cyan group-hover:bg-cyan group-hover:text-black">
               <ArrowUpRight className="h-4 w-4" />
-            </div>
+            </span>
+          </div>
+
+          <div>
+            <p className="mb-2 max-w-sm text-sm leading-relaxed text-silver opacity-90 md:text-base">
+              {category.description}
+            </p>
+            <h3
+              className={cn(
+                "font-display font-semibold uppercase leading-none tracking-[-0.025em] text-white",
+                featured ? "text-5xl md:text-7xl" : "text-4xl md:text-5xl"
+              )}
+            >
+              {category.name}
+            </h3>
           </div>
         </div>
       </Link>
-    </motion.div>
+    </motion.article>
   );
 }

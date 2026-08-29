@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useRef, Component, ReactNode } from "react";
+import { Component, ReactNode, Suspense, useEffect, useRef } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { ContactShadows, Environment, useGLTF } from "@react-three/drei";
 import { MotionValue } from "framer-motion";
@@ -31,19 +31,22 @@ function CarModel({ scrollProgress, reducedMotion }: { scrollProgress: MotionVal
   const boundingBox = useRef(new THREE.Box3());
   const center = useRef(new THREE.Vector3());
   const size = useRef(new THREE.Vector3());
-  let initialized = false;
+  const initialized = useRef(false);
 
-  scene.traverse((child) => {
-    if ((child as THREE.Mesh).isMesh) {
-      child.castShadow = false;
-      child.receiveShadow = false;
-    }
-  });
+  useEffect(() => {
+    initialized.current = false;
+    scene.traverse((child) => {
+      if ((child as THREE.Mesh).isMesh) {
+        child.castShadow = false;
+        child.receiveShadow = false;
+      }
+    });
+  }, [scene]);
 
   useFrame((_, delta) => {
     if (!groupRef.current) return;
 
-    if (!initialized) {
+    if (!initialized.current) {
       boundingBox.current.setFromObject(scene);
       boundingBox.current.getCenter(center.current);
       boundingBox.current.getSize(size.current);
@@ -51,7 +54,7 @@ function CarModel({ scrollProgress, reducedMotion }: { scrollProgress: MotionVal
       const scale = 3 / maxDim;
       groupRef.current.scale.setScalar(scale);
       groupRef.current.position.set(-center.current.x * scale, -center.current.y * scale - 0.3, -center.current.z * scale);
-      initialized = true;
+      initialized.current = true;
     }
 
     if (reducedMotion) {
@@ -130,9 +133,11 @@ function StudioLighting() {
 export function HeroCanvas({
   scrollProgress,
   reducedMotion,
+  active,
 }: {
   scrollProgress: MotionValue<number>;
   reducedMotion: boolean;
+  active: boolean;
 }) {
   return (
     <div className="absolute inset-0 z-0">
@@ -141,6 +146,7 @@ export function HeroCanvas({
           gl={{ antialias: false, alpha: false, powerPreference: "high-performance", failIfMajorPerformanceCaveat: false }}
           dpr={[1, 1]}
           camera={{ position: [3.5, 1.2, 4.5], fov: 35 }}
+          frameloop={active && !reducedMotion ? "always" : "demand"}
           shadows={false}
         >
           <color attach="background" args={["#000000"]} />
