@@ -120,6 +120,14 @@ function optionValuesForVariant(product, variant, optionMap) {
     .filter(Boolean);
 }
 
+async function verifiedImages(sourceProduct, skipImageCheck) {
+  const urls = (sourceProduct.images || []).map((image) => image.src).filter(Boolean);
+  return validateImageUrls(urls, {
+    max: Math.max(urls.length, 1),
+    skipImageCheck,
+  });
+}
+
 async function main() {
   const args = parseArgs();
   console.log("=== Sahiba Car live catalog import ===");
@@ -135,17 +143,14 @@ async function main() {
   if (args.dryRun) {
     let ready = 0;
     for (const sourceProduct of rawProducts) {
-      const images = await validateImageUrls(
-        (sourceProduct.images || []).map((image) => image.src),
-        { max: 12, skipImageCheck: args.skipImageCheck }
-      );
+      const images = await verifiedImages(sourceProduct, args.skipImageCheck);
       const variants = (sourceProduct.variants || []).filter(
         (variant) => rupeesToPaise(variant.price) > 0
       );
       if (!images.length || !variants.length) continue;
       ready += 1;
       console.log(
-        `[OK] ${sourceProduct.title} | ${mapCategory(sourceProduct)} | ${variants.length} variants | ${images.length} images | ₹${sourceProduct.variants[0]?.price || "0"}`
+        `[OK] ${sourceProduct.title} | ${mapCategory(sourceProduct)} | ${variants.length} variants | ${images.length}/${(sourceProduct.images || []).length} images | ₹${sourceProduct.variants[0]?.price || "0"}`
       );
     }
     console.log(`Dry-run ready products: ${ready}/${rawProducts.length}`);
@@ -176,10 +181,7 @@ async function main() {
         continue;
       }
 
-      const images = await validateImageUrls(
-        (sourceProduct.images || []).map((image) => image.src),
-        { max: 12, skipImageCheck: args.skipImageCheck }
-      );
+      const images = await verifiedImages(sourceProduct, args.skipImageCheck);
       if (!images.length) {
         console.log(`[SKIP] no verified source images: ${sourceProduct.title}`);
         skipped += 1;
@@ -303,7 +305,7 @@ async function main() {
       }
 
       console.log(
-        `[${result.created ? "CREATE" : "UPDATE"}] ${sourceProduct.title} | ${variants.length} variants | ${images.length} images`
+        `[${result.created ? "CREATE" : "UPDATE"}] ${sourceProduct.title} | ${variants.length} variants | ${images.length}/${(sourceProduct.images || []).length} images`
       );
     } catch (error) {
       errors += 1;
