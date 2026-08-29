@@ -104,6 +104,43 @@ async function fetchJson(url) {
   return response.json();
 }
 
+function looksLikeImageBytes(buffer) {
+  if (!buffer || buffer.length < 12) return false;
+
+  // JPEG: FF D8 FF
+  if (buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff) {
+    return true;
+  }
+
+  // PNG: 89 50 4E 47 0D 0A 1A 0A
+  if (
+    buffer[0] === 0x89 &&
+    buffer[1] === 0x50 &&
+    buffer[2] === 0x4e &&
+    buffer[3] === 0x47 &&
+    buffer[4] === 0x0d &&
+    buffer[5] === 0x0a &&
+    buffer[6] === 0x1a &&
+    buffer[7] === 0x0a
+  ) {
+    return true;
+  }
+
+  // GIF87a / GIF89a
+  const ascii6 = buffer.subarray(0, 6).toString("ascii");
+  if (ascii6 === "GIF87a" || ascii6 === "GIF89a") return true;
+
+  // WEBP: RIFF....WEBP
+  if (
+    buffer.subarray(0, 4).toString("ascii") === "RIFF" &&
+    buffer.subarray(8, 12).toString("ascii") === "WEBP"
+  ) {
+    return true;
+  }
+
+  return false;
+}
+
 async function validateImageUrl(url, skipImageCheck = false) {
   if (!/^https?:\/\//i.test(url || "")) return false;
   if (skipImageCheck) return true;
@@ -120,11 +157,20 @@ async function validateImageUrl(url, skipImageCheck = false) {
       { method: "GET", headers: { Range: "bytes=0-1023" } },
       15000
     );
+    if (!response.ok) return false;
+
     const type = response.headers.get("content-type") || "";
-    if (response.body && typeof response.body.cancel === "function") {
-      await response.body.cancel().catch(() => {});
+    if (type.toLowerCase().startsWith("image/")) {
+      if (response.body && typeof response.body.cancel === "function") {
+        await response.body.cancel().catch(() => {});
+      }
+      return true;
     }
-    return response.ok && type.toLowerCase().startsWith("image/");
+
+    // Neo serves some valid product images from extensionless/odd paths with a
+    // non-image MIME header. Inspect the first bytes instead of rejecting them.
+    const bytes = Buffer.from(await response.arrayBuffer());
+    return looksLikeImageBytes(bytes);
   } catch (_) {
     return false;
   }
