@@ -203,6 +203,21 @@ async function ensureIndiaRegion(container, dryRun = false) {
   }
 
   const manager = container.resolve("manager");
+  const currencyRows = await manager.query(
+    "SELECT code FROM currency WHERE LOWER(code) = 'inr' LIMIT 1"
+  );
+  if (!currencyRows.length) {
+    throw new Error("INR currency row was not found in Medusa");
+  }
+  const currencyCode = String(currencyRows[0].code).toLowerCase();
+
+  await manager.query(
+    `INSERT INTO store_currencies (store_id, currency_code)
+     SELECT id, $1
+     FROM store
+     ON CONFLICT DO NOTHING`,
+    [currencyCode]
+  );
   await manager.query(
     "UPDATE payment_provider SET is_installed = true WHERE id = 'manual'"
   );
@@ -213,7 +228,7 @@ async function ensureIndiaRegion(container, dryRun = false) {
   console.log("Creating India / INR region...");
   return regionService.create({
     name: "India",
-    currency_code: "INR",
+    currency_code: currencyCode,
     tax_rate: 0,
     payment_providers: ["manual"],
     fulfillment_providers: ["manual"],
