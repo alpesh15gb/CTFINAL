@@ -16,9 +16,7 @@ class CanvasErrorBoundary extends Component<{ children: ReactNode }, { hasError:
   }
   render() {
     if (this.state.hasError) {
-      return (
-        <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-raised" />
-      );
+      return null;
     }
     return this.props.children;
   }
@@ -63,12 +61,12 @@ function CarModel({ scrollProgress, reducedMotion }: { scrollProgress: MotionVal
     }
 
     const p = scrollProgress.get();
-    // Extended rotation for the longer scroll range
-    const targetRotation = -Math.PI * 0.25 + p * Math.PI * 1.1;
+    // Subtle vehicle orientation change — camera does the moving
+    const targetRotation = -Math.PI * 0.15 + p * Math.PI * 0.2;
     groupRef.current.rotation.y = THREE.MathUtils.lerp(
       groupRef.current.rotation.y,
       targetRotation,
-      delta * 3
+      delta * 2
     );
   });
 
@@ -79,6 +77,10 @@ function CarModel({ scrollProgress, reducedMotion }: { scrollProgress: MotionVal
   );
 }
 
+function smoothstep(t: number) {
+  return t * t * (3 - 2 * t);
+}
+
 function CameraRig({
   scrollProgress,
   reducedMotion,
@@ -87,9 +89,11 @@ function CameraRig({
   reducedMotion: boolean;
 }) {
   const { camera } = useThree();
-  const initialPosition = useRef(new THREE.Vector3(4.5, 1.8, 6));
+  const initialPosition = useRef(new THREE.Vector3(5, 2, 7));
+  const targetPos = useRef(new THREE.Vector3());
+  const targetLook = useRef(new THREE.Vector3());
 
-  useFrame(() => {
+  useFrame((_, delta) => {
     if (reducedMotion) {
       camera.position.copy(initialPosition.current);
       camera.lookAt(0, 0, 0);
@@ -97,43 +101,49 @@ function CameraRig({
     }
     const p = scrollProgress.get();
 
-    // Multi-phase camera choreography
-    // Phase 1 (0–0.2): Wide establishing shot, slowly approaching
-    // Phase 2 (0.2–0.5): Orbit around the vehicle, closer
-    // Phase 3 (0.5–0.75): Push toward front detail
-    // Phase 4 (0.75–1): Pull back slightly for exit
-
     let x: number, y: number, z: number;
     let lookX: number, lookY: number, lookZ: number;
 
     if (p < 0.2) {
-      const t = p / 0.2;
-      x = 4.5 - t * 1.0;
-      y = 1.8 - t * 0.3;
-      z = 6 - t * 1.2;
+      // Phase 1: Wide establishing shot, slowly approaching
+      const t = smoothstep(p / 0.2);
+      x = 5 - t * 1.2;
+      y = 2 - t * 0.3;
+      z = 7 - t * 1.5;
       lookX = 0; lookY = 0; lookZ = 0;
     } else if (p < 0.5) {
-      const t = (p - 0.2) / 0.3;
-      x = 3.5 - t * 1.5;
-      y = 1.5 - t * 0.4;
-      z = 4.8 - t * 1.5;
-      lookX = t * 0.3; lookY = -t * 0.1; lookZ = t * 0.2;
+      // Phase 2: Slow dolly closer with gentle lateral movement
+      const t = smoothstep((p - 0.2) / 0.3);
+      x = 3.8 - t * 1.0;
+      y = 1.7 - t * 0.3;
+      z = 5.5 - t * 1.2;
+      lookX = t * 0.2; lookY = -t * 0.05; lookZ = t * 0.1;
     } else if (p < 0.75) {
-      const t = (p - 0.5) / 0.25;
-      x = 2.0 - t * 1.2;
-      y = 1.1 - t * 0.5;
-      z = 3.3 - t * 1.5;
-      lookX = 0.3 + t * 0.4; lookY = -0.1 - t * 0.15; lookZ = 0.2 + t * 0.4;
+      // Phase 3: Push toward front-quarter detail
+      const t = smoothstep((p - 0.5) / 0.25);
+      x = 2.8 - t * 0.8;
+      y = 1.4 - t * 0.3;
+      z = 4.3 - t * 1.0;
+      lookX = 0.2 + t * 0.2; lookY = -0.05 - t * 0.1; lookZ = 0.1 + t * 0.2;
     } else {
-      const t = (p - 0.75) / 0.25;
-      x = 0.8 + t * 1.5;
-      y = 0.6 + t * 0.6;
-      z = 1.8 + t * 2.0;
-      lookX = 0.7 - t * 0.3; lookY = -0.25 + t * 0.1; lookZ = 0.6 - t * 0.3;
+      // Phase 4: Gentle pullback for controlled exit
+      const t = smoothstep((p - 0.75) / 0.25);
+      x = 2.0 + t * 1.5;
+      y = 1.1 + t * 0.5;
+      z = 3.3 + t * 2.0;
+      lookX = 0.4 - t * 0.2; lookY = -0.15 + t * 0.05; lookZ = 0.3 - t * 0.15;
     }
 
-    camera.position.set(x, y, z);
-    camera.lookAt(lookX, lookY, lookZ);
+    targetPos.current.set(x, y, z);
+    targetLook.current.set(lookX, lookY, lookZ);
+
+    // Smooth interpolation for extra cinematic lag
+    camera.position.lerp(targetPos.current, Math.min(1, delta * 4));
+    const currentLook = new THREE.Vector3();
+    camera.getWorldDirection(currentLook);
+    const desiredDir = targetLook.current.clone().sub(camera.position).normalize();
+    currentLook.lerp(desiredDir, Math.min(1, delta * 4));
+    camera.lookAt(camera.position.clone().add(currentLook));
   });
 
   return null;
@@ -142,38 +152,83 @@ function CameraRig({
 function StudioLighting({ scrollProgress }: { scrollProgress: MotionValue<number> }) {
   const keyLightRef = useRef<THREE.SpotLight>(null);
   const fillLightRef = useRef<THREE.SpotLight>(null);
+  const rimLightRef = useRef<THREE.SpotLight>(null);
 
   useFrame(() => {
     const p = scrollProgress.get();
-    // Light intensity evolves with scroll — starts dim, peaks mid, settles
+
     if (keyLightRef.current) {
-      const intensity = p < 0.15 ? 20 + p * 500 : p < 0.6 ? 100 : 100 - (p - 0.6) * 80;
-      keyLightRef.current.intensity = Math.max(20, intensity);
+      // Key light: barely visible at start, builds through reveal, holds steady
+      let intensity: number;
+      if (p < 0.1) {
+        intensity = 5 + p * 80; // 5 → 13
+      } else if (p < 0.35) {
+        intensity = 13 + (p - 0.1) * 320; // 13 → 93
+      } else if (p < 0.7) {
+        intensity = 93; // hold
+      } else {
+        intensity = 93 - (p - 0.7) * 100; // settle for exit
+      }
+      keyLightRef.current.intensity = Math.max(5, intensity);
     }
+
     if (fillLightRef.current) {
-      const intensity = p < 0.15 ? 10 + p * 300 : p < 0.6 ? 60 : 60 - (p - 0.6) * 50;
-      fillLightRef.current.intensity = Math.max(10, intensity);
+      // Cyan fill: very subtle accent, never dominant
+      let intensity: number;
+      if (p < 0.15) {
+        intensity = 2 + p * 20;
+      } else if (p < 0.5) {
+        intensity = 5 + (p - 0.15) * 40; // 5 → 19
+      } else if (p < 0.7) {
+        intensity = 19;
+      } else {
+        intensity = 19 - (p - 0.7) * 30;
+      }
+      fillLightRef.current.intensity = Math.max(2, intensity);
+    }
+
+    if (rimLightRef.current) {
+      // Rim/back light: provides edge definition in silhouette phase
+      let intensity: number;
+      if (p < 0.08) {
+        intensity = 30; // visible edge in darkness
+      } else if (p < 0.3) {
+        intensity = 30 + (p - 0.08) * 200; // build
+      } else if (p < 0.6) {
+        intensity = 74;
+      } else {
+        intensity = 74 - (p - 0.6) * 80;
+      }
+      rimLightRef.current.intensity = Math.max(10, intensity);
     }
   });
 
   return (
     <>
-      <ambientLight intensity={0.15} />
+      <ambientLight intensity={0.08} />
       <spotLight
         ref={keyLightRef}
         position={[5, 8, 6]}
         angle={0.35}
         penumbra={0.5}
-        intensity={20}
-        color="#f2f2f2"
+        intensity={5}
+        color="#f5f5f5"
       />
       <spotLight
         ref={fillLightRef}
         position={[-6, 3, -4]}
         angle={0.6}
         penumbra={0.8}
-        intensity={10}
+        intensity={2}
         color="#02bbfc"
+      />
+      <spotLight
+        ref={rimLightRef}
+        position={[-3, 5, -6]}
+        angle={0.4}
+        penumbra={0.6}
+        intensity={30}
+        color="#e8e8e8"
       />
     </>
   );
@@ -189,17 +244,16 @@ export function HeroCanvas({
   active: boolean;
 }) {
   return (
-    <div className="absolute inset-0 z-0">
+    <div className="absolute inset-0 z-[5]">
       <CanvasErrorBoundary>
         <Canvas
-          gl={{ antialias: false, alpha: false, powerPreference: "high-performance", failIfMajorPerformanceCaveat: false }}
+          gl={{ antialias: true, alpha: true, powerPreference: "high-performance", failIfMajorPerformanceCaveat: false }}
           dpr={[1, 1.5]}
-          camera={{ position: [4.5, 1.8, 6], fov: 35 }}
+          camera={{ position: [5, 2, 7], fov: 35 }}
           frameloop={active && !reducedMotion ? "always" : "demand"}
           shadows={false}
         >
-          <color attach="background" args={["#000000"]} />
-          <fog attach="fog" args={["#000000", 8, 22]} />
+          <fog attach="fog" args={["#030405", 8, 22]} />
           <Suspense fallback={null}>
             <StudioLighting scrollProgress={scrollProgress} />
             <Environment preset="city" environmentIntensity={0.15} />

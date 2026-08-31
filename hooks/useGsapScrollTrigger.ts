@@ -3,23 +3,27 @@
 import { useEffect, useRef } from "react";
 import { useReducedMotion } from "./useReducedMotion";
 
-export function useGsapScrollTrigger() {
+type GsapSetupFn = (gsap: typeof import("gsap").default, ScrollTrigger: typeof import("gsap/ScrollTrigger").ScrollTrigger) => void;
+
+export function useGsapScrollTrigger(setup: GsapSetupFn) {
   const reducedMotion = useReducedMotion();
   const ref = useRef<HTMLDivElement>(null);
+  const setupRef = useRef(setup);
+  setupRef.current = setup;
 
   useEffect(() => {
     if (reducedMotion || !ref.current) return;
 
-    let ctx: ReturnType<typeof Object> | null = null;
+    let ctx: gsap.Context | null = null;
 
     const init = async () => {
       const gsap = (await import("gsap")).default;
       const { ScrollTrigger } = await import("gsap/ScrollTrigger");
       gsap.registerPlugin(ScrollTrigger);
 
-      // gsap.context scopes all tweens/ScrollTriggers created inside it
-      // to this ref element, so ctx.revert() only kills THIS component's triggers.
-      ctx = gsap.context(() => {}, ref.current!);
+      ctx = gsap.context(() => {
+        setupRef.current(gsap, ScrollTrigger);
+      }, ref.current!);
     };
 
     init();

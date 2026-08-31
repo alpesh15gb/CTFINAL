@@ -90,55 +90,55 @@ export function Hero() {
   }
 
   return (
-    <section ref={containerRef} className="relative h-[350vh] bg-background">
+    <section ref={containerRef} className="relative h-[280vh] bg-background">
       {/* Sticky visual stage */}
       <div className="sticky top-0 h-svh min-h-[680px] overflow-hidden bg-background">
         {/* === Z-INDEX MAP ===
-            z-0:  WebGL canvas
             z-[1]: precision-grid texture
             z-[2]: noise texture
             z-[3]: atmospheric gradients (vignette + top-to-bottom)
-            z-[4]: background typography (BEHIND car visually, but above overlays so it's visible)
-            z-[5]: darkness reveal overlay
-            z-[6]: exit shade overlay
+            z-[4]: background typography BUILT BEYOND (BEHIND transparent canvas)
+            z-[5]: WebGL canvas (transparent — car occludes bg type naturally)
+            z-[6]: darkness reveal overlay (above canvas)
+            z-[7]: exit shade overlay (above canvas)
             z-10: main headline
-            z-[12]: foreground typography (IN FRONT of car)
+            z-[12]: foreground FACTORY typography (IN FRONT of car)
             z-20: UI elements (intro, CTAs, annotations, side panel)
         */}
 
-        {/* 3D Canvas */}
+        {/* Atmospheric overlays — below everything */}
+        <div className="precision-grid pointer-events-none absolute inset-0 z-[1] opacity-70" />
+        <div className="noise-overlay pointer-events-none absolute inset-0 z-[2] opacity-[0.025]" />
+        <div className="pointer-events-none absolute inset-0 z-[3] bg-[radial-gradient(circle_at_66%_46%,transparent_0%,rgba(3,4,5,0.08)_26%,rgba(3,4,5,0.8)_78%)]" />
+        <div className="pointer-events-none absolute inset-0 z-[3] bg-gradient-to-b from-black/50 via-transparent to-background" />
+
+        {/* BACKGROUND TYPOGRAPHY — behind the transparent canvas so the car occludes it */}
+        <motion.div
+          style={{ opacity: bgTypeOpacity, scale: bgTypeScale }}
+          className="pointer-events-none absolute inset-0 z-[4] flex items-center justify-center overflow-hidden"
+        >
+          <div className="whitespace-nowrap font-display text-[clamp(8rem,22vw,28rem)] font-bold uppercase leading-[0.7] tracking-[-0.06em] text-white/[0.07]">
+            BUILT BEYOND
+          </div>
+        </motion.div>
+
+        {/* 3D Canvas — transparent, sits above bg typography */}
         <HeroCanvas
           scrollProgress={scrollYProgress}
           reducedMotion={reducedMotion}
           active={isInView}
         />
 
-        {/* Atmospheric overlays */}
-        <div className="precision-grid pointer-events-none absolute inset-0 z-[1] opacity-70" />
-        <div className="noise-overlay pointer-events-none absolute inset-0 z-[2] opacity-[0.025]" />
-        <div className="pointer-events-none absolute inset-0 z-[3] bg-[radial-gradient(circle_at_66%_46%,transparent_0%,rgba(3,4,5,0.08)_26%,rgba(3,4,5,0.8)_78%)]" />
-        <div className="pointer-events-none absolute inset-0 z-[3] bg-gradient-to-b from-black/50 via-transparent to-background" />
-
-        {/* BACKGROUND TYPOGRAPHY LAYER — above overlays so it's visible through them */}
-        <motion.div
-          style={{ opacity: bgTypeOpacity, scale: bgTypeScale }}
-          className="pointer-events-none absolute inset-0 z-[4] flex items-center justify-center overflow-hidden"
-        >
-          <div className="whitespace-nowrap font-display text-[clamp(8rem,22vw,28rem)] font-bold uppercase leading-[0.7] tracking-[-0.06em] text-white/[0.05]">
-            BUILT BEYOND
-          </div>
-        </motion.div>
-
-        {/* Darkness overlay — fades out as scroll begins (light sweep reveal) */}
+        {/* Darkness overlay — above canvas, fades out as scroll begins */}
         <motion.div
           style={{ opacity: lightReveal }}
-          className="pointer-events-none absolute inset-0 z-[5] bg-background"
+          className="pointer-events-none absolute inset-0 z-[6] bg-background"
         />
 
-        {/* Exit shade */}
+        {/* Exit shade — above canvas */}
         <motion.div
           style={{ opacity: shadeOpacity }}
-          className="pointer-events-none absolute inset-0 z-[6] bg-background"
+          className="pointer-events-none absolute inset-0 z-[7] bg-background"
         />
 
         {/* === INTRO OVERLAY (visible at rest, fades on scroll) === */}
