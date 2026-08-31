@@ -1,5 +1,5 @@
 import { Hero } from "@/components/sections/Hero";
-import { IdentityStatement } from "@/components/sections/IdentityStatement";
+import { Bridge } from "@/components/sections/Bridge";
 import { VehicleSelector } from "@/components/sections/VehicleSelector";
 import { UpgradeStory } from "@/components/sections/UpgradeStory";
 import { Categories } from "@/components/sections/Categories";
@@ -15,17 +15,17 @@ import { FinalCTA } from "@/components/sections/FinalCTA";
 
 export default function Home() {
   return (
-    <main className="relative overflow-hidden bg-background">
-      {/* ACT 01 — THE MACHINE (cinematic hero) */}
+    <main className="relative overflow-x-clip bg-background">
+      {/* ACT 01 — THE MACHINE (4-shot cinematic hero) */}
       <Hero />
 
-      {/* ACT 02 — IDENTITY STATEMENT */}
-      <IdentityStatement />
+      {/* ACT 02 — CARTUNEZ HANDOFF */}
+      <Bridge />
 
       {/* ACT 03 — FIND YOUR CAR */}
       <VehicleSelector />
 
-      {/* ACT 04 — TRANSFORMATION STORY */}
+      {/* ACT 04 — TRANSFORMATION STORY (three acts) */}
       <UpgradeStory />
 
       {/* ACT 05 — PRODUCTS (clean commerce interface) */}

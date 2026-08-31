@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { motion, useMotionValueEvent, useScroll } from "framer-motion";
 import { ArrowRight, CarFront, Menu, Search, ShoppingBag, User, X } from "lucide-react";
@@ -27,9 +27,25 @@ export function Navbar() {
   const { totalItems } = useCart();
   const cartCount = totalItems();
 
+  const isHome = pathname === "/";
+  // Cinematic act (hero + bridge) keeps only logo/cart/menu visible
+  const [navHidden, setNavHidden] = useState(isHome);
+
+  useEffect(() => {
+    if (!isHome) return;
+    const sync = () => setNavHidden(window.scrollY < window.innerHeight * 2);
+    sync();
+    window.addEventListener("resize", sync);
+    return () => window.removeEventListener("resize", sync);
+  }, [isHome]);
+
   useMotionValueEvent(scrollY, "change", (latest) => {
     const next = latest > 32;
     setScrolled((current) => (current === next ? current : next));
+    if (isHome) {
+      const hidden = latest < window.innerHeight * 2;
+      setNavHidden((current) => (current === hidden ? current : hidden));
+    }
   });
 
   const isActive = (href: string) => {
@@ -44,12 +60,17 @@ export function Navbar() {
       transition={{ duration: 0.7, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
       className={cn(
         "fixed inset-x-0 top-0 z-50 border-b transition-all duration-500",
-        scrolled
+        scrolled && !navHidden
           ? "border-white/[0.09] bg-[rgba(3,4,5,0.88)] shadow-[0_18px_55px_rgba(0,0,0,0.28)] backdrop-blur-xl"
           : "border-white/[0.06] bg-gradient-to-b from-black/70 to-transparent"
       )}
     >
-      <div className="hidden h-7 border-b border-white/[0.06] bg-black/30 lg:block">
+      <div
+        className={cn(
+          "hidden overflow-hidden bg-black/30 transition-all duration-500 lg:block",
+          navHidden ? "h-0" : "h-7 border-b border-white/[0.06]"
+        )}
+      >
         <div className="site-container flex h-full items-center justify-between font-mono text-[9px] uppercase tracking-[0.2em] text-silver-muted">
           <span>Vehicle-specific upgrades / verified fitment</span>
           <div className="flex items-center gap-6">
@@ -73,7 +94,13 @@ export function Navbar() {
           />
         </Link>
 
-        <nav className="hidden items-center gap-9 lg:flex" aria-label="Main navigation">
+        <nav
+          className={cn(
+            "hidden items-center gap-9 transition-opacity duration-500 lg:flex",
+            navHidden ? "pointer-events-none opacity-0" : "opacity-100"
+          )}
+          aria-label="Main navigation"
+        >
           {navLinks.map((link, index) => (
             <Link
               key={link.label}
@@ -128,7 +155,13 @@ export function Navbar() {
             </button>
           </CartSheet>
 
-          <Button asChild className="ml-2 hidden xl:inline-flex">
+          <Button
+            asChild
+            className={cn(
+              "ml-2 hidden transition-opacity duration-500 xl:inline-flex",
+              navHidden && "pointer-events-none opacity-0"
+            )}
+          >
             <Link href="/#vehicle-selector">
               Match my vehicle <ArrowRight className="h-4 w-4" />
             </Link>
