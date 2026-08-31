@@ -5,7 +5,6 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import { Instagram, ExternalLink, Play } from "lucide-react";
 import { staggerContainer, fadeInUp } from "@/lib/animations";
-import { TextReveal } from "@/components/animations";
 
 interface Reel {
   id: string;
@@ -41,7 +40,6 @@ const fallbackReels = [
 
 export function InstagramReels() {
   const [reels, setReels] = useState<Reel[]>(fallbackReels);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchReels() {
@@ -53,13 +51,10 @@ export function InstagramReels() {
             setReels(data.reels);
           }
         }
-      } catch (error) {
-        console.log("Using fallback reels");
-      } finally {
-        setLoading(false);
+      } catch {
+        // Using fallback reels
       }
     }
-
     fetchReels();
   }, []);
 
@@ -71,95 +66,95 @@ export function InstagramReels() {
           whileInView="visible"
           viewport={{ once: true, margin: "-100px" }}
           variants={staggerContainer}
-          className="mb-12 text-center"
+          className="mb-14 flex items-end justify-between border-b border-white/[0.06] pb-6"
         >
-          <motion.span
-            variants={fadeInUp}
-            className="mb-3 inline-block text-xs font-semibold uppercase tracking-[0.25em] text-cyan"
-          >
-            Follow Us
-          </motion.span>
-          <motion.h2
-            variants={fadeInUp}
-            className="font-display text-5xl font-bold uppercase leading-[0.9] tracking-tight text-foreground md:text-7xl"
-          >
-            <TextReveal by="word" stagger={0.03}>
+          <div>
+            <motion.span
+              variants={fadeInUp}
+              className="mb-2 inline-block font-mono text-[10px] font-bold uppercase tracking-[0.25em] text-cyan"
+            >
+              Social Feed
+            </motion.span>
+            <motion.h2
+              variants={fadeInUp}
+              className="font-display text-4xl font-bold uppercase leading-[0.9] tracking-tight text-foreground md:text-6xl"
+            >
               Latest Reels
-            </TextReveal>
-          </motion.h2>
-          <motion.p
+            </motion.h2>
+          </div>
+          <motion.a
             variants={fadeInUp}
-            className="mx-auto mt-6 max-w-lg text-lg text-silver-muted"
+            href="https://instagram.com/cartunez_hyd"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hidden items-center gap-2 font-mono text-[10px] uppercase tracking-[0.15em] text-silver-muted transition-colors hover:text-cyan md:flex"
           >
-            Check out our latest builds, transformations, and car content on Instagram.
-          </motion.p>
+            <Instagram className="h-4 w-4" /> @cartunez_hyd
+            <ExternalLink className="h-3 w-3" />
+          </motion.a>
         </motion.div>
 
-        {/* Reel Thumbnails Grid */}
+        {/* Reel grid — clean editorial layout */}
         <motion.div
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: "-50px" }}
           variants={staggerContainer}
-          className="mx-auto grid max-w-5xl gap-6 sm:grid-cols-2 lg:grid-cols-3"
+          className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3"
         >
-          {reels.map((reel, idx) => (
+          {reels.map((reel) => (
             <motion.a
               key={reel.id}
               href={reel.permalink}
               target="_blank"
               rel="noopener noreferrer"
               variants={fadeInUp}
-              className="group relative aspect-[9/16] overflow-hidden rounded-xl border border-border bg-background"
+              className="group relative aspect-[9/16] overflow-hidden border border-border bg-background"
             >
               <Image
                 src={reel.thumbnail}
                 alt={reel.caption}
                 fill
                 sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                className="object-cover transition-transform duration-500 group-hover:scale-105"
+                className="object-cover saturate-[0.8] transition duration-700 ease-out-expo group-hover:scale-[1.04] group-hover:saturate-100"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-              
-              {/* Play Icon */}
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-cyan/90 text-black transition-transform duration-300 group-hover:scale-110">
-                  <Play className="h-8 w-8 fill-current" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
+
+              {/* Play icon — minimal */}
+              <div className="absolute inset-0 flex items-center justify-center opacity-80 transition-opacity group-hover:opacity-100">
+                <div className="flex h-14 w-14 items-center justify-center rounded-full border border-white/30 bg-black/40 text-white backdrop-blur-sm transition-transform duration-300 group-hover:scale-110">
+                  <Play className="h-5 w-5 fill-current" />
                 </div>
               </div>
 
               {/* Caption */}
-              <div className="absolute inset-x-0 bottom-0 p-6">
+              <div className="absolute inset-x-0 bottom-0 p-5">
                 <p className="line-clamp-2 font-display text-lg font-semibold uppercase text-foreground">
                   {reel.caption}
                 </p>
-                <p className="mt-2 flex items-center gap-2 text-sm text-silver-muted">
-                  <Instagram className="h-4 w-4" /> Watch on Instagram
-                  <ExternalLink className="h-3 w-3" />
+                <p className="mt-2 flex items-center gap-2 font-mono text-[9px] uppercase tracking-[0.15em] text-silver-muted">
+                  <Instagram className="h-3 w-3" /> Watch on Instagram
                 </p>
               </div>
             </motion.a>
           ))}
         </motion.div>
 
-        {/* CTA */}
+        {/* Mobile-only follow CTA */}
         <motion.div
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
-          className="mt-12 text-center"
+          className="mt-10 text-center md:hidden"
         >
           <a
             href="https://instagram.com/cartunez_hyd"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-full bg-cyan px-8 py-4 text-sm font-semibold uppercase tracking-wider text-black transition-colors hover:bg-cyan-light"
+            className="inline-flex items-center gap-2 rounded-sm bg-cyan px-6 py-3 text-xs font-bold uppercase tracking-wider text-black transition-colors hover:bg-cyan-light"
           >
-            <Instagram className="h-5 w-5" /> Follow @cartunez_hyd
+            <Instagram className="h-4 w-4" /> Follow @cartunez_hyd
           </a>
-          <p className="mt-4 text-sm text-silver-muted">
-            Want your feature? Tag <span className="font-semibold text-cyan">@cartunez_hyd</span> in your builds!
-          </p>
         </motion.div>
       </div>
     </section>

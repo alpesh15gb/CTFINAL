@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import Image from "next/image";
 import { motion, useInView } from "framer-motion";
 import { cn } from "@/lib/utils";
 
@@ -28,7 +27,7 @@ function AnimatedCounter({
     if (!isInView || mode !== "count") return;
 
     const start = Math.floor(end * 0.7);
-    const duration = 600;
+    const duration = 800;
     let startTime: number;
     const animate = (timestamp: number) => {
       if (!startTime) startTime = timestamp;
@@ -43,10 +42,10 @@ function AnimatedCounter({
   return (
     <motion.span
       ref={ref}
-      initial={{ opacity: 0, y: 16 }}
+      initial={{ opacity: 0, y: 20 }}
       animate={isInView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-      className={cn("font-display text-5xl font-bold text-foreground md:text-7xl", className)}
+      transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+      className={cn("font-display text-[clamp(4rem,10vw,9rem)] font-bold leading-none text-foreground", className)}
     >
       {prefix}
       {count.toLocaleString()}
@@ -56,65 +55,64 @@ function AnimatedCounter({
 }
 
 const stats = [
-  { value: 12000, suffix: "+", label: "Cars Upgraded", description: "Across India", mode: "count" as const },
+  { value: 12000, suffix: "+", label: "Cars Transformed", description: "Across India", mode: "count" as const },
   { value: 98, suffix: "%", label: "Fitment Accuracy", description: "OEM-grade precision", mode: "reveal" as const },
   { value: 450, suffix: "+", label: "Products", description: "Curated catalog", mode: "count" as const },
-  { value: 2, suffix: "yr", label: "Warranty", description: "On all products", mode: "reveal" as const },
+  { value: 2, suffix: " YR", label: "Warranty", description: "On all products", mode: "reveal" as const },
 ];
 
 export function Stats() {
   return (
-    <section className="relative z-20 overflow-hidden bg-background pt-16 pb-24 md:pt-20 md:pb-32">
-      {/* Dark macro automotive photography background */}
-      <div className="absolute inset-0">
-        <Image
-          src="https://images.unsplash.com/photo-1542377281-73d08e3a10aa?q=80&w=2400&auto=format&fit=crop"
-          alt=""
-          fill
-          sizes="100vw"
-          className="object-cover opacity-[0.08]"
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-background via-background/70 to-background" />
-      </div>
+    <section className="relative z-20 overflow-hidden bg-background py-24 md:py-32 lg:py-40">
+      {/* Subtle background texture */}
+      <div className="noise-overlay pointer-events-none absolute inset-0 opacity-[0.015]" />
 
-      {/* Ghosted oversized typography */}
-      <div className="ghost-type pointer-events-none absolute inset-x-0 bottom-0 select-none text-center font-display text-[16vw] font-bold uppercase leading-none tracking-tighter">
-        Engineered
+      {/* Oversized ghosted typography */}
+      <div className="ghost-type pointer-events-none absolute inset-x-0 top-1/2 -translate-y-1/2 select-none text-center font-display text-[20vw] font-bold uppercase leading-none tracking-tighter opacity-40">
+        TELEMETRY
       </div>
-
-      <div className="atmo-glow pointer-events-none absolute inset-0" />
 
       <div className="relative mx-auto max-w-[1600px] px-4 md:px-8">
-        <div className="mb-14 text-center">
-          <span className="mb-3 inline-block text-xs font-semibold uppercase tracking-[0.25em] text-cyan">
-            By The Numbers
+        {/* Header — minimal */}
+        <div className="mb-16 flex items-end justify-between border-b border-white/[0.06] pb-6">
+          <div>
+            <span className="mb-2 inline-block font-mono text-[10px] font-bold uppercase tracking-[0.25em] text-cyan">
+              Performance Data
+            </span>
+            <h2 className="font-display text-4xl font-bold uppercase leading-[0.9] tracking-tight text-foreground md:text-6xl">
+              By The Numbers.
+            </h2>
+          </div>
+          <span className="hidden font-mono text-[9px] uppercase tracking-[0.2em] text-silver-muted md:block">
+            Live metrics / Verified
           </span>
-          <h2 className="font-display text-4xl font-bold uppercase leading-[0.9] tracking-tight text-foreground md:text-6xl">
-            Proven Performance.
-          </h2>
         </div>
 
-        <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-4">
+        {/* Stats grid — telemetry aesthetic */}
+        <div className="grid gap-0 sm:grid-cols-2 lg:grid-cols-4">
           {stats.map((stat, i) => (
             <motion.div
               key={stat.label}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-100px" }}
-              transition={{ duration: 0.6, delay: i * 0.1, ease: [0.16, 1, 0.3, 1] }}
-              className="relative text-center"
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.5, delay: i * 0.08 }}
+              className="group relative border-l border-white/[0.06] py-10 pl-8 first:border-l-0 first:pl-0 md:py-14 md:pl-10"
             >
-              <div className="atmo-horizon absolute -top-6 left-1/2 w-24 -translate-x-1/2" />
+              {/* Status indicator */}
+              <div className="absolute left-0 top-10 hidden h-2 w-2 -translate-x-1/2 rounded-full bg-cyan/60 group-first:hidden lg:block" />
+
               <AnimatedCounter
                 end={stat.value}
                 suffix={stat.suffix}
                 mode={stat.mode}
-                className="text-cyan"
               />
-              <p className="mt-4 font-display text-xl font-semibold uppercase tracking-wide text-foreground">
+              <p className="mt-4 font-display text-lg font-semibold uppercase tracking-wide text-foreground">
                 {stat.label}
               </p>
-              <p className="mt-1 text-sm text-silver-muted">{stat.description}</p>
+              <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.15em] text-silver-muted">
+                {stat.description}
+              </p>
             </motion.div>
           ))}
         </div>

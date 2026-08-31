@@ -1,4 +1,5 @@
 import { Hero } from "@/components/sections/Hero";
+import { IdentityStatement } from "@/components/sections/IdentityStatement";
 import { VehicleSelector } from "@/components/sections/VehicleSelector";
 import { UpgradeStory } from "@/components/sections/UpgradeStory";
 import { Categories } from "@/components/sections/Categories";
@@ -11,33 +12,46 @@ import { DetailsStory } from "@/components/sections/DetailsStory";
 import { Testimonials } from "@/components/sections/Testimonials";
 import { InstagramReels } from "@/components/sections/InstagramReels";
 import { FinalCTA } from "@/components/sections/FinalCTA";
-import { BrandMarquee } from "@/components/sections/BrandMarquee";
 
 export default function Home() {
   return (
     <main className="relative overflow-hidden bg-background">
-      {/* ACT 01 — Desire */}
+      {/* ACT 01 — THE MACHINE (cinematic hero) */}
       <Hero />
-      <BrandMarquee />
-      {/* ACT 02 — Find your car */}
+
+      {/* ACT 02 — IDENTITY STATEMENT */}
+      <IdentityStatement />
+
+      {/* ACT 03 — FIND YOUR CAR */}
       <VehicleSelector />
-      {/* ACT 03 — Transform it (cinematic scroll story) */}
+
+      {/* ACT 04 — TRANSFORMATION STORY */}
       <UpgradeStory />
-      {/* Conventional shopping interface */}
+
+      {/* ACT 05 — PRODUCTS (clean commerce interface) */}
       <Categories />
       <FeaturedProducts />
-      {/* Built by Cartunez */}
+
+      {/* ACT 06 — BUILT BY CARTUNEZ */}
       <BuildsShowcase />
+
+      {/* ACT 07 — CRAFTSMANSHIP / PROCESS */}
       <Craftsmanship />
-      {/* Take a closer look */}
+
+      {/* ACT 08 — CONFIGURATOR */}
       <Configurator />
-      {/* Performance story */}
+
+      {/* ACT 09 — PERFORMANCE NUMBERS */}
       <Stats />
+
+      {/* ACT 10 — DETAILS / MACRO STORY */}
       <DetailsStory />
-      {/* Reviews */}
+
+      {/* SOCIAL PROOF */}
       <Testimonials />
-      {/* Social */}
       <InstagramReels />
+
+      {/* FINAL ACT */}
       <FinalCTA />
     </main>
   );

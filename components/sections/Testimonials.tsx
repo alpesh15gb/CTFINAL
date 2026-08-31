@@ -38,17 +38,17 @@ export function Testimonials() {
           whileInView="visible"
           viewport={{ once: true, margin: "-100px" }}
           variants={staggerContainer}
-          className="mb-16 text-center"
+          className="mb-16"
         >
           <motion.span
             variants={fadeInUp}
-            className="mb-3 inline-block text-xs font-semibold uppercase tracking-[0.25em] text-cyan"
+            className="mb-3 inline-block font-mono text-[10px] font-bold uppercase tracking-[0.25em] text-cyan"
           >
             08 / Trust
           </motion.span>
           <motion.h2
             variants={fadeInUp}
-            className="font-display text-5xl font-bold uppercase leading-[0.9] tracking-tight text-foreground md:text-7xl"
+            className="font-display text-[clamp(3rem,6vw,6rem)] font-bold uppercase leading-[0.85] tracking-[-0.04em] text-foreground"
           >
             10,000+
             <br />
@@ -56,7 +56,8 @@ export function Testimonials() {
           </motion.h2>
         </motion.div>
 
-        <div className="grid gap-6 md:grid-cols-3">
+        {/* Large editorial testimonial cards */}
+        <div className="grid gap-0 lg:grid-cols-3">
           {testimonials.map((t, idx) => (
             <motion.div
               key={idx}
@@ -64,23 +65,25 @@ export function Testimonials() {
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true, margin: "-50px" }}
-              className="group relative overflow-hidden rounded-lg border border-border bg-background p-6"
+              className="group relative border-l border-white/[0.06] py-10 pl-0 first:border-l-0 lg:pl-10"
             >
-              <Quote className="mb-4 h-8 w-8 text-cyan/40" />
-              <p className="text-lg leading-relaxed text-foreground">&ldquo;{t.quote}&rdquo;</p>
-              <div className="mt-6 flex items-center gap-3">
-                <div className="relative h-12 w-12 overflow-hidden rounded-full border border-border">
+              <Quote className="mb-6 h-8 w-8 text-cyan/30" />
+              <p className="text-xl leading-relaxed text-foreground md:text-2xl lg:text-[1.6rem]">
+                &ldquo;{t.quote}&rdquo;
+              </p>
+              <div className="mt-8 flex items-center gap-4">
+                <div className="relative h-14 w-14 overflow-hidden rounded-full border border-border">
                   <Image
                     src={t.image}
                     alt={t.vehicle}
                     fill
-                    className="object-cover"
-                    sizes="48px"
+                    className="object-cover saturate-[0.8]"
+                    sizes="56px"
                   />
                 </div>
                 <div>
-                  <p className="font-medium text-foreground">{t.vehicle}</p>
-                  <p className="text-xs text-silver-muted">{t.location}</p>
+                  <p className="font-display text-lg font-semibold uppercase text-foreground">{t.vehicle}</p>
+                  <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-silver-muted">{t.location}</p>
                 </div>
               </div>
             </motion.div>
