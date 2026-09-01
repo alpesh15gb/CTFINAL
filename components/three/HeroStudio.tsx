@@ -111,9 +111,19 @@ function CarModel({ scrollProgress, reducedMotion }: { scrollProgress: MotionVal
     };
   }, []);
 
+  // Dispose component-owned custom materials on unmount
   useEffect(() => {
-    initialized.current = false;
-    scene.traverse((child) => {
+    return () => {
+      Object.values(materials).forEach((mat) => {
+        mat.dispose();
+      });
+    };
+  }, [materials]);
+
+  // Clone scene per instance to avoid destructively mutating globally cached GLTF
+  const clonedScene = useMemo(() => {
+    const clone = scene.clone(true);
+    clone.traverse((child) => {
       if ((child as THREE.Mesh).isMesh) {
         const mesh = child as THREE.Mesh;
         mesh.castShadow = false;
@@ -139,13 +149,18 @@ function CarModel({ scrollProgress, reducedMotion }: { scrollProgress: MotionVal
         }
       }
     });
+    return clone;
   }, [scene, materials]);
+
+  useEffect(() => {
+    initialized.current = false;
+  }, [clonedScene]);
 
   useFrame((_, delta) => {
     if (!groupRef.current) return;
 
     if (!initialized.current) {
-      boundingBox.current.setFromObject(scene);
+      boundingBox.current.setFromObject(clonedScene);
       boundingBox.current.getCenter(center.current);
       boundingBox.current.getSize(size.current);
       const maxDim = Math.max(size.current.x, size.current.y, size.current.z);
@@ -185,7 +200,7 @@ function CarModel({ scrollProgress, reducedMotion }: { scrollProgress: MotionVal
   return (
     <group ref={groupRef} position={[0, 0, 0]} rotation={[0, -0.06, 0]}>
       <group ref={innerRef}>
-        <primitive object={scene} />
+        <primitive object={clonedScene} />
       </group>
     </group>
   );
@@ -352,6 +367,13 @@ function ContactGrounding() {
     return tex;
   }, []);
 
+  // Dispose CanvasTexture on unmount
+  useEffect(() => {
+    return () => {
+      shadowTex?.dispose();
+    };
+  }, [shadowTex]);
+
   if (!shadowTex) return null;
 
   return (
@@ -419,6 +441,14 @@ function BackdropType({ scrollProgress, reducedMotion }: { scrollProgress: Motio
   const beyondTex = useMemo(() => makeWordTexture("BEYOND"), []);
   const builtMat = useRef<THREE.MeshBasicMaterial>(null);
   const beyondMat = useRef<THREE.MeshBasicMaterial>(null);
+
+  // Dispose CanvasTextures on unmount
+  useEffect(() => {
+    return () => {
+      builtTex.dispose();
+      beyondTex.dispose();
+    };
+  }, [builtTex, beyondTex]);
 
   useFrame(() => {
     if (reducedMotion) {
@@ -570,3 +600,5 @@ export function HeroStudio({
     </CanvasErrorBoundary>
   );
 }
+
+useGLTF.preload("/models/hero-car.glb");
