@@ -1,7 +1,9 @@
 import { Hero } from "@/components/sections/Hero";
 import { Bridge } from "@/components/sections/Bridge";
 import { VehicleSelector } from "@/components/sections/VehicleSelector";
+import { WheelScrubber } from "@/components/configurator/WheelScrubber";
 import { UpgradeStory } from "@/components/sections/UpgradeStory";
+import { EngineeringBento } from "@/components/sections/EngineeringBento";
 import { Categories } from "@/components/sections/Categories";
 import { FeaturedProducts } from "@/components/sections/FeaturedProducts";
 import { BuildsShowcase } from "@/components/sections/BuildsShowcase";
@@ -16,7 +18,7 @@ import { FinalCTA } from "@/components/sections/FinalCTA";
 export default function Home() {
   return (
     <main className="relative overflow-x-clip bg-background">
-      {/* ACT 01 — THE MACHINE (4-shot cinematic hero) */}
+      {/* ACT 01 — THE MACHINE (Cinematic Hero) */}
       <Hero />
 
       {/* ACT 02 — CARTUNEZ HANDOFF */}
@@ -25,26 +27,32 @@ export default function Home() {
       {/* ACT 03 — FIND YOUR CAR */}
       <VehicleSelector />
 
-      {/* ACT 04 — TRANSFORMATION STORY (three acts) */}
+      {/* ACT 04 — INTERACTIVE WHEEL SCRUBBER & SPEC DECK */}
+      <WheelScrubber />
+
+      {/* ACT 05 — TRANSFORMATION STORY (Three Acts) */}
       <UpgradeStory />
 
-      {/* ACT 05 — PRODUCTS (clean commerce interface) */}
+      {/* ACT 06 — AEROSPACE METALLURGY & PERFORMANCE BENTO */}
+      <EngineeringBento />
+
+      {/* ACT 07 — PRODUCTS (Clean Commerce Interface) */}
       <Categories />
       <FeaturedProducts />
 
-      {/* ACT 06 — BUILT BY CARTUNEZ */}
+      {/* ACT 08 — BUILT BY CARTUNEZ */}
       <BuildsShowcase />
 
-      {/* ACT 07 — CRAFTSMANSHIP / PROCESS */}
+      {/* ACT 09 — CRAFTSMANSHIP / PROCESS */}
       <Craftsmanship />
 
-      {/* ACT 08 — CONFIGURATOR */}
+      {/* ACT 10 — CONFIGURATOR */}
       <Configurator />
 
-      {/* ACT 09 — PERFORMANCE NUMBERS */}
+      {/* ACT 11 — PERFORMANCE NUMBERS */}
       <Stats />
 
-      {/* ACT 10 — DETAILS / MACRO STORY */}
+      {/* ACT 12 — DETAILS / MACRO STORY */}
       <DetailsStory />
 
       {/* SOCIAL PROOF */}
