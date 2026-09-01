@@ -3,4 +3,5 @@ node_modules/
 .env.local
 *.tsbuildinfo
 scripts/screenshots/
+qa-shots/
 nginx/certs/

@@ -44,8 +44,8 @@ export function Hero() {
 
   // SHOT C — FACTORY. stays DOM (in front of the canvas); BUILT/BEYOND live
   // inside the WebGL scene so the car physically occludes them.
-  const factoryOpacity = useTransform(scrollYProgress, [0.58, 0.63, 0.74, 0.79], [0, 1, 1, 0]);
-  const factoryY = useTransform(scrollYProgress, [0.58, 0.68], [50, 0]);
+  const factoryOpacity = useTransform(scrollYProgress, [0.54, 0.60, 0.74, 0.79], [0, 1, 1, 0]);
+  const factoryY = useTransform(scrollYProgress, [0.54, 0.62], [36, 0]);
 
   // SHOT D — macro handoff: canvas dims toward black before the mask opens so
   // the asset swap reads as a focus pull through darkness.
