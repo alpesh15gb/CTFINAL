@@ -1,3 +1,4 @@
+import { ApexHomeNav } from "@/components/layout/ApexHomeNav";
 import { ApexCloneExperience } from "@/components/sections/ApexCloneExperience";
 import { VehicleSelector } from "@/components/sections/VehicleSelector";
 import { Categories } from "@/components/sections/Categories";
@@ -8,6 +9,8 @@ import { FinalCTA } from "@/components/sections/FinalCTA";
 export default function Home() {
   return (
     <main className="relative overflow-x-clip bg-[#050505]">
+      <ApexHomeNav />
+
       {/* APEX-style cinematic brand film, directed by scroll */}
       <ApexCloneExperience />
 
