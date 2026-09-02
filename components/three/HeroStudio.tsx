@@ -6,16 +6,15 @@ import { Environment, useGLTF } from "@react-three/drei";
 import { MotionValue } from "framer-motion";
 import * as THREE from "three";
 
-/**
- * Director's Cut V2 Visual Recovery — 3 Photographic Moments:
- *   FRAME A (0.00–0.25): Dark Machine — photographic low 3/4 stance, graphite paint, negative space on left
- *   FRAME B (0.25–0.70): Campaign Hero — car 78–82% width, clear body midtones, restrained DOM typography
- *   FRAME C (0.70–1.00): Detail & Macro Handoff — camera pushes toward front wheel into dark aperture handoff
- */
+const HERO_MODEL = "/models/huracan.glb";
 
-function smoothstep(t: number) {
-  const c = Math.min(1, Math.max(0, t));
-  return c * c * (3 - 2 * c);
+function clamp01(value: number) {
+  return Math.min(1, Math.max(0, value));
+}
+
+function smoothstep(value: number) {
+  const t = clamp01(value);
+  return t * t * (3 - 2 * t);
 }
 
 class CanvasErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
@@ -23,382 +22,326 @@ class CanvasErrorBoundary extends Component<{ children: ReactNode }, { hasError:
     super(props);
     this.state = { hasError: false };
   }
+
   static getDerivedStateFromError() {
     return { hasError: true };
   }
+
   render() {
     return this.state.hasError ? null : this.props.children;
   }
 }
 
-function CarModel({ scrollProgress, reducedMotion }: { scrollProgress: MotionValue<number>; reducedMotion: boolean }) {
-  const groupRef = useRef<THREE.Group>(null);
-  const innerRef = useRef<THREE.Group>(null);
-  const { scene } = useGLTF("/models/hero-car.glb");
+function tuneMaterial(material: THREE.Material, key: string) {
+  const tuned = material.clone();
 
-  const boundingBox = useRef(new THREE.Box3());
-  const center = useRef(new THREE.Vector3());
-  const size = useRef(new THREE.Vector3());
+  if (tuned instanceof THREE.MeshStandardMaterial || tuned instanceof THREE.MeshPhysicalMaterial) {
+    const body =
+      key.includes("body") ||
+      key.includes("paint") ||
+      key.includes("carpaint") ||
+      key.includes("exterior") ||
+      key.includes("livery");
+    const tire = key.includes("tire") || key.includes("tyre") || key.includes("rubber");
+    const wheel = key.includes("wheel") || key.includes("rim") || key.includes("alloy");
+    const glass = key.includes("glass") || key.includes("window") || key.includes("windshield");
+    const light =
+      key.includes("light") ||
+      key.includes("lamp") ||
+      key.includes("head") ||
+      key.includes("tail");
+    const carbon = key.includes("carbon") || key.includes("splitter") || key.includes("diffuser");
+
+    if (body) {
+      tuned.color.set("#151719");
+      tuned.metalness = 0.72;
+      tuned.roughness = 0.2;
+      tuned.envMapIntensity = 1.55;
+      if (tuned instanceof THREE.MeshPhysicalMaterial) {
+        tuned.clearcoat = 0.9;
+        tuned.clearcoatRoughness = 0.08;
+      }
+    } else if (tire) {
+      tuned.color.set("#08090a");
+      tuned.metalness = 0;
+      tuned.roughness = 0.95;
+      tuned.envMapIntensity = 0.08;
+    } else if (wheel) {
+      tuned.color.set("#676c72");
+      tuned.metalness = 0.95;
+      tuned.roughness = 0.18;
+      tuned.envMapIntensity = 1.8;
+    } else if (carbon) {
+      tuned.color.multiplyScalar(0.45);
+      tuned.metalness = Math.max(tuned.metalness, 0.45);
+      tuned.roughness = Math.max(tuned.roughness, 0.32);
+    } else if (glass) {
+      tuned.color.set("#080a0c");
+      tuned.metalness = 0.1;
+      tuned.roughness = 0.08;
+      tuned.transparent = true;
+      tuned.opacity = 0.84;
+    } else if (light) {
+      tuned.envMapIntensity = 1.6;
+      if ("emissive" in tuned) {
+        tuned.emissive = new THREE.Color("#f3f7ff");
+        tuned.emissiveIntensity = 0.55;
+      }
+    } else {
+      tuned.envMapIntensity = Math.max(tuned.envMapIntensity ?? 1, 0.9);
+      tuned.roughness = Math.min(Math.max(tuned.roughness, 0.18), 0.72);
+    }
+  }
+
+  return tuned;
+}
+
+function HuracanModel({
+  scrollProgress,
+  reducedMotion,
+}: {
+  scrollProgress: MotionValue<number>;
+  reducedMotion: boolean;
+}) {
+  const group = useRef<THREE.Group>(null);
+  const inner = useRef<THREE.Group>(null);
   const initialized = useRef(false);
+  const { scene } = useGLTF(HERO_MODEL);
 
-  // Selective high-end automotive materials:
-  // Body paint: deep metallic graphite with visible midtones (bonnet, fender & shoulder curves clearly readable)
-  // Wheels: brushed titanium gunmetal
-  // Calipers: dark metallic titanium (no cyan gimmick)
-  // Tires: clean matte vulcanized rubber
-  const materials = useMemo(() => {
-    return {
-      paint: new THREE.MeshPhysicalMaterial({
-        color: new THREE.Color("#262a30"),
-        metalness: 0.60,
-        roughness: 0.24,
-        clearcoat: 0.70,
-        clearcoatRoughness: 0.10,
-        reflectivity: 0.88,
-        envMapIntensity: 1.15,
-      }),
-      carbon: new THREE.MeshStandardMaterial({
-        color: new THREE.Color("#16181b"),
-        metalness: 0.50,
-        roughness: 0.38,
-        envMapIntensity: 0.7,
-      }),
-      rims: new THREE.MeshStandardMaterial({
-        color: new THREE.Color("#b8bcc0"),
-        metalness: 0.90,
-        roughness: 0.22,
-        envMapIntensity: 1.6,
-      }),
-      caliper: new THREE.MeshStandardMaterial({
-        color: new THREE.Color("#444950"),
-        metalness: 0.85,
-        roughness: 0.30,
-        envMapIntensity: 0.8,
-      }),
-      tire: new THREE.MeshStandardMaterial({
-        color: new THREE.Color("#0c0d0e"),
-        metalness: 0.0,
-        roughness: 0.96,
-        envMapIntensity: 0.04,
-      }),
-      glass: new THREE.MeshPhysicalMaterial({
-        color: new THREE.Color("#080a0d"),
-        metalness: 0.1,
-        roughness: 0.08,
-        transmission: 0.55,
-        transparent: true,
-        opacity: 0.94,
-        ior: 1.50,
-      }),
-      lights: new THREE.MeshStandardMaterial({
-        color: new THREE.Color("#ffffff"),
-        metalness: 0.2,
-        roughness: 0.08,
-        emissive: new THREE.Color("#e8f0f8"),
-        emissiveIntensity: 0.60,
-      }),
-      exhaust: new THREE.MeshStandardMaterial({
-        color: new THREE.Color("#707880"),
-        metalness: 0.92,
-        roughness: 0.16,
-      }),
-    };
-  }, []);
+  const clone = useMemo(() => {
+    const next = scene.clone(true);
 
-  // Dispose component-owned custom materials on unmount
-  useEffect(() => {
-    return () => {
-      Object.values(materials).forEach((mat) => {
-        mat.dispose();
-      });
-    };
-  }, [materials]);
+    next.traverse((child) => {
+      if (!(child instanceof THREE.Mesh)) return;
 
-  // Clone scene per instance to avoid mutating globally cached GLTF
-  const clonedScene = useMemo(() => {
-    const clone = scene.clone(true);
-    clone.traverse((child) => {
-      if ((child as THREE.Mesh).isMesh) {
-        const mesh = child as THREE.Mesh;
-        mesh.castShadow = false;
-        mesh.receiveShadow = false;
-        const name = (mesh.name || "").toLowerCase();
-        const matName = (Array.isArray(mesh.material) ? mesh.material[0]?.name : mesh.material?.name || "").toLowerCase();
+      child.castShadow = false;
+      child.receiveShadow = false;
 
-        if (name.includes("mat_0") || name.includes("livery") || matName.includes("mat_0") || matName.includes("livery") || name.includes("body") || matName.includes("body")) {
-          mesh.material = materials.paint;
-        } else if (name.includes("glass") || name.includes("window") || matName.includes("glass") || matName.includes("window")) {
-          mesh.material = materials.glass;
-        } else if (name.includes("rims") || name.includes("misc_silver") || name.includes("disc") || matName.includes("rims") || matName.includes("misc_silver") || matName.includes("disc")) {
-          mesh.material = materials.rims;
-        } else if (name.includes("caliper") || matName.includes("caliper")) {
-          mesh.material = materials.caliper;
-        } else if (name.includes("tire") || matName.includes("tire")) {
-          mesh.material = materials.tire;
-        } else if (name.includes("lights") || matName.includes("lights")) {
-          mesh.material = materials.lights;
-        } else if (name.includes("mumfkler") || matName.includes("mumfkler") || name.includes("exhaust")) {
-          mesh.material = materials.exhaust;
-        } else {
-          mesh.material = materials.carbon;
-        }
+      const meshName = (child.name || "").toLowerCase();
+      if (Array.isArray(child.material)) {
+        child.material = child.material.map((material) =>
+          tuneMaterial(material, `${meshName} ${(material.name || "").toLowerCase()}`)
+        );
+      } else if (child.material) {
+        child.material = tuneMaterial(
+          child.material,
+          `${meshName} ${(child.material.name || "").toLowerCase()}`
+        );
       }
     });
-    return clone;
-  }, [scene, materials]);
+
+    return next;
+  }, [scene]);
 
   useEffect(() => {
     initialized.current = false;
-  }, [clonedScene]);
+    return () => {
+      clone.traverse((child) => {
+        if (!(child instanceof THREE.Mesh)) return;
+        const materials = Array.isArray(child.material) ? child.material : [child.material];
+        materials.forEach((material) => material?.dispose());
+      });
+    };
+  }, [clone]);
 
   useFrame((_, delta) => {
-    if (!groupRef.current) return;
+    if (!group.current || !inner.current) return;
 
     if (!initialized.current) {
-      boundingBox.current.setFromObject(clonedScene);
-      boundingBox.current.getCenter(center.current);
-      boundingBox.current.getSize(size.current);
-      const maxDim = Math.max(size.current.x, size.current.y, size.current.z);
-      const scale = 3.65 / maxDim;
-      groupRef.current.scale.setScalar(scale);
-      groupRef.current.position.set(0, 0, 0);
+      const bounds = new THREE.Box3().setFromObject(clone);
+      const center = new THREE.Vector3();
+      const size = new THREE.Vector3();
+      bounds.getCenter(center);
+      bounds.getSize(size);
 
-      if (innerRef.current) {
-        const minY = boundingBox.current.min.y - center.current.y;
-        innerRef.current.position.set(
-          -center.current.x,
-          -center.current.y - minY,
-          -center.current.z
-        );
-      }
-      const initialRot = reducedMotion ? 0.08 : -0.04;
-      groupRef.current.rotation.y = initialRot;
+      const longest = Math.max(size.x, size.y, size.z) || 1;
+      const scale = 4.35 / longest;
+      group.current.scale.setScalar(scale);
+
+      const floorOffset = bounds.min.y - center.y;
+      inner.current.position.set(-center.x, -center.y - floorOffset, -center.z);
+
+      group.current.rotation.y = -0.28;
       initialized.current = true;
-      return;
     }
 
     if (reducedMotion) {
-      groupRef.current.rotation.y = 0.08;
+      group.current.rotation.y = -0.24;
       return;
     }
 
-    const p = scrollProgress.get();
-    // Subtle, heavy automotive track drift
-    const targetRotation = -0.04 + p * 0.12;
-    groupRef.current.rotation.y = THREE.MathUtils.lerp(
-      groupRef.current.rotation.y,
+    const progress = scrollProgress.get();
+    const targetRotation = -0.34 + progress * 0.24;
+    group.current.rotation.y = THREE.MathUtils.lerp(
+      group.current.rotation.y,
       targetRotation,
-      Math.min(1, delta * 12)
+      Math.min(1, delta * 8)
     );
   });
 
   return (
-    <group ref={groupRef} position={[0, 0, 0]} rotation={[0, -0.04, 0]}>
-      <group ref={innerRef}>
-        <primitive object={clonedScene} />
+    <group ref={group} position={[0.28, 0, 0]}>
+      <group ref={inner}>
+        <primitive object={clone} />
       </group>
     </group>
   );
 }
 
-/** Soft photographic studio lighting — restrained intensities, rich graphite midtones, dark floor. */
-function StudioLights({ scrollProgress, reducedMotion }: { scrollProgress: MotionValue<number>; reducedMotion: boolean }) {
-  const keyLightRef = useRef<THREE.DirectionalLight>(null);
-  const rimLightRef = useRef<THREE.SpotLight>(null);
-  const fillLightRef = useRef<THREE.DirectionalLight>(null);
+function Lighting({
+  scrollProgress,
+  reducedMotion,
+}: {
+  scrollProgress: MotionValue<number>;
+  reducedMotion: boolean;
+}) {
+  const key = useRef<THREE.SpotLight>(null);
+  const rim = useRef<THREE.SpotLight>(null);
+  const front = useRef<THREE.DirectionalLight>(null);
   const target = useMemo(() => new THREE.Object3D(), []);
 
   useFrame(() => {
-    const p = reducedMotion ? 0.5 : scrollProgress.get();
+    const p = reducedMotion ? 0.45 : scrollProgress.get();
 
-    // Key light: soft overhead-right illumination revealing hood and body surfacing
-    if (keyLightRef.current) {
-      const keyIntensity = 1.25 + smoothstep((p - 0.15) / 0.40) * 0.45;
-      keyLightRef.current.intensity = keyIntensity;
-    }
-
-    // Rim light: traces roofline, A-pillar and rear haunch softly
-    if (rimLightRef.current) {
-      const rimIntensity = 1.6 + (1 - smoothstep(p / 0.35)) * 0.5;
-      rimLightRef.current.intensity = rimIntensity;
-    }
-
-    // Soft front-left fill: keeps shadow side readable without washing out blacks
-    if (fillLightRef.current) {
-      fillLightRef.current.intensity = 0.55 + smoothstep((p - 0.2) / 0.4) * 0.25;
-    }
+    if (key.current) key.current.intensity = 5.2 + smoothstep((p - 0.08) / 0.4) * 2.4;
+    if (rim.current) rim.current.intensity = 4.6 + (1 - smoothstep(p / 0.55)) * 2.2;
+    if (front.current) front.current.intensity = 0.75 + smoothstep((p - 0.2) / 0.5) * 0.45;
   });
 
   return (
     <>
-      <primitive object={target} position={[-0.10, 0.35, 0.15]} />
-      {/* Soft ambient ground fill */}
-      <ambientLight intensity={0.22} />
-
-      {/* Main Key: Soft angled high-right studio light */}
-      <directionalLight
-        ref={keyLightRef}
-        position={[3.5, 4.5, 3.8]}
-        intensity={1.35}
-        color="#f2f5f8"
-      />
-
-      {/* Silhouette Rim: Rear-left specular edge */}
+      <primitive object={target} position={[0.15, 0.55, 0]} />
+      <ambientLight intensity={0.14} />
       <spotLight
-        ref={rimLightRef}
-        position={[-4.5, 3.2, -3.8]}
+        ref={key}
+        position={[4.8, 6.5, 4.2]}
         target={target}
-        angle={0.65}
-        penumbra={0.85}
-        intensity={1.7}
-        color="#edf2f7"
-        distance={22}
-        decay={1.2}
+        angle={0.58}
+        penumbra={0.92}
+        intensity={5.4}
+        color="#f6f7f8"
+        distance={24}
+        decay={1.8}
       />
-
-      {/* Front-left gentle fill for front splitter & grille readability */}
+      <spotLight
+        ref={rim}
+        position={[-5.8, 3.2, -4.5]}
+        target={target}
+        angle={0.72}
+        penumbra={0.86}
+        intensity={5.2}
+        color="#dce5ee"
+        distance={28}
+        decay={1.6}
+      />
       <directionalLight
-        ref={fillLightRef}
-        position={[-2.8, 1.8, 3.5]}
-        intensity={0.60}
-        color="#dce4ec"
+        ref={front}
+        position={[-3.4, 1.5, 4.8]}
+        intensity={0.9}
+        color="#e9edf1"
       />
     </>
   );
 }
 
-/** Tarmac / dark studio floor with subtle localized contact shadow under the wheels. */
-function StudioEnvironment() {
-  const shadowTex = useMemo(() => {
-    if (typeof document === "undefined") return null;
-    const c = document.createElement("canvas");
-    c.width = 512;
-    c.height = 256;
-    const ctx = c.getContext("2d");
-    if (ctx) {
-      ctx.clearRect(0, 0, 512, 256);
-      // Tight, dark contact shadow directly under car footprint
-      const rad = ctx.createRadialGradient(256, 128, 15, 256, 128, 110);
-      rad.addColorStop(0, "rgba(0, 0, 0, 0.96)");
-      rad.addColorStop(0.45, "rgba(0, 0, 0, 0.65)");
-      rad.addColorStop(0.80, "rgba(0, 0, 0, 0.18)");
-      rad.addColorStop(1, "rgba(0, 0, 0, 0)");
-      ctx.fillStyle = rad;
-      ctx.fillRect(0, 0, 512, 256);
-    }
-    const tex = new THREE.CanvasTexture(c);
-    return tex;
-  }, []);
-
-  // Dispose CanvasTexture on unmount
-  useEffect(() => {
-    return () => {
-      shadowTex?.dispose();
-    };
-  }, [shadowTex]);
-
+function DarkStudioFloor() {
   return (
-    <group>
-      {/* Tight contact grounding shadow under tires */}
-      {shadowTex && (
-        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.005, 0]}>
-          <planeGeometry args={[4.2, 2.2]} />
-          <meshBasicMaterial map={shadowTex} transparent opacity={0.90} depthWrite={false} />
-        </mesh>
-      )}
-
-      {/* Dark charcoal studio floor — rough, non-reflective, zero white pool */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]}>
-        <planeGeometry args={[50, 50]} />
-        <meshStandardMaterial
-          color="#040506"
-          roughness={0.96}
-          metalness={0.05}
-        />
+    <>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.01, 0]}>
+        <planeGeometry args={[70, 70]} />
+        <meshStandardMaterial color="#030303" roughness={0.94} metalness={0.08} />
       </mesh>
-    </group>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0.35, 0, 0]}>
+        <circleGeometry args={[3.5, 64]} />
+        <meshBasicMaterial color="#000000" transparent opacity={0.44} depthWrite={false} />
+      </mesh>
+    </>
   );
 }
 
-/** Photographic camera rig: low angle, cinematic framing, negative space on left. */
-function CameraRig({ scrollProgress, reducedMotion }: { scrollProgress: MotionValue<number>; reducedMotion: boolean }) {
+function CameraRig({
+  scrollProgress,
+  reducedMotion,
+}: {
+  scrollProgress: MotionValue<number>;
+  reducedMotion: boolean;
+}) {
   const { camera } = useThree();
-  const targetPos = useRef(new THREE.Vector3());
+  const targetPosition = useRef(new THREE.Vector3());
   const targetLook = useRef(new THREE.Vector3());
   const currentLook = useRef(new THREE.Vector3());
-  const initializedCam = useRef(false);
+  const initialized = useRef(false);
 
   useFrame((state, delta) => {
     const cam = camera as THREE.PerspectiveCamera;
-    const p = reducedMotion ? 0.45 : scrollProgress.get();
+    const p = reducedMotion ? 0.38 : scrollProgress.get();
 
-    let x: number, y: number, z: number;
-    let lx: number, ly: number, lz: number;
+    let x: number;
+    let y: number;
+    let z: number;
+    let lx: number;
+    let ly: number;
+    let lz: number;
     let fov: number;
 
-    if (p < 0.30) {
-      // FRAME A — Dark Machine: photographic low 3/4 pose, negative black space on left
-      const t = smoothstep(p / 0.30);
-      x = 2.25 - t * 0.10;
-      y = 0.48 + t * 0.02;
-      z = 3.75 - t * 0.15;
-      lx = -0.25; ly = 0.32; lz = 0.08;
-      fov = 33.5;
-    } else if (p < 0.70) {
-      // FRAME B — Campaign Hero: car occupies ~78-82% width, low powerful stance
-      const t = smoothstep((p - 0.30) / 0.40);
-      x = 2.15 - t * 0.20;
-      y = 0.50 - t * 0.02;
-      z = 3.60 - t * 0.25;
-      lx = -0.20 - t * 0.02;
-      ly = 0.32;
-      lz = 0.10 + t * 0.04;
-      fov = 34 + t * 1.5;
+    if (p < 0.3) {
+      const t = smoothstep(p / 0.3);
+      x = 3.9 - t * 0.28;
+      y = 1.0 - t * 0.08;
+      z = 5.05 - t * 0.35;
+      lx = -0.2;
+      ly = 0.48;
+      lz = 0.12;
+      fov = 30.5;
+    } else if (p < 0.72) {
+      const t = smoothstep((p - 0.3) / 0.42);
+      x = 3.62 - t * 0.45;
+      y = 0.92 - t * 0.08;
+      z = 4.7 - t * 0.5;
+      lx = -0.12 + t * 0.16;
+      ly = 0.46;
+      lz = 0.1 + t * 0.08;
+      fov = 31 + t * 1.8;
     } else {
-      // FRAME C — Detail Push into front wheel / fender before dark aperture handoff
-      const t = smoothstep((p - 0.70) / 0.30);
-      x = 1.95 - t * 0.95;
-      y = 0.48 - t * 0.24;
-      z = 3.35 - t * 1.65;
-      lx = -0.22 + t * 0.70;
-      ly = 0.32 - t * 0.10;
-      lz = 0.14 + t * 0.65;
-      fov = 35.5 - t * 8.0;
+      const t = smoothstep((p - 0.72) / 0.28);
+      x = 3.17 - t * 1.5;
+      y = 0.84 - t * 0.3;
+      z = 4.2 - t * 2.1;
+      lx = 0.04 + t * 0.65;
+      ly = 0.46 - t * 0.18;
+      lz = 0.18 + t * 0.5;
+      fov = 32.8 - t * 6;
     }
 
-    // Mobile / Portrait aspect compensation
     const aspect = state.size.width / state.size.height;
-    if (aspect < 0.8) {
-      const portraitFactor = Math.min(1, (0.8 - aspect) / 0.35);
-      z *= 1 + 0.28 * portraitFactor;
-      y += 0.05 * portraitFactor;
-      fov += 8 * portraitFactor;
+    if (aspect < 0.85) {
+      const portrait = Math.min(1, (0.85 - aspect) / 0.45);
+      z *= 1 + 0.34 * portrait;
+      x *= 1 - 0.08 * portrait;
+      y += 0.12 * portrait;
+      fov += 8 * portrait;
     }
 
-    targetPos.current.set(x, y, z);
+    targetPosition.current.set(x, y, z);
     targetLook.current.set(lx, ly, lz);
+    const direction = targetLook.current.clone().sub(targetPosition.current).normalize();
 
-    const desiredDir = targetLook.current.clone().sub(targetPos.current).normalize();
-
-    if (!initializedCam.current) {
-      cam.position.copy(targetPos.current);
-      currentLook.current.copy(desiredDir);
-      cam.lookAt(targetPos.current.clone().add(desiredDir));
+    if (!initialized.current) {
+      cam.position.copy(targetPosition.current);
+      currentLook.current.copy(direction);
+      cam.lookAt(targetPosition.current.clone().add(direction));
       cam.fov = fov;
       cam.updateProjectionMatrix();
-      initializedCam.current = true;
+      initialized.current = true;
       return;
     }
 
-    cam.position.lerp(targetPos.current, Math.min(1, delta * 12));
+    cam.position.lerp(targetPosition.current, Math.min(1, delta * 9));
     cam.getWorldDirection(currentLook.current);
-    currentLook.current.lerp(desiredDir, Math.min(1, delta * 12));
+    currentLook.current.lerp(direction, Math.min(1, delta * 9));
     cam.lookAt(cam.position.clone().add(currentLook.current));
-
-    if (Math.abs(cam.fov - fov) > 0.05) {
-      cam.fov = THREE.MathUtils.lerp(cam.fov, fov, Math.min(1, delta * 12));
-      cam.updateProjectionMatrix();
-    }
+    cam.fov = THREE.MathUtils.lerp(cam.fov, fov, Math.min(1, delta * 9));
+    cam.updateProjectionMatrix();
   });
 
   return null;
@@ -416,18 +359,23 @@ export function HeroStudio({
   return (
     <CanvasErrorBoundary>
       <Canvas
-        gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
-        dpr={[1, 1.5]}
-        camera={{ position: [2.25, 0.48, 3.75], fov: 33.5 }}
-        frameloop="always"
+        gl={{
+          antialias: true,
+          alpha: true,
+          powerPreference: "high-performance",
+          toneMapping: THREE.ACESFilmicToneMapping,
+        }}
+        dpr={[1, 1.45]}
+        camera={{ position: [3.9, 1, 5.05], fov: 30.5 }}
+        frameloop={active ? "always" : "never"}
         shadows={false}
       >
-        <fog attach="fog" args={["#030405", 10, 26]} />
+        <fog attach="fog" args={["#020202", 9, 24]} />
         <Suspense fallback={null}>
-          <StudioLights scrollProgress={scrollProgress} reducedMotion={reducedMotion} />
-          <Environment preset="studio" environmentIntensity={0.16} />
-          <StudioEnvironment />
-          <CarModel scrollProgress={scrollProgress} reducedMotion={reducedMotion} />
+          <Environment preset="studio" environmentIntensity={0.38} />
+          <Lighting scrollProgress={scrollProgress} reducedMotion={reducedMotion} />
+          <DarkStudioFloor />
+          <HuracanModel scrollProgress={scrollProgress} reducedMotion={reducedMotion} />
         </Suspense>
         <CameraRig scrollProgress={scrollProgress} reducedMotion={reducedMotion} />
       </Canvas>
@@ -435,4 +383,4 @@ export function HeroStudio({
   );
 }
 
-useGLTF.preload("/models/hero-car.glb");
+useGLTF.preload(HERO_MODEL);
