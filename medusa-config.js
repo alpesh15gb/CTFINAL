@@ -12,6 +12,10 @@ module.exports = {
       resolve: "@medusajs/event-bus-local",
       options: {},
     },
+    cacheService: {
+      resolve: "@medusajs/cache-inmemory",
+      options: {},
+    },
   },
   plugins: [
     {

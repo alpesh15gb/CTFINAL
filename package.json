@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@medusajs/admin": "^7.1.18",
+    "@medusajs/cache-inmemory": "^1.8.11",
     "@medusajs/event-bus-local": "^1.9.9",
     "@medusajs/medusa": "^1.20.11",
     "@radix-ui/react-accordion": "^1.2.0",
@@ -53,9 +54,11 @@
     "@types/react": "^18.3.4",
     "@types/react-dom": "^18.3.0",
     "@types/three": "^0.167.2",
+    "@swc/core": "^1.7.0",
     "autoprefixer": "^10.4.20",
     "babel-preset-medusa-package": "^1.1.4",
     "postcss": "^8.4.41",
+    "swc-loader": "^0.2.6",
     "tailwindcss": "^3.4.10",
     "typescript": "^5.5.4"
   },
