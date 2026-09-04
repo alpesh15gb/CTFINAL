@@ -1,63 +1,66 @@
-import { Hero } from "@/components/sections/Hero";
-import { Bridge } from "@/components/sections/Bridge";
+import { CinematicIntro } from "@/components/cinematic/CinematicIntro";
+import { DarkMachineHero } from "@/components/cinematic/DarkMachineHero";
+import { NumbersLightning } from "@/components/cinematic/NumbersLightning";
+import { GiantMark } from "@/components/cinematic/GiantMark";
+import { WovenNotWelded } from "@/components/cinematic/WovenNotWelded";
+import { ObsidianBlack } from "@/components/cinematic/ObsidianBlack";
+import { EveryAngle } from "@/components/cinematic/EveryAngle";
+import { FutureArrived, Philosophy } from "@/components/cinematic/FutureArrived";
+import { Services } from "@/components/cinematic/Services";
+import { SelectedMachines } from "@/components/cinematic/SelectedMachines";
+import { CinematicBridge } from "@/components/cinematic/CinematicBridge";
 import { VehicleSelector } from "@/components/sections/VehicleSelector";
 import { WheelScrubber } from "@/components/configurator/WheelScrubber";
-import { UpgradeStory } from "@/components/sections/UpgradeStory";
-import { EngineeringBento } from "@/components/sections/EngineeringBento";
 import { Categories } from "@/components/sections/Categories";
 import { FeaturedProducts } from "@/components/sections/FeaturedProducts";
 import { BuildsShowcase } from "@/components/sections/BuildsShowcase";
-import { Craftsmanship } from "@/components/sections/Craftsmanship";
 import { Configurator } from "@/components/sections/Configurator";
-import { Stats } from "@/components/sections/Stats";
-import { DetailsStory } from "@/components/sections/DetailsStory";
-import { Testimonials } from "@/components/sections/Testimonials";
-import { InstagramReels } from "@/components/sections/InstagramReels";
 import { FinalCTA } from "@/components/sections/FinalCTA";
 
 export default function Home() {
   return (
-    <main className="relative overflow-x-clip bg-background">
-      {/* ACT 01 — THE MACHINE (Cinematic Hero) */}
-      <Hero />
+    <main className="relative overflow-x-clip bg-[#020202]">
+      {/* Cinematic loader (once per session) */}
+      <CinematicIntro />
 
-      {/* ACT 02 — CARTUNEZ HANDOFF */}
-      <Bridge />
+      {/* ACT 01 — DARK MACHINE + HERO REVEAL */}
+      <DarkMachineHero />
 
-      {/* ACT 03 — FIND YOUR CAR */}
+      {/* ACT 02 — NUMBERS WRITTEN IN LIGHTNING */}
+      <NumbersLightning />
+
+      {/* ACT 03 — GIANT MARK */}
+      <GiantMark />
+
+      {/* ACT 04 — WOVEN, NOT WELDED */}
+      <WovenNotWelded />
+
+      {/* ACT 05 — OBSIDIAN BLACK */}
+      <ObsidianBlack />
+
+      {/* ACT 06 — EVERY ANGLE, AN ARGUMENT */}
+      <EveryAngle />
+
+      {/* ACT 07 — THE MACHINE HAS EVOLVED (night) */}
+      <FutureArrived />
+
+      {/* ACT 08 — PHILOSOPHY */}
+      <Philosophy />
+
+      {/* ACT 09 — SERVICES INDEX */}
+      <Services />
+
+      {/* ACT 10 — SELECTED MACHINES */}
+      <SelectedMachines />
+
+      {/* HANDOFF — cinematic → commerce */}
+      <CinematicBridge />
       <VehicleSelector />
-
-      {/* ACT 04 — INTERACTIVE WHEEL SCRUBBER & SPEC DECK */}
       <WheelScrubber />
-
-      {/* ACT 05 — TRANSFORMATION STORY (Three Acts) */}
-      <UpgradeStory />
-
-      {/* ACT 06 — AEROSPACE METALLURGY & PERFORMANCE BENTO */}
-      <EngineeringBento />
-
-      {/* ACT 07 — PRODUCTS (Clean Commerce Interface) */}
       <Categories />
       <FeaturedProducts />
-
-      {/* ACT 08 — BUILT BY CARTUNEZ */}
       <BuildsShowcase />
-
-      {/* ACT 09 — CRAFTSMANSHIP / PROCESS */}
-      <Craftsmanship />
-
-      {/* ACT 10 — CONFIGURATOR */}
       <Configurator />
-
-      {/* ACT 11 — PERFORMANCE NUMBERS */}
-      <Stats />
-
-      {/* ACT 12 — DETAILS / MACRO STORY */}
-      <DetailsStory />
-
-      {/* SOCIAL PROOF */}
-      <Testimonials />
-      <InstagramReels />
 
       {/* FINAL ACT */}
       <FinalCTA />

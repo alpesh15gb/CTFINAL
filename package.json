@@ -25,7 +25,7 @@
     "@react-three/fiber": "^8.17.6",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
-    "framer-motion": "^11.3.30",
+    "framer-motion": "^13.2.0",
     "gsap": "^3.15.0",
     "lenis": "^1.1.13",
     "lucide-react": "^0.436.0",
@@ -53,5 +53,22 @@
     "postcss": "^8.4.41",
     "tailwindcss": "^3.4.10",
     "typescript": "^5.5.4"
-  }
+  },
+  "description": "",
+  "main": "medusa-config.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alpesh15gb/CTFINAL.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/alpesh15gb/CTFINAL/issues"
+  },
+  "homepage": "https://github.com/alpesh15gb/CTFINAL#readme"
 }

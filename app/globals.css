@@ -5,23 +5,23 @@
 :root {
   color-scheme: dark;
 
-  /* Precision-dark surface stack */
-  --background: #030405;
-  --foreground: #f5f7f8;
-  --raised: #07090b;
-  --surface: #0b0e11;
-  --elevated: #101418;
-  --surface-hover: #151a1f;
-  --muted: #1a2026;
+  /* APEX-grade black stack — black + white + car body + light */
+  --background: #020202;
+  --foreground: #f5f5f2;
+  --raised: #090909;
+  --surface: #0a0a0b;
+  --elevated: #101214;
+  --surface-hover: #15181b;
+  --muted: #1a1e22;
   --muted-foreground: #9aa3aa;
 
-  /* Brand Accents */
+  /* Brand Accents (kept for commerce components; cinematic homepage uses white/red only) */
   --cyan: #31cfff;
   --cyan-light: #75e0ff;
   --cyan-glow: rgba(49, 207, 255, 0.25);
-  --red: #c72727;
-  --red-light: #e73737;
-  --red-glow: rgba(199, 39, 39, 0.2);
+  --red: #e32219;
+  --red-light: #f04438;
+  --red-glow: rgba(227, 34, 25, 0.2);
 
   /* Silver Scale */
   --silver: #d2d7da;
@@ -40,7 +40,7 @@
   --accent-foreground: #f2f2f2;
   --destructive: #c72727;
   --destructive-foreground: #f2f2f2;
-  --ring: #31cfff;
+  --ring: #f5f5f2;
 
   /* Radii */
   --radius-sm: 0.25rem;
@@ -70,7 +70,7 @@
 
   html {
     scroll-behavior: auto;
-    background: var(--background);
+    background: #020202;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
@@ -78,21 +78,19 @@
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
-    background-image:
-      radial-gradient(circle at 12% -8%, rgba(49, 207, 255, 0.07), transparent 27rem),
-      linear-gradient(180deg, #030405 0%, #050607 42%, #030405 100%);
+    background-image: linear-gradient(180deg, #020202 0%, #050505 42%, #020202 100%);
     overflow-x: hidden;
     text-rendering: optimizeLegibility;
   }
 
   ::selection {
-    background: rgba(49, 207, 255, 0.3);
+    background: rgba(255, 255, 255, 0.28);
     color: #ffffff;
   }
 
   /* Visible focus rings for keyboard navigation */
   :focus-visible {
-    outline: 2px solid var(--cyan);
+    outline: 2px solid #f5f5f2;
     outline-offset: 2px;
   }
 
@@ -111,7 +109,7 @@
 
 @layer components {
   .skip-link {
-    @apply fixed left-4 top-4 z-[1000] -translate-y-24 rounded-sm bg-cyan px-4 py-3 font-mono text-xs font-bold uppercase tracking-wider text-black transition-transform focus:translate-y-0;
+    @apply fixed left-4 top-4 z-[1000] -translate-y-24 rounded-sm bg-white px-4 py-3 font-mono text-xs font-bold uppercase tracking-wider text-black transition-transform focus:translate-y-0;
   }
 
   .site-container {
@@ -123,7 +121,7 @@
   }
 
   .technical-label {
-    @apply inline-flex items-center gap-3 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-cyan md:text-[11px];
+    @apply inline-flex items-center gap-3 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-white/55 md:text-[11px];
   }
 
   .technical-label::before {
@@ -136,7 +134,23 @@
 
   .display-outline {
     color: transparent;
-    -webkit-text-stroke: 1px rgba(245, 247, 248, 0.72);
+    -webkit-text-stroke: 1px rgba(245, 245, 242, 0.72);
+  }
+
+  /* Campaign typography — poster-like automotive display */
+  .campaign-title {
+    font-family: var(--font-display), system-ui, sans-serif;
+    text-transform: uppercase;
+    font-weight: 700;
+    line-height: 0.82;
+    letter-spacing: -0.04em;
+    color: #f5f5f2;
+  }
+
+  /* Mask wrapper for vertical line reveals */
+  .clip-mask {
+    overflow: hidden;
+    display: block;
   }
 
   .glass-panel {
@@ -170,7 +184,7 @@
     inset: 0;
     pointer-events: none;
     border-radius: inherit;
-    background: linear-gradient(115deg, transparent 20%, rgba(49, 207, 255, 0.09), transparent 55%);
+    background: linear-gradient(115deg, transparent 20%, rgba(255, 255, 255, 0.08), transparent 55%);
     opacity: 0;
     transition: opacity 300ms ease;
   }
@@ -183,6 +197,12 @@
   .noise-overlay {
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.9'/%3E%3C/svg%3E");
     mix-blend-mode: soft-light;
+  }
+
+  /* Extremely subtle cinematic film grain (set opacity 0.02–0.045 at usage) */
+  .film-grain {
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 220 220' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+    background-size: 220px 220px;
   }
 
   .text-balance {
@@ -206,12 +226,12 @@
     background: linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0) 100%);
   }
 
-  /* Premium atmosphere: soft radial cyan glow behind focal content */
+  /* Cinematic atmosphere: soft neutral glow behind focal content */
   .atmo-glow {
-    background: radial-gradient(ellipse 60% 40% at 50% 40%, rgba(2, 187, 252, 0.06) 0%, transparent 70%);
+    background: radial-gradient(ellipse 60% 40% at 50% 40%, rgba(255, 255, 255, 0.05) 0%, transparent 70%);
   }
 
-  /* Premium atmosphere: subtle technical grid lines */
+  /* Cinematic atmosphere: subtle technical grid lines */
   .atmo-grid {
     background-image:
       linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
@@ -219,21 +239,21 @@
     background-size: 80px 80px;
   }
 
-  /* Premium atmosphere: faint carbon-fibre texture */
+  /* Cinematic atmosphere: faint carbon-fibre texture */
   .atmo-carbon {
     background-image:
       repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.012) 0 2px, transparent 2px 4px),
       repeating-linear-gradient(-45deg, rgba(255, 255, 255, 0.012) 0 2px, transparent 2px 4px);
   }
 
-  /* Premium atmosphere: subtle vignette */
+  /* Cinematic atmosphere: subtle vignette */
   .atmo-vignette {
     background: radial-gradient(ellipse 100% 80% at 50% 50%, transparent 55%, rgba(0, 0, 0, 0.5) 100%);
   }
 
-  /* Premium atmosphere: faint illuminated horizon line */
+  /* Cinematic atmosphere: faint illuminated horizon line */
   .atmo-horizon {
-    background: linear-gradient(90deg, transparent 0%, rgba(2, 187, 252, 0.12) 50%, transparent 100%);
+    background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.1) 50%, transparent 100%);
     height: 1px;
   }
 

@@ -75,7 +75,7 @@ export function Navbar() {
           <span>Vehicle-specific upgrades / verified fitment</span>
           <div className="flex items-center gap-6">
             <span>India / INR</span>
-            <Link href="/contact" className="transition-colors hover:text-cyan">
+            <Link href="/contact" className="transition-colors hover:text-white">
               Expert consultation
             </Link>
           </div>
@@ -108,14 +108,14 @@ export function Navbar() {
               aria-current={isActive(link.href) ? "page" : undefined}
               className={cn(
                 "group relative flex min-h-11 items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.18em] transition-colors",
-                isActive(link.href) ? "text-cyan" : "text-silver hover:text-foreground"
+                isActive(link.href) ? "text-white" : "text-silver hover:text-foreground"
               )}
             >
               <span className="text-[8px] text-silver-muted/60">0{index + 1}</span>
               {link.label}
               <span
                 className={cn(
-                  "absolute inset-x-0 bottom-0 h-px origin-left bg-cyan transition-transform duration-300",
+                  "absolute inset-x-0 bottom-0 h-px origin-left bg-white transition-transform duration-300",
                   isActive(link.href) ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
                 )}
               />
@@ -126,7 +126,7 @@ export function Navbar() {
         <div className="flex items-center gap-1.5 md:gap-2">
           <Link
             href="/shop"
-            className="hidden h-11 w-11 items-center justify-center rounded-sm border border-transparent text-silver transition-all hover:border-border hover:bg-white/[0.04] hover:text-cyan md:flex"
+            className="hidden h-11 w-11 items-center justify-center rounded-sm border border-transparent text-silver transition-all hover:border-border hover:bg-white/[0.04] hover:text-white md:flex"
             aria-label="Search products"
           >
             <Search className="h-[18px] w-[18px]" />
@@ -134,7 +134,7 @@ export function Navbar() {
 
           <Link
             href="/account"
-            className="hidden h-11 w-11 items-center justify-center rounded-sm border border-transparent text-silver transition-all hover:border-border hover:bg-white/[0.04] hover:text-cyan md:flex"
+            className="hidden h-11 w-11 items-center justify-center rounded-sm border border-transparent text-silver transition-all hover:border-border hover:bg-white/[0.04] hover:text-white md:flex"
             aria-label="Account"
           >
             <User className="h-[18px] w-[18px]" />
@@ -143,12 +143,12 @@ export function Navbar() {
           <CartSheet>
             <button
               type="button"
-              className="relative flex h-11 w-11 cursor-pointer items-center justify-center rounded-sm border border-transparent text-silver transition-all hover:border-border hover:bg-white/[0.04] hover:text-cyan"
+              className="relative flex h-11 w-11 cursor-pointer items-center justify-center rounded-sm border border-transparent text-silver transition-all hover:border-border hover:bg-white/[0.04] hover:text-white"
               aria-label={`Cart with ${cartCount} item${cartCount === 1 ? "" : "s"}`}
             >
               <ShoppingBag className="h-[18px] w-[18px]" />
               {cartCount > 0 && (
-                <span className="absolute right-0.5 top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-cyan px-1 font-mono text-[8px] font-bold text-black">
+                <span className="absolute right-0.5 top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-white px-1 font-mono text-[8px] font-bold text-black">
                   {cartCount}
                 </span>
               )}
@@ -199,11 +199,11 @@ export function Navbar() {
                     <SheetClose key={link.label} asChild>
                       <Link
                         href={link.href}
-                        className="group flex min-h-16 items-center justify-between border-b border-border/70 py-4 font-display text-4xl font-semibold uppercase tracking-tight text-foreground transition-colors hover:text-cyan"
+                        className="group flex min-h-16 items-center justify-between border-b border-border/70 py-4 font-display text-4xl font-semibold uppercase tracking-tight text-foreground transition-colors hover:text-white"
                       >
                         <span className="font-mono text-[10px] tracking-widest text-silver-muted">0{index + 1}</span>
                         {link.label}
-                        <ArrowRight className="h-5 w-5 text-silver-muted transition-transform group-hover:translate-x-1 group-hover:text-cyan" />
+                        <ArrowRight className="h-5 w-5 text-silver-muted transition-transform group-hover:translate-x-1 group-hover:text-white" />
                       </Link>
                     </SheetClose>
                   ))}
@@ -216,8 +216,8 @@ export function Navbar() {
                     </Link>
                   </Button>
                   <div className="flex items-center justify-center gap-8 font-mono text-[10px] uppercase tracking-wider text-silver-muted">
-                    <Link href="/account" className="min-h-11 py-3 hover:text-cyan">Account</Link>
-                    <Link href="/cart" className="min-h-11 py-3 hover:text-cyan">Cart ({cartCount})</Link>
+                      <Link href="/account" className="min-h-11 py-3 hover:text-white">Account</Link>
+                      <Link href="/cart" className="min-h-11 py-3 hover:text-white">Cart ({cartCount})</Link>
                   </div>
                 </div>
               </div>
