@@ -1,6 +1,12 @@
 services:
   cartunez:
-    build: .
+    build:
+      context: .
+      args:
+        # Browser-facing Medusa URL (baked into the client bundle).
+        # MUST be publicly reachable — set via `.env` next to this file.
+        NEXT_PUBLIC_MEDUSA_BACKEND_URL: ${STOREFRONT_MEDUSA_URL:-http://localhost:9000}
+        NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY: ${MEDUSA_PUBLISHABLE_KEY:-}
     container_name: cartunez-app
     restart: unless-stopped
     ports:
@@ -67,6 +73,8 @@ services:
       JWT_SECRET: change_this_to_a_long_random_string
       COOKIE_SECRET: change_this_to_another_random_string
       PORT: 9000
+      # Browser origins allowed to call the store API (comma-separated).
+      STORE_CORS: https://cartunez.in,https://www.cartunez.in
     depends_on:
       medusa-db:
         condition: service_healthy

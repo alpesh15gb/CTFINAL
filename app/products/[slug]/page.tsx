@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -21,7 +21,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { getProductBySlug, products } from "@/data/products";
+import { listStoreProducts } from "@/lib/medusa";
+import {
+  adaptStoreProduct,
+  type MedusaStoreProduct,
+} from "@/lib/store-adapter";
+import type { Product } from "@/types";
 import { useVehicle } from "@/hooks/useVehicle";
 import { useCart } from "@/hooks/useCart";
 import { ProductCard } from "@/components/product/ProductCard";
@@ -32,13 +37,72 @@ export const dynamic = "force-dynamic";
 export default function ProductDetailPage() {
   const params = useParams();
   const slug = typeof params.slug === "string" ? params.slug : "";
-  const product = getProductBySlug(slug);
+
+  // Live catalog from Medusa (single fetch serves detail + related).
+  const [catalog, setCatalog] = useState<Product[] | null>(null);
+  const [loadError, setLoadError] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const raw = await listStoreProducts({ limit: 100 });
+        if (!cancelled) {
+          setCatalog((raw as MedusaStoreProduct[]).map(adaptStoreProduct));
+        }
+      } catch (error) {
+        console.error("[product] failed to load live catalog:", error);
+        if (!cancelled) setLoadError(true);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const product = catalog?.find((p) => p.slug === slug) ?? null;
 
   const { selected } = useVehicle();
   const { addItem } = useCart();
   const [quantity, setQuantity] = useState(1);
   const [added, setAdded] = useState(false);
   const [activeImage, setActiveImage] = useState(0);
+
+  if (!loadError && catalog === null) {
+    return (
+      <main className="min-h-screen bg-background pb-24 pt-28">
+        <div className="mx-auto max-w-[1600px] px-4 md:px-8">
+          <div className="h-6 w-32 animate-pulse rounded bg-raised" />
+          <div className="mt-6 grid gap-10 lg:grid-cols-2">
+            <div className="aspect-square animate-pulse rounded-xl bg-raised" />
+            <div className="space-y-4">
+              <div className="h-10 w-3/4 animate-pulse rounded bg-raised" />
+              <div className="h-6 w-1/3 animate-pulse rounded bg-raised" />
+              <div className="h-24 w-full animate-pulse rounded bg-raised" />
+            </div>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-background pt-20">
+        <div className="text-center">
+          <h1 className="font-display text-4xl uppercase text-foreground">
+            Store Unavailable
+          </h1>
+          <p className="mt-2 text-silver-muted">
+            We couldn&apos;t reach the live catalog.
+          </p>
+          <Button asChild className="mt-6 bg-cyan text-black hover:bg-cyan-light">
+            <Link href="/shop">Back to Shop</Link>
+          </Button>
+        </div>
+      </main>
+    );
+  }
 
   if (!product) {
     return (
@@ -55,17 +119,23 @@ export default function ProductDetailPage() {
     );
   }
 
-  const fits = selected ? product.compatibility.includes(selected.slug) : null;
+  const fits = selected
+    ? product.compatibility.length === 0 ||
+      product.compatibility.includes(selected.slug)
+    : null;
   const discount = product.originalPrice
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
     : null;
 
-  const related = products
+  const related = (catalog ?? [])
     .filter(
       (p) =>
         p.categorySlug === product.categorySlug && p.id !== product.id
     )
     .slice(0, 3);
+
+  const gallery = product.images;
+  const activeSrc = gallery[Math.min(activeImage, gallery.length - 1)];
 
   const handleAdd = () => {
     for (let i = 0; i < quantity; i++) {
@@ -94,14 +164,23 @@ export default function ProductDetailPage() {
           {/* Gallery */}
           <motion.div variants={fadeInUp} className="space-y-4">
             <div className="relative aspect-square overflow-hidden rounded-xl border border-border bg-raised">
-              <Image
-                src={product.images[activeImage]}
-                alt={product.name}
-                fill
-                sizes="(max-width: 1024px) 100vw, 50vw"
-                className="object-cover"
-                priority
-              />
+              {activeSrc ? (
+                <Image
+                  src={activeSrc}
+                  alt={product.name}
+                  fill
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                  className="object-cover"
+                  priority
+                />
+              ) : (
+                <div className="flex h-full w-full flex-col items-center justify-center gap-3 text-silver-muted">
+                  <Wrench className="h-10 w-10" aria-hidden="true" />
+                  <span className="font-mono text-xs uppercase tracking-[0.2em]">
+                    No image
+                  </span>
+                </div>
+              )}
               {product.badge && (
                 <Badge className="absolute left-4 top-4 bg-red text-white">
                   {product.badge}
@@ -109,7 +188,7 @@ export default function ProductDetailPage() {
               )}
             </div>
             <div className="flex gap-3">
-              {product.images.map((img, idx) => (
+              {gallery.map((img, idx) => (
                 <button
                   key={idx}
                   onClick={() => setActiveImage(idx)}

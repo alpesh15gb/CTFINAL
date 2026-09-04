@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { ArrowUpRight, Check, Heart, ShoppingBag, Star } from "lucide-react";
+import { ArrowUpRight, Check, Heart, Package, ShoppingBag, Star } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Product } from "@/types";
 import { useVehicle } from "@/hooks/useVehicle";
@@ -31,7 +31,10 @@ export function ProductCard({ product, featured = false, wide = false }: Product
     };
   }, []);
 
-  const fits = selected ? product.compatibility.includes(selected.slug) : null;
+  const fits = selected
+    ? product.compatibility.length === 0 ||
+      product.compatibility.includes(selected.slug)
+    : null;
   const discount = product.originalPrice
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
     : null;
@@ -64,17 +67,26 @@ export function ProductCard({ product, featured = false, wide = false }: Product
           )}
           aria-label={`View ${product.name}`}
         >
-          <Image
-            src={product.images[0]}
-            alt={product.name}
-            fill
-            sizes={
-              featured
-                ? "(max-width: 1024px) 100vw, 50vw"
-                : "(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
-            }
-            className="object-cover saturate-[0.82] transition duration-700 ease-out group-hover:scale-[1.035] group-hover:saturate-100"
-          />
+          {product.images[0] ? (
+            <Image
+              src={product.images[0]}
+              alt={product.name}
+              fill
+              sizes={
+                featured
+                  ? "(max-width: 1024px) 100vw, 50vw"
+                  : "(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+              }
+              className="object-cover saturate-[0.82] transition duration-700 ease-out group-hover:scale-[1.035] group-hover:saturate-100"
+            />
+          ) : (
+            <div className="flex h-full w-full flex-col items-center justify-center gap-3 bg-surface text-silver-muted">
+              <Package className="h-10 w-10" aria-hidden="true" />
+              <span className="font-mono text-[11px] uppercase tracking-[0.18em]">
+                No image
+              </span>
+            </div>
+          )}
           <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/5 to-black/15" />
 
           <div className="absolute inset-x-4 bottom-4 flex items-end justify-between gap-3">
@@ -130,11 +142,13 @@ export function ProductCard({ product, featured = false, wide = false }: Product
           <p className="font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-cyan">
             {product.category}
           </p>
-          <div className="flex items-center gap-1.5 font-mono text-[11px] text-silver-muted">
-            <Star className="h-3.5 w-3.5 fill-cyan text-cyan" aria-hidden="true" />
-            <span className="text-foreground">{product.rating}</span>
-            <span>/{product.reviewCount}</span>
-          </div>
+          {product.reviewCount > 0 && (
+            <div className="flex items-center gap-1.5 font-mono text-[11px] text-silver-muted">
+              <Star className="h-3.5 w-3.5 fill-cyan text-cyan" aria-hidden="true" />
+              <span className="text-foreground">{product.rating}</span>
+              <span>/{product.reviewCount}</span>
+            </div>
+          )}
         </div>
 
         <Link

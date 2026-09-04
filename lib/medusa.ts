@@ -1,41 +1,48 @@
 import Medusa from "@medusajs/medusa-js";
 
-const MEDUSA_BACKEND_URL = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000";
+export const MEDUSA_BACKEND_URL =
+  process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000";
+export const MEDUSA_PUBLISHABLE_KEY =
+  process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "";
+
+if (typeof window !== "undefined" && !MEDUSA_PUBLISHABLE_KEY) {
+  // eslint-disable-next-line no-console
+  console.warn(
+    "[store] NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY is not set — live product fetches will fail."
+  );
+}
 
 export const medusaClient = new Medusa({
   baseUrl: MEDUSA_BACKEND_URL,
   maxRetries: 3,
+  apiKey: MEDUSA_PUBLISHABLE_KEY || undefined,
 });
 
-// Product helpers
-export async function getProducts(options?: {
+// Product helpers (live Medusa store API — these throw on failure so callers
+// can distinguish "backend unreachable" from "no products").
+export async function listStoreProducts(options?: {
   limit?: number;
   offset?: number;
-  category?: string;
-  search?: string;
 }) {
-  try {
-    const res = await medusaClient.products.list({
-      limit: options?.limit || 12,
-      offset: options?.offset || 0,
-    });
-    return res.products;
-  } catch (error) {
-    console.error("Failed to fetch products:", error);
-    return [];
-  }
+  const res = await medusaClient.products.list({
+    limit: options?.limit ?? 100,
+    offset: options?.offset ?? 0,
+  });
+  return (res?.products ?? []) as unknown[];
 }
 
-export async function getProductBySlug(slug: string) {
-  try {
-    const { products } = await medusaClient.products.list({
-      handle: slug,
-    });
-    return products[0] || null;
-  } catch (error) {
-    console.error("Failed to fetch product:", error);
-    return null;
-  }
+export async function getStoreProductByHandle(handle: string) {
+  const { products } = await medusaClient.products.list({ handle });
+  return ((products ?? [])[0] ?? null) as unknown | null;
+}
+
+export async function listStoreCategories() {
+  const res = await medusaClient.productCategories.list({ limit: 100 });
+  const raw = res as unknown as {
+    product_categories?: unknown[];
+    productCategories?: unknown[];
+  };
+  return (raw?.product_categories ?? raw?.productCategories ?? []) as unknown[];
 }
 
 // Cart helpers

@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -30,8 +30,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ProductCard } from "@/components/product/ProductCard";
-import { products } from "@/data/products";
-import { categories } from "@/data/categories";
+import type { Category, Product } from "@/types";
+import { listStoreCategories, listStoreProducts } from "@/lib/medusa";
+import {
+  adaptStoreCategory,
+  adaptStoreProduct,
+  type MedusaStoreCategory,
+  type MedusaStoreProduct,
+} from "@/lib/store-adapter";
 import { useVehicle } from "@/hooks/useVehicle";
 import { staggerContainer, fadeInUp } from "@/lib/animations";
 
@@ -69,6 +75,42 @@ function ShopContent() {
   const [query, setQuery] = useState(searchParams.get("q") ?? "");
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
+  // Live catalog from Medusa — no local fallback (an empty/error state is
+  // always preferable to showing products we don't sell).
+  const [catalog, setCatalog] = useState<Product[] | null>(null);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loadError, setLoadError] = useState(false);
+  const [attempt, setAttempt] = useState(0);
+
+  useEffect(() => {
+    let cancelled = false;
+    setCatalog(null);
+    setLoadError(false);
+    (async () => {
+      try {
+        const [rawProducts, rawCategories] = await Promise.all([
+          listStoreProducts({ limit: 100 }),
+          listStoreCategories().catch(() => [] as unknown[]),
+        ]);
+        if (cancelled) return;
+        setCatalog(
+          (rawProducts as MedusaStoreProduct[]).map(adaptStoreProduct)
+        );
+        setCategories(
+          (rawCategories as MedusaStoreCategory[]).map(adaptStoreCategory)
+        );
+      } catch (error) {
+        console.error("[shop] failed to load live catalog:", error);
+        if (!cancelled) setLoadError(true);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [attempt]);
+
+  const products = useMemo(() => catalog ?? [], [catalog]);
+
   const categoryParam = searchParams.get("category");
   const sortParam = searchParams.get("sort") ?? "featured";
   const compatibleOnly = searchParams.get("compatible") === "true";
@@ -93,7 +135,12 @@ function ShopContent() {
     }
 
     if (selected && compatibleOnly) {
-      list = list.filter((p) => p.compatibility.includes(selected.slug));
+      // Products without fitment info are treated as universal fit.
+      list = list.filter(
+        (p) =>
+          p.compatibility.length === 0 ||
+          p.compatibility.includes(selected.slug)
+      );
     }
 
     switch (sortParam) {
@@ -127,6 +174,35 @@ function ShopContent() {
     setQuery("");
     router.push("/shop", { scroll: false });
   };
+
+  if (loadError) {
+    return (
+      <main className="min-h-screen bg-background pb-24 pt-28">
+        <div className="mx-auto max-w-[1600px] px-4 md:px-8">
+          <div className="flex flex-col items-center justify-center rounded-xl border border-border bg-raised py-24 text-center">
+            <Search className="h-10 w-10 text-silver-muted" />
+            <h3 className="mt-4 font-display text-2xl uppercase text-foreground">
+              Store unavailable
+            </h3>
+            <p className="mt-2 max-w-xs text-silver-muted">
+              We couldn&apos;t reach the live catalog. Check your connection
+              and try again.
+            </p>
+            <Button
+              onClick={() => setAttempt((a) => a + 1)}
+              className="mt-6 bg-cyan text-black hover:bg-cyan-light"
+            >
+              Retry
+            </Button>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  if (catalog === null) {
+    return <ShopSkeleton />;
+  }
 
   const filterCount =
     (activeCategory ? 1 : 0) +
@@ -270,6 +346,7 @@ function ShopContent() {
                 </SheetHeader>
                 <div className="mt-6 space-y-6">
                   <FilterContent
+                    categories={categories}
                     activeCategory={activeCategory}
                     updateParam={updateParam}
                     resetFilters={resetFilters}
@@ -286,6 +363,7 @@ function ShopContent() {
           {/* Desktop filters */}
           <aside className="hidden space-y-8 md:block">
             <FilterContent
+              categories={categories}
               activeCategory={activeCategory}
               updateParam={updateParam}
               resetFilters={resetFilters}
@@ -341,13 +419,15 @@ function ShopContent() {
 }
 
 function FilterContent({
+  categories,
   activeCategory,
   updateParam,
   resetFilters,
   selected,
   compatibleOnly,
 }: {
-  activeCategory: (typeof categories)[number] | null;
+  categories: Category[];
+  activeCategory: Category | null;
   updateParam: (key: string, value: string | null) => void;
   resetFilters: () => void;
   selected: ReturnType<typeof useVehicle>["selected"];

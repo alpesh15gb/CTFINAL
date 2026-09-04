@@ -6,6 +6,9 @@ module.exports = {
     database_type: "postgres",
     jwt_secret: process.env.JWT_SECRET || "supersecret",
     cookie_secret: process.env.COOKIE_SECRET || "supersecret",
+    store_cors: process.env.STORE_CORS || "http://localhost:8000",
+    admin_cors:
+      process.env.ADMIN_CORS || "http://localhost:7000,http://localhost:7001",
   },
   modules: {
     eventBus: {

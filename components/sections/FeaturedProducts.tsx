@@ -1,18 +1,47 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ProductCard } from "@/components/product/ProductCard";
-import { products } from "@/data/products";
+import type { Product } from "@/types";
+import { listStoreProducts } from "@/lib/medusa";
+import {
+  adaptStoreProduct,
+  type MedusaStoreProduct,
+} from "@/lib/store-adapter";
 import { useVehicle } from "@/hooks/useVehicle";
 import { staggerContainer, fadeInUp } from "@/lib/animations";
 
 export function FeaturedProducts() {
   const { selected } = useVehicle();
-  const featured = products[0];
-  const secondary = products.slice(1, 5);
+  const [items, setItems] = useState<Product[] | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const raw = await listStoreProducts({ limit: 5 });
+        if (!cancelled) {
+          setItems((raw as MedusaStoreProduct[]).map(adaptStoreProduct));
+        }
+      } catch (error) {
+        console.error("[featured] failed to load live products:", error);
+        if (!cancelled) setItems([]);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Nothing live to show — hide the section rather than faking it.
+  if (items !== null && items.length === 0) return null;
+
+  const featured = items?.[0] ?? null;
+  const secondary = items?.slice(1, 5) ?? [];
 
   return (
     <section className="section-space precision-grid relative z-20 overflow-hidden bg-background">
@@ -60,12 +89,24 @@ export function FeaturedProducts() {
         </motion.div>
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 lg:gap-5">
-          <div className="md:col-span-2 lg:col-span-2 lg:row-span-2">
-            <ProductCard product={featured} featured />
-          </div>
-          {secondary.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
+          {featured ? (
+            <div className="md:col-span-2 lg:col-span-2 lg:row-span-2">
+              <ProductCard product={featured} featured />
+            </div>
+          ) : (
+            <div className="h-96 animate-pulse rounded-sm bg-raised md:col-span-2 lg:col-span-2 lg:row-span-2" />
+          )}
+          {secondary.length > 0
+            ? secondary.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))
+            : items === null &&
+              [0, 1, 2, 3].map((i) => (
+                <div
+                  key={i}
+                  className="h-96 animate-pulse rounded-sm bg-raised"
+                />
+              ))}
         </div>
       </div>
     </section>
