@@ -12,5 +12,13 @@ COPY medusa-config.js babel.config.js ./
 COPY data/ ./data/
 COPY src/ ./src/
 
+# Prebuild the admin dashboard so `medusa start` can serve it statically
+# (avoids the dev-server webpack pipeline entirely).
+# Override once the public backend URL is known, e.g.:
+#   docker compose build --build-arg MEDUSA_ADMIN_BACKEND=https://api.example.com medusa
+ARG MEDUSA_ADMIN_BACKEND=http://localhost:9000
+ENV NODE_ENV=production
+RUN ./node_modules/.bin/medusa-admin build --path /admin --backend "$MEDUSA_ADMIN_BACKEND"
+
 # Run migrations and seed on first start, then start server
-CMD ["sh", "-c", "medusa migrations run && medusa user -e admin@cartunez.in -p CartunezAdmin2024! || true && medusa develop --host 0.0.0.0"]
+CMD ["sh", "-c", "medusa migrations run && medusa user -e admin@cartunez.in -p CartunezAdmin2024! || true && medusa start -H 0.0.0.0 -p 9000"]

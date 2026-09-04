@@ -52,6 +52,11 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.medusa
+      # Bake the public backend URL into the admin UI. Rebuild with your
+      # value once nginx exposes the backend, e.g.:
+      #   docker compose build --build-arg MEDUSA_ADMIN_BACKEND=https://api.example.com medusa
+      # args:
+      #   MEDUSA_ADMIN_BACKEND: https://api.example.com
     container_name: cartunez-medusa
     restart: unless-stopped
     ports:
