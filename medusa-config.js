@@ -7,6 +7,12 @@ module.exports = {
     jwt_secret: process.env.JWT_SECRET || "supersecret",
     cookie_secret: process.env.COOKIE_SECRET || "supersecret",
   },
+  modules: {
+    eventBus: {
+      resolve: "@medusajs/event-bus-local",
+      options: {},
+    },
+  },
   plugins: [
     {
       resolve: `medusa-fulfillment-manual`,

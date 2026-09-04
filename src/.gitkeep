@@ -1,0 +1,5 @@
+// Placeholder so the `src/` directory is tracked by git. Medusa's
+// `develop`/`build` commands run `babel src -d dist`, which fails when the
+// directory is missing. Dotfiles are ignored by both babel and Medusa's
+// module loaders, so this file is never compiled or loaded. Add custom
+// backend code (api/, models/, services/, ...) here as needed.

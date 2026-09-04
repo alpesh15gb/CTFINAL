@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@medusajs/admin": "^7.1.18",
+    "@medusajs/event-bus-local": "^1.9.9",
     "@medusajs/medusa": "^1.20.11",
     "@radix-ui/react-accordion": "^1.2.0",
     "@radix-ui/react-dialog": "^1.1.1",
@@ -45,11 +46,15 @@
     "zustand": "^4.5.5"
   },
   "devDependencies": {
+    "@babel/cli": "^7.24.7",
+    "@babel/core": "^7.24.7",
+    "@babel/preset-typescript": "^7.24.7",
     "@types/node": "^22.5.0",
     "@types/react": "^18.3.4",
     "@types/react-dom": "^18.3.0",
     "@types/three": "^0.167.2",
     "autoprefixer": "^10.4.20",
+    "babel-preset-medusa-package": "^1.1.4",
     "postcss": "^8.4.41",
     "tailwindcss": "^3.4.10",
     "typescript": "^5.5.4"
