@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { motion, useMotionValueEvent, useScroll } from "framer-motion";
 import { ArrowRight, CarFront, Menu, Search, ShoppingBag, User, X } from "lucide-react";
@@ -27,25 +27,9 @@ export function Navbar() {
   const { totalItems } = useCart();
   const cartCount = totalItems();
 
-  const isHome = pathname === "/";
-  // Cinematic act (hero + bridge) keeps only logo/cart/menu visible
-  const [navHidden, setNavHidden] = useState(isHome);
-
-  useEffect(() => {
-    if (!isHome) return;
-    const sync = () => setNavHidden(window.scrollY < window.innerHeight * 2);
-    sync();
-    window.addEventListener("resize", sync);
-    return () => window.removeEventListener("resize", sync);
-  }, [isHome]);
-
   useMotionValueEvent(scrollY, "change", (latest) => {
     const next = latest > 32;
     setScrolled((current) => (current === next ? current : next));
-    if (isHome) {
-      const hidden = latest < window.innerHeight * 2;
-      setNavHidden((current) => (current === hidden ? current : hidden));
-    }
   });
 
   const isActive = (href: string) => {
@@ -60,22 +44,17 @@ export function Navbar() {
       transition={{ duration: 0.7, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
       className={cn(
         "fixed inset-x-0 top-0 z-50 border-b transition-all duration-500",
-        scrolled && !navHidden
-          ? "border-white/[0.09] bg-[rgba(3,4,5,0.88)] shadow-[0_18px_55px_rgba(0,0,0,0.28)] backdrop-blur-xl"
-          : "border-white/[0.06] bg-gradient-to-b from-black/70 to-transparent"
+        scrolled
+          ? "border-ink/10 bg-paper/90 shadow-[0_18px_55px_rgba(20,20,23,0.10)] backdrop-blur-xl"
+          : "border-transparent bg-gradient-to-b from-paper/85 to-transparent"
       )}
     >
-      <div
-        className={cn(
-          "hidden overflow-hidden bg-black/30 transition-all duration-500 lg:block",
-          navHidden ? "h-0" : "h-7 border-b border-white/[0.06]"
-        )}
-      >
-        <div className="site-container flex h-full items-center justify-between font-mono text-[9px] uppercase tracking-[0.2em] text-silver-muted">
+      <div className="hidden overflow-hidden bg-ink/[0.04] transition-all duration-500 lg:block">
+        <div className="site-container flex h-7 items-center justify-between font-mono text-[9px] uppercase tracking-[0.2em] text-ink-mute">
           <span>Vehicle-specific upgrades / verified fitment</span>
           <div className="flex items-center gap-6">
             <span>India / INR</span>
-            <Link href="/contact" className="transition-colors hover:text-white">
+            <Link href="/contact" className="transition-colors hover:text-ink">
               Expert consultation
             </Link>
           </div>
@@ -84,21 +63,20 @@ export function Navbar() {
 
       <div className="site-container flex h-[76px] items-center justify-between lg:h-20">
         <Link href="/" className="relative z-10 flex min-h-11 items-center" aria-label="Cartunez home">
-          <Image
-            src="/logo/cartunez-logo.png"
-            alt="Cartunez"
-            width={156}
-            height={54}
-            className="h-10 w-auto object-contain lg:h-11"
-            priority
-          />
+          <span className="flex items-center rounded-md bg-[#0a0a0b] p-1.5">
+            <Image
+              src="/logo/cartunez-logo.png"
+              alt="Cartunez"
+              width={156}
+              height={54}
+              className="h-8 w-auto object-contain lg:h-9"
+              priority
+            />
+          </span>
         </Link>
 
         <nav
-          className={cn(
-            "hidden items-center gap-9 transition-opacity duration-500 lg:flex",
-            navHidden ? "pointer-events-none opacity-0" : "opacity-100"
-          )}
+          className="hidden items-center gap-9 transition-opacity duration-500 lg:flex"
           aria-label="Main navigation"
         >
           {navLinks.map((link, index) => (
@@ -108,14 +86,14 @@ export function Navbar() {
               aria-current={isActive(link.href) ? "page" : undefined}
               className={cn(
                 "group relative flex min-h-11 items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.18em] transition-colors",
-                isActive(link.href) ? "text-white" : "text-silver hover:text-foreground"
+                isActive(link.href) ? "text-ink" : "text-ink-soft hover:text-ink"
               )}
             >
-              <span className="text-[8px] text-silver-muted/60">0{index + 1}</span>
+              <span className="text-[8px] text-ink-mute/70">0{index + 1}</span>
               {link.label}
               <span
                 className={cn(
-                  "absolute inset-x-0 bottom-0 h-px origin-left bg-white transition-transform duration-300",
+                  "absolute inset-x-0 bottom-0 h-[2px] origin-left bg-red transition-transform duration-300",
                   isActive(link.href) ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
                 )}
               />
@@ -126,7 +104,7 @@ export function Navbar() {
         <div className="flex items-center gap-1.5 md:gap-2">
           <Link
             href="/shop"
-            className="hidden h-11 w-11 items-center justify-center rounded-sm border border-transparent text-silver transition-all hover:border-border hover:bg-white/[0.04] hover:text-white md:flex"
+            className="hidden h-11 w-11 items-center justify-center rounded-sm border border-transparent text-ink-soft transition-all hover:border-ink/15 hover:bg-ink/[0.05] hover:text-ink md:flex"
             aria-label="Search products"
           >
             <Search className="h-[18px] w-[18px]" />
@@ -134,7 +112,7 @@ export function Navbar() {
 
           <Link
             href="/account"
-            className="hidden h-11 w-11 items-center justify-center rounded-sm border border-transparent text-silver transition-all hover:border-border hover:bg-white/[0.04] hover:text-white md:flex"
+            className="hidden h-11 w-11 items-center justify-center rounded-sm border border-transparent text-ink-soft transition-all hover:border-ink/15 hover:bg-ink/[0.05] hover:text-ink md:flex"
             aria-label="Account"
           >
             <User className="h-[18px] w-[18px]" />
@@ -143,25 +121,19 @@ export function Navbar() {
           <CartSheet>
             <button
               type="button"
-              className="relative flex h-11 w-11 cursor-pointer items-center justify-center rounded-sm border border-transparent text-silver transition-all hover:border-border hover:bg-white/[0.04] hover:text-white"
+              className="relative flex h-11 w-11 cursor-pointer items-center justify-center rounded-sm border border-transparent text-ink-soft transition-all hover:border-ink/15 hover:bg-ink/[0.05] hover:text-ink"
               aria-label={`Cart with ${cartCount} item${cartCount === 1 ? "" : "s"}`}
             >
               <ShoppingBag className="h-[18px] w-[18px]" />
               {cartCount > 0 && (
-                <span className="absolute right-0.5 top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-white px-1 font-mono text-[8px] font-bold text-black">
+                <span className="absolute right-0.5 top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-red px-1 font-mono text-[8px] font-bold text-white">
                   {cartCount}
                 </span>
               )}
             </button>
           </CartSheet>
 
-          <Button
-            asChild
-            className={cn(
-              "ml-2 hidden transition-opacity duration-500 xl:inline-flex",
-              navHidden && "pointer-events-none opacity-0"
-            )}
-          >
+          <Button asChild className="ml-2 hidden xl:inline-flex">
             <Link href="/#vehicle-selector">
               Match my vehicle <ArrowRight className="h-4 w-4" />
             </Link>
@@ -175,18 +147,19 @@ export function Navbar() {
             </SheetTrigger>
             <SheetContent
               side="right"
-              className="w-full border-border/70 bg-[rgba(5,7,9,0.97)] p-0 backdrop-blur-2xl sm:max-w-md"
+              className="w-full border-ink/10 bg-paper p-0 sm:max-w-md"
             >
-              <div className="precision-grid pointer-events-none absolute inset-0 opacity-60" />
               <div className="relative flex h-full flex-col px-6">
-                <div className="flex h-24 items-center justify-between border-b border-border">
-                  <Image
-                    src="/logo/cartunez-logo.png"
-                    alt="Cartunez"
-                    width={140}
-                    height={48}
-                    className="h-10 w-auto object-contain"
-                  />
+                <div className="flex h-24 items-center justify-between border-b border-ink/10">
+                  <span className="flex items-center rounded-md bg-[#0a0a0b] p-1.5">
+                    <Image
+                      src="/logo/cartunez-logo.png"
+                      alt="Cartunez"
+                      width={140}
+                      height={48}
+                      className="h-9 w-auto object-contain"
+                    />
+                  </span>
                   <SheetClose asChild>
                     <Button variant="ghost" size="icon" aria-label="Close menu">
                       <X className="h-5 w-5" />
@@ -199,25 +172,25 @@ export function Navbar() {
                     <SheetClose key={link.label} asChild>
                       <Link
                         href={link.href}
-                        className="group flex min-h-16 items-center justify-between border-b border-border/70 py-4 font-display text-4xl font-semibold uppercase tracking-tight text-foreground transition-colors hover:text-white"
+                        className="group flex min-h-16 items-center justify-between border-b border-ink/10 py-4 font-display text-4xl font-bold uppercase tracking-tight text-ink transition-colors hover:text-red"
                       >
-                        <span className="font-mono text-[10px] tracking-widest text-silver-muted">0{index + 1}</span>
+                        <span className="font-mono text-[10px] tracking-widest text-ink-mute">0{index + 1}</span>
                         {link.label}
-                        <ArrowRight className="h-5 w-5 text-silver-muted transition-transform group-hover:translate-x-1 group-hover:text-white" />
+                        <ArrowRight className="h-5 w-5 text-ink-mute transition-transform group-hover:translate-x-1 group-hover:text-red" />
                       </Link>
                     </SheetClose>
                   ))}
                 </nav>
 
-                <div className="space-y-4 border-t border-border py-7">
+                <div className="space-y-4 border-t border-ink/10 py-7">
                   <Button asChild size="lg" className="w-full">
                     <Link href="/#vehicle-selector">
                       <CarFront className="h-4 w-4" /> Match my vehicle
                     </Link>
                   </Button>
-                  <div className="flex items-center justify-center gap-8 font-mono text-[10px] uppercase tracking-wider text-silver-muted">
-                      <Link href="/account" className="min-h-11 py-3 hover:text-white">Account</Link>
-                      <Link href="/cart" className="min-h-11 py-3 hover:text-white">Cart ({cartCount})</Link>
+                  <div className="flex items-center justify-center gap-8 font-mono text-[10px] uppercase tracking-wider text-ink-mute">
+                      <Link href="/account" className="min-h-11 py-3 hover:text-ink">Account</Link>
+                      <Link href="/cart" className="min-h-11 py-3 hover:text-ink">Cart ({cartCount})</Link>
                   </div>
                 </div>
               </div>

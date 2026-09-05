@@ -20,6 +20,12 @@ const config: Config = {
         "muted-foreground": "var(--muted-foreground)",
         border: "var(--border)",
         "border-muted": "var(--border-muted)",
+        ink: {
+          DEFAULT: "#141417",
+          soft: "#3a3f47",
+          mute: "#6b7280",
+        },
+        paper: "#f4f2ed",
         obsidian: {
           DEFAULT: "#08080A",
           deep: "#040507",
@@ -45,11 +51,13 @@ const config: Config = {
         },
         cyan: {
           DEFAULT: "var(--cyan)",
+          deep: "var(--cyan-deep)",
           light: "var(--cyan-light)",
           glow: "var(--cyan-glow)",
         },
         red: {
           DEFAULT: "var(--red)",
+          deep: "var(--red-deep)",
           light: "var(--red-light)",
           glow: "var(--red-glow)",
         },
@@ -124,6 +132,10 @@ const config: Config = {
           "0%": { backgroundPosition: "-200% 0" },
           "100%": { backgroundPosition: "200% 0" },
         },
+        marquee: {
+          from: { transform: "translateX(0)" },
+          to: { transform: "translateX(-50%)" },
+        },
         "accordion-down": {
           from: { height: "0" },
           to: { height: "var(--radix-accordion-content-height)" },
@@ -139,6 +151,7 @@ const config: Config = {
         "scan-line": "scan-line 3s linear infinite",
         "radar-sweep": "radar-sweep 4s linear infinite",
         shimmer: "shimmer 2.5s linear infinite",
+        marquee: "marquee 32s linear infinite",
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
       },

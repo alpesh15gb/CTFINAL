@@ -3,44 +3,46 @@
 @tailwind utilities;
 
 :root {
-  color-scheme: dark;
+  color-scheme: light;
 
-  /* APEX-grade black stack — black + white + car body + light */
-  --background: #020202;
-  --foreground: #f5f5f2;
-  --raised: #090909;
-  --surface: #0a0a0b;
-  --elevated: #101214;
-  --surface-hover: #15181b;
-  --muted: #1a1e22;
-  --muted-foreground: #9aa3aa;
+  /* DAYLIGHT STUDIO — paper + ink + signal red/cyan */
+  --background: #f4f2ed;
+  --foreground: #141417;
+  --raised: #ffffff;
+  --surface: #ece9e0;
+  --elevated: #ffffff;
+  --surface-hover: #e5e1d5;
+  --muted: #e0dccc;
+  --muted-foreground: #5b6470;
 
-  /* Brand Accents (kept for commerce components; cinematic homepage uses white/red only) */
-  --cyan: #31cfff;
-  --cyan-light: #75e0ff;
-  --cyan-glow: rgba(49, 207, 255, 0.25);
+  /* Brand Accents */
+  --cyan: #2fb3f0;
+  --cyan-deep: #0369a1;
+  --cyan-light: #8fd8fa;
+  --cyan-glow: rgba(47, 179, 240, 0.22);
   --red: #e32219;
+  --red-deep: #b3120b;
   --red-light: #f04438;
-  --red-glow: rgba(227, 34, 25, 0.2);
+  --red-glow: rgba(227, 34, 25, 0.16);
 
-  /* Silver Scale */
-  --silver: #d2d7da;
-  --silver-muted: #929ba2;
+  /* Silver Scale (ink-tinted for light theme) */
+  --silver: #3a3f47;
+  --silver-muted: #6b7280;
 
   /* Borders */
-  --border: rgba(255, 255, 255, 0.1);
-  --border-muted: rgba(255, 255, 255, 0.055);
+  --border: rgba(20, 20, 23, 0.14);
+  --border-muted: rgba(20, 20, 23, 0.07);
 
   /* Mapped shadcn tokens */
-  --primary: #31cfff;
-  --primary-foreground: #000000;
-  --secondary: #111519;
-  --secondary-foreground: #f2f2f2;
-  --accent: #111519;
-  --accent-foreground: #f2f2f2;
+  --primary: #e32219;
+  --primary-foreground: #ffffff;
+  --secondary: #141417;
+  --secondary-foreground: #f4f2ed;
+  --accent: #e9e5d8;
+  --accent-foreground: #141417;
   --destructive: #c72727;
-  --destructive-foreground: #f2f2f2;
-  --ring: #f5f5f2;
+  --destructive-foreground: #ffffff;
+  --ring: #e32219;
 
   /* Radii */
   --radius-sm: 0.25rem;
@@ -58,7 +60,7 @@
   --space-3xl: 5rem;
 
   /* Font stacks (overridden by next/font in layout) */
-  --font-display: "Barlow Condensed", system-ui, sans-serif;
+  --font-display: "Syncopate", system-ui, sans-serif;
   --font-sans: "Barlow", system-ui, sans-serif;
   --font-mono: "Space Mono", ui-monospace, monospace;
 }
@@ -70,7 +72,7 @@
 
   html {
     scroll-behavior: auto;
-    background: #020202;
+    background: #f4f2ed;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
