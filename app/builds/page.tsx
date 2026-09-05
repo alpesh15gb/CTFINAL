@@ -61,7 +61,7 @@ export default function BuildsPage() {
                     <span className="h-1 w-1 rounded-full bg-silver-muted" />
                     <span>{build.vehicle}</span>
                   </div>
-                  <h2 className="mt-2 font-display text-2xl font-semibold uppercase text-foreground transition-colors group-hover:text-cyan">
+                  <h2 className="mt-2 font-display text-2xl font-semibold uppercase text-foreground transition-colors group-hover:text-cyan-deep">
                     {build.title}
                   </h2>
                   <p className="mt-3 line-clamp-2 text-sm text-silver-muted">
@@ -69,10 +69,10 @@ export default function BuildsPage() {
                   </p>
                   <div className="mt-4 flex items-center justify-between">
                     <span className="flex items-center gap-2 text-sm text-silver-muted">
-                      <Wrench className="h-4 w-4 text-cyan" />
+                      <Wrench className="h-4 w-4 text-cyan-deep" />
                       {build.upgradeCount} upgrades
                     </span>
-                    <span className="inline-flex items-center gap-1 text-sm font-medium text-cyan">
+                    <span className="inline-flex items-center gap-1 text-sm font-medium text-cyan-deep">
                       View Build <ArrowRight className="h-3.5 w-3.5" />
                     </span>
                   </div>

@@ -107,7 +107,7 @@ export default function BuildDetailPage() {
 
             <div className="rounded-lg border border-border bg-raised p-6">
               <div className="flex items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full border border-cyan/40 text-cyan">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full border border-cyan-deep/40 text-cyan-deep">
                   <Wrench className="h-5 w-5" />
                 </div>
                 <div>
@@ -140,7 +140,7 @@ export default function BuildDetailPage() {
                     key={idx}
                     className="flex items-center gap-2 text-sm text-silver-muted"
                   >
-                    <span className="text-cyan">{String(idx + 1).padStart(2, "0")}</span>
+                    <span className="text-cyan-deep">{String(idx + 1).padStart(2, "0")}</span>
                     {upgrade}
                   </li>
                 ))}
@@ -150,7 +150,7 @@ export default function BuildDetailPage() {
             <Button
               asChild
               size="lg"
-              className="w-full gap-2 bg-cyan text-black hover:bg-cyan-light md:w-auto"
+              className="w-full gap-2 bg-red text-white hover:bg-red-deep md:w-auto"
             >
               <Link href="/shop" className="gap-2">
                 Shop This Build <ArrowRight className="h-4 w-4" />

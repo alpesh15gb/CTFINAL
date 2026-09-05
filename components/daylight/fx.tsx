@@ -131,6 +131,7 @@ export function Reveal({
   if (reduce) return <div className={className}>{children}</div>;
   return (
     <motion.div
+      data-reveal
       initial={{ opacity: 0, y }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-70px" }}

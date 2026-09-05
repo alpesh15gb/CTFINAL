@@ -28,7 +28,7 @@ export default function ContactPage() {
         >
           <motion.span
             variants={fadeInUp}
-            className="mb-3 inline-block text-xs font-semibold uppercase tracking-[0.25em] text-cyan"
+            className="mb-3 inline-block text-xs font-semibold uppercase tracking-[0.25em] text-cyan-deep"
           >
             Contact
           </motion.span>
@@ -43,7 +43,7 @@ export default function ContactPage() {
         <div className="grid gap-12 lg:grid-cols-2">
           <motion.div variants={fadeInUp} className="space-y-8">
             <div className="flex items-start gap-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full border border-border text-cyan">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full border border-border text-cyan-deep">
                 <MapPin className="h-5 w-5" />
               </div>
               <div>
@@ -59,7 +59,7 @@ export default function ContactPage() {
             </div>
 
             <div className="flex items-start gap-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full border border-border text-cyan">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full border border-border text-cyan-deep">
                 <Phone className="h-5 w-5" />
               </div>
               <div>
@@ -71,7 +71,7 @@ export default function ContactPage() {
             </div>
 
             <div className="flex items-start gap-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full border border-border text-cyan">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full border border-border text-cyan-deep">
                 <Mail className="h-5 w-5" />
               </div>
               <div>
@@ -144,7 +144,7 @@ export default function ContactPage() {
                 </div>
                 <Button
                   type="submit"
-                  className="w-full gap-2 bg-cyan text-black hover:bg-cyan-light"
+                  className="w-full gap-2 bg-red text-white hover:bg-red-deep"
                 >
                   Send Message <Send className="h-4 w-4" />
                 </Button>

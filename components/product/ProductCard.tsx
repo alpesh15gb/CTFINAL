@@ -139,7 +139,7 @@ export function ProductCard({ product, featured = false, wide = false }: Product
 
       <div className={cn("flex flex-1 flex-col p-5 md:p-6", wide && "md:justify-center md:p-8")}>
         <div className="flex items-center justify-between gap-3">
-          <p className="font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-cyan">
+          <p className="font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-cyan-deep">
             {product.category}
           </p>
           {product.reviewCount > 0 && (
@@ -157,7 +157,7 @@ export function ProductCard({ product, featured = false, wide = false }: Product
         >
           <h3
             className={cn(
-              "font-display text-2xl font-semibold uppercase leading-[0.95] tracking-tight text-foreground transition-colors group-hover:text-cyan",
+              "font-display text-2xl font-semibold uppercase leading-[0.95] tracking-tight text-foreground transition-colors group-hover:text-cyan-deep",
               featured && "md:text-4xl"
             )}
           >

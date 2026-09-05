@@ -194,7 +194,7 @@ export default function ProductDetailPage() {
                   onClick={() => setActiveImage(idx)}
                   className={`relative h-20 w-20 overflow-hidden rounded-md border ${
                     activeImage === idx
-                      ? "border-cyan"
+                      ? "border-cyan-deep"
                       : "border-border hover:border-silver"
                   }`}
                 >
@@ -213,7 +213,7 @@ export default function ProductDetailPage() {
           {/* Details */}
           <motion.div variants={fadeInUp} className="space-y-6">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-deep">
                 {product.category}
               </p>
               <h1 className="mt-2 font-display text-4xl font-bold uppercase leading-tight text-foreground md:text-5xl">
@@ -221,7 +221,7 @@ export default function ProductDetailPage() {
               </h1>
               <div className="mt-3 flex items-center gap-3">
                 <div className="flex items-center gap-1">
-                  <Star className="h-4 w-4 fill-cyan text-cyan" />
+                  <Star className="h-4 w-4 fill-cyan text-cyan-deep" />
                   <span className="text-sm font-medium text-foreground">
                     {product.rating}
                   </span>
@@ -236,7 +236,7 @@ export default function ProductDetailPage() {
             <div
               className={`rounded-lg border p-4 ${
                 fits === true
-                  ? "border-cyan/40 bg-cyan/10"
+                  ? "border-cyan-deep/40 bg-cyan/10"
                   : fits === false
                   ? "border-red/40 bg-red/10"
                   : "border-border bg-raised"
@@ -244,7 +244,7 @@ export default function ProductDetailPage() {
             >
               <div className="flex items-start gap-3">
                 {fits === true ? (
-                  <Check className="h-5 w-5 text-cyan" />
+                  <Check className="h-5 w-5 text-cyan-deep" />
                 ) : fits === false ? (
                   <X className="h-5 w-5 text-red" />
                 ) : (
@@ -294,7 +294,7 @@ export default function ProductDetailPage() {
                 <button
                   type="button"
                   onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                  className="flex h-11 w-11 items-center justify-center text-foreground hover:text-cyan"
+                  className="flex h-11 w-11 items-center justify-center text-foreground hover:text-cyan-deep"
                 >
                   <Minus className="h-4 w-4" />
                 </button>
@@ -304,7 +304,7 @@ export default function ProductDetailPage() {
                 <button
                   type="button"
                   onClick={() => setQuantity((q) => q + 1)}
-                  className="flex h-11 w-11 items-center justify-center text-foreground hover:text-cyan"
+                  className="flex h-11 w-11 items-center justify-center text-foreground hover:text-cyan-deep"
                 >
                   <Plus className="h-4 w-4" />
                 </button>
@@ -330,7 +330,7 @@ export default function ProductDetailPage() {
               <Button
                 size="icon"
                 variant="outline"
-                className="h-12 w-12 border-border bg-transparent text-foreground hover:border-cyan hover:text-cyan"
+                className="h-12 w-12 border-border bg-transparent text-foreground hover:border-cyan-deep hover:text-cyan-deep"
               >
                 <Heart className="h-5 w-5" />
               </Button>
@@ -349,7 +349,7 @@ export default function ProductDetailPage() {
                     key={feature}
                     className="flex items-center gap-2 text-sm text-silver-muted"
                   >
-                    <Check className="h-3.5 w-3.5 text-cyan" />
+                    <Check className="h-3.5 w-3.5 text-cyan-deep" />
                     {feature}
                   </li>
                 ))}
@@ -358,10 +358,10 @@ export default function ProductDetailPage() {
 
             <div className="flex flex-wrap gap-4 text-sm text-silver-muted">
               <span className="inline-flex items-center gap-2">
-                <Truck className="h-4 w-4 text-cyan" /> Free shipping over ₹5,000
+                <Truck className="h-4 w-4 text-cyan-deep" /> Free shipping over ₹5,000
               </span>
               <span className="inline-flex items-center gap-2">
-                <ShieldCheck className="h-4 w-4 text-cyan" /> 2-year warranty
+                <ShieldCheck className="h-4 w-4 text-cyan-deep" /> 2-year warranty
               </span>
             </div>
           </motion.div>

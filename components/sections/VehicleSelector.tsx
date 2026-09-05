@@ -61,7 +61,7 @@ export function VehicleSelector() {
       id="vehicle-selector"
       className="relative z-30 overflow-hidden border-b border-border bg-background py-24 md:py-32 lg:py-40"
     >
-      <div className="precision-grid pointer-events-none absolute inset-0 opacity-50" />
+      <div className="precision-grid-ink pointer-events-none absolute inset-0 opacity-60" />
       <div className="pointer-events-none absolute left-0 top-1/3 h-96 w-96 -translate-x-1/2 rounded-full bg-cyan/[0.055] blur-[100px]" />
       <div className="site-container relative">
         <motion.div
@@ -73,7 +73,8 @@ export function VehicleSelector() {
         >
           {/* Copy */}
           <div className="max-w-xl">
-            <motion.span variants={fadeInUp} className="technical-label mb-5">
+            <motion.span variants={fadeInUp} className="mb-5 inline-flex items-center gap-3 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-ink-mute md:text-[11px]">
+              <span aria-hidden className="inline-block h-px w-8 bg-current opacity-60" />
               <CarFront className="h-4 w-4" />
               01 / Vehicle fitment
             </motion.span>
@@ -104,7 +105,7 @@ export function VehicleSelector() {
                 <p className="mt-2 font-display text-3xl font-semibold uppercase text-foreground">
                   {selected.year} {selected.brand} {selected.model} {selected.variant}
                 </p>
-                <Button asChild className="mt-4 bg-cyan text-black hover:bg-cyan-light">
+                <Button asChild className="mt-4 bg-red text-white hover:bg-red-deep">
                   <Link href="/shop" className="gap-2">
                     Find Upgrades <ArrowRight className="h-4 w-4" />
                   </Link>
@@ -116,9 +117,9 @@ export function VehicleSelector() {
           {/* Selector */}
           <motion.div
             variants={staggerContainer}
-            className="glass-panel relative space-y-8 overflow-hidden rounded-sm p-6 md:p-10 lg:p-12"
+            className="relative space-y-8 overflow-hidden rounded-sm border border-ink/10 bg-raised p-6 shadow-[0_24px_70px_rgba(20,20,23,0.10)] md:p-10 lg:p-12"
           >
-            <div className="precision-grid pointer-events-none absolute inset-0 opacity-35" />
+            <div className="precision-grid-ink pointer-events-none absolute inset-0 opacity-40" />
             {/* Brand */}
             <Step label="01" title="Brand">
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
@@ -216,7 +217,7 @@ function Step({
   return (
     <motion.div variants={fadeInUp} className={cn("relative space-y-3", disabled && "opacity-45")}>
       <div className="flex items-center gap-3">
-        <span className="font-mono text-[9px] font-bold tracking-widest text-cyan">{label}</span>
+        <span className="font-mono text-[9px] font-bold tracking-widest text-cyan-deep">{label}</span>
         <span className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-foreground">
           {title}
         </span>
@@ -246,9 +247,9 @@ function OptionButton({
       className={cn(
         "relative flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-sm border px-4 py-3 font-mono text-[10px] font-bold uppercase tracking-[0.12em] transition-all duration-300",
         active
-          ? "border-cyan bg-cyan/[0.11] text-cyan shadow-[inset_0_0_24px_rgba(49,207,255,0.05)]"
-          : "border-border bg-black/20 text-silver hover:border-silver/60 hover:bg-white/[0.035] hover:text-foreground",
-        disabled && "cursor-not-allowed opacity-40 hover:border-border hover:text-silver"
+          ? "border-cyan-deep bg-cyan-deep/10 text-cyan-deep shadow-[inset_0_0_24px_rgba(3,105,161,0.08)]"
+          : "border-border bg-ink/[0.04] text-ink-soft hover:border-ink/30 hover:bg-ink/[0.07] hover:text-ink",
+        disabled && "cursor-not-allowed opacity-40 hover:border-border hover:text-ink-soft"
       )}
     >
       {active && <Check className="h-3.5 w-3.5" />}

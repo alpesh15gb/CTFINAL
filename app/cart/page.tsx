@@ -94,12 +94,12 @@ export default function CartPage() {
                           </p>
                           <Link
                             href={`/products/${item.product.slug}`}
-                            className="font-display text-lg font-semibold uppercase text-foreground transition-colors hover:text-cyan"
+                            className="font-display text-lg font-semibold uppercase text-foreground transition-colors hover:text-cyan-deep"
                           >
                             {item.product.name}
                           </Link>
                           {fits === true && (
-                            <p className="mt-1 inline-flex items-center gap-1 text-xs text-cyan">
+                            <p className="mt-1 inline-flex items-center gap-1 text-xs text-cyan-deep">
                               <Check className="h-3 w-3" /> Fits your vehicle
                             </p>
                           )}
@@ -122,7 +122,7 @@ export default function CartPage() {
                             onClick={() =>
                               updateQuantity(item.product.id, item.quantity - 1)
                             }
-                            className="flex h-9 w-9 items-center justify-center text-foreground hover:text-cyan"
+                            className="flex h-9 w-9 items-center justify-center text-foreground hover:text-cyan-deep"
                           >
                             <Minus className="h-3.5 w-3.5" />
                           </button>
@@ -134,7 +134,7 @@ export default function CartPage() {
                             onClick={() =>
                               updateQuantity(item.product.id, item.quantity + 1)
                             }
-                            className="flex h-9 w-9 items-center justify-center text-foreground hover:text-cyan"
+                            className="flex h-9 w-9 items-center justify-center text-foreground hover:text-cyan-deep"
                           >
                             <Plus className="h-3.5 w-3.5" />
                           </button>
@@ -188,7 +188,7 @@ export default function CartPage() {
               <Button
                 asChild
                 variant="outline"
-                className="mt-3 w-full border-border bg-transparent text-foreground hover:border-cyan hover:text-cyan"
+                className="mt-3 w-full border-border bg-transparent text-foreground hover:border-cyan-deep hover:text-cyan-deep"
               >
                 <Link href="/shop" className="gap-2">
                   <ArrowLeft className="h-4 w-4" /> Continue Shopping

@@ -170,6 +170,15 @@
     mask-image: linear-gradient(to bottom, black, transparent 88%);
   }
 
+  /* Ink grid for light surfaces (VehicleSelector panel). */
+  .precision-grid-ink {
+    background-image:
+      linear-gradient(rgba(20, 20, 23, 0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(20, 20, 23, 0.05) 1px, transparent 1px);
+    background-size: 64px 64px;
+    mask-image: linear-gradient(to bottom, black, transparent 88%);
+  }
+
   .premium-card {
     border: 1px solid var(--border);
     background: linear-gradient(145deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.012));

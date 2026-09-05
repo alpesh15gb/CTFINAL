@@ -38,7 +38,7 @@ export function CartSheet({ children }: { children: React.ReactNode }) {
             <ShoppingBag className="h-12 w-12 text-silver-muted" />
             <p className="mt-4 text-silver-muted">Your cart is empty.</p>
             <SheetClose asChild>
-              <Button asChild className="mt-4 bg-cyan text-black hover:bg-cyan-light">
+              <Button asChild className="mt-4 bg-red text-white hover:bg-red-deep">
                 <Link href="/shop">Shop Now</Link>
               </Button>
             </SheetClose>
@@ -69,12 +69,12 @@ export function CartSheet({ children }: { children: React.ReactNode }) {
                         <div>
                           <Link
                             href={`/products/${item.product.slug}`}
-                            className="font-display text-sm font-semibold uppercase leading-tight text-foreground transition-colors hover:text-cyan"
+                            className="font-display text-sm font-semibold uppercase leading-tight text-foreground transition-colors hover:text-cyan-deep"
                           >
                             {item.product.name}
                           </Link>
                           {fits === true && (
-                            <p className="mt-1 inline-flex items-center gap-1 text-[10px] text-cyan">
+                            <p className="mt-1 inline-flex items-center gap-1 text-[10px] text-cyan-deep">
                               <Check className="h-3 w-3" /> Fits
                             </p>
                           )}
@@ -91,7 +91,7 @@ export function CartSheet({ children }: { children: React.ReactNode }) {
                               onClick={() =>
                                 updateQuantity(item.product.id, item.quantity - 1)
                               }
-                              className="flex h-7 w-7 items-center justify-center text-foreground hover:text-cyan"
+                              className="flex h-7 w-7 items-center justify-center text-foreground hover:text-cyan-deep"
                             >
                               <Minus className="h-3 w-3" />
                             </button>
@@ -103,7 +103,7 @@ export function CartSheet({ children }: { children: React.ReactNode }) {
                               onClick={() =>
                                 updateQuantity(item.product.id, item.quantity + 1)
                               }
-                              className="flex h-7 w-7 items-center justify-center text-foreground hover:text-cyan"
+                              className="flex h-7 w-7 items-center justify-center text-foreground hover:text-cyan-deep"
                             >
                               <Plus className="h-3 w-3" />
                             </button>
@@ -135,7 +135,7 @@ export function CartSheet({ children }: { children: React.ReactNode }) {
                 </span>
               </div>
               <SheetClose asChild>
-                <Button asChild className="w-full gap-2 bg-cyan text-black hover:bg-cyan-light">
+                <Button asChild className="w-full gap-2 bg-red text-white hover:bg-red-deep">
                   <Link href="/cart">
                     Checkout <ArrowRight className="h-4 w-4" />
                   </Link>
@@ -144,7 +144,7 @@ export function CartSheet({ children }: { children: React.ReactNode }) {
               <SheetClose asChild>
                 <Button
                   variant="outline"
-                  className="w-full border-border bg-transparent text-foreground hover:border-cyan hover:text-cyan"
+                  className="w-full border-border bg-transparent text-foreground hover:border-cyan-deep hover:text-cyan-deep"
                 >
                   Continue Shopping
                 </Button>

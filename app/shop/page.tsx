@@ -244,7 +244,7 @@ function ShopContent() {
               className="mt-4 flex flex-col gap-4 rounded-lg border border-border bg-raised p-4 md:flex-row md:items-center md:justify-between"
             >
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full border border-cyan/40 text-cyan">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full border border-cyan-deep/40 text-cyan-deep">
                   <CarFront className="h-5 w-5" />
                 </div>
                 <div>
@@ -267,7 +267,7 @@ function ShopContent() {
                   className={
                     compatibleOnly
                       ? "bg-cyan text-black hover:bg-cyan-light"
-                      : "border-border bg-transparent text-foreground hover:border-cyan hover:text-cyan"
+                      : "border-border bg-transparent text-foreground hover:border-cyan-deep hover:text-cyan-deep"
                   }
                 >
                   Fits {selected.model} only
@@ -293,7 +293,7 @@ function ShopContent() {
               </span>
               <Link
                 href="/#vehicle-selector"
-                className="inline-flex items-center gap-1 text-sm font-medium text-cyan hover:underline"
+                className="inline-flex items-center gap-1 text-sm font-medium text-cyan-deep hover:underline"
               >
                 Find My Car <ArrowRight className="h-3 w-3" />
               </Link>
@@ -338,7 +338,7 @@ function ShopContent() {
               <SheetTrigger asChild>
                 <Button
                   variant="outline"
-                  className="border-border bg-transparent text-foreground hover:border-cyan hover:text-cyan md:hidden"
+                  className="border-border bg-transparent text-foreground hover:border-cyan-deep hover:text-cyan-deep md:hidden"
                 >
                   <SlidersHorizontal className="mr-2 h-4 w-4" />
                   Filters
@@ -394,7 +394,7 @@ function ShopContent() {
               {filterCount > 0 && (
                 <button
                   onClick={resetFilters}
-                  className="inline-flex items-center gap-1 text-cyan hover:underline"
+                  className="inline-flex items-center gap-1 text-cyan-deep hover:underline"
                 >
                   <X className="h-3 w-3" /> Reset filters
                 </button>
@@ -457,7 +457,7 @@ function FilterContent({
             onClick={() => updateParam("category", null)}
             className={`block w-full text-left text-sm transition-colors ${
               !activeCategory
-                ? "font-medium text-cyan"
+                ? "font-medium text-cyan-deep"
                 : "text-silver-muted hover:text-foreground"
             }`}
           >
@@ -469,7 +469,7 @@ function FilterContent({
               onClick={() => updateParam("category", cat.slug)}
               className={`block w-full text-left text-sm transition-colors ${
                 activeCategory?.slug === cat.slug
-                  ? "font-medium text-cyan"
+                  ? "font-medium text-cyan-deep"
                   : "text-silver-muted hover:text-foreground"
               }`}
             >
@@ -501,7 +501,7 @@ function FilterContent({
       <Button
         onClick={resetFilters}
         variant="outline"
-        className="w-full border-border bg-transparent text-foreground hover:border-cyan hover:text-cyan"
+        className="w-full border-border bg-transparent text-foreground hover:border-cyan-deep hover:text-cyan-deep"
       >
         Reset Filters
       </Button>

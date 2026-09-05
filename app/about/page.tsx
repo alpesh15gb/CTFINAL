@@ -15,7 +15,7 @@ export default function AboutPage() {
           className="grid gap-12 lg:grid-cols-2"
         >
           <motion.div variants={fadeInUp}>
-            <span className="mb-3 inline-block text-xs font-semibold uppercase tracking-[0.25em] text-cyan">
+            <span className="mb-3 inline-block text-xs font-semibold uppercase tracking-[0.25em] text-cyan-deep">
               About Cartunez
             </span>
             <h1 className="font-display text-5xl font-bold uppercase leading-[0.9] tracking-tight text-foreground md:text-7xl">
@@ -69,7 +69,7 @@ export default function AboutPage() {
             { value: "2yr", label: "Warranty on upgrades" },
           ].map((stat) => (
             <motion.div key={stat.label} variants={fadeInUp}>
-              <p className="font-display text-4xl font-semibold text-cyan">
+              <p className="font-display text-4xl font-semibold text-cyan-deep">
                 {stat.value}
               </p>
               <p className="mt-1 text-sm uppercase tracking-widest text-silver-muted">
