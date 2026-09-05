@@ -21,6 +21,7 @@ export interface Product {
   name: string;
   category: string;
   categorySlug: string;
+  collectionId: string | null; // medusa collection (brand) id
   price: number;
   originalPrice?: number;
   currency: string;

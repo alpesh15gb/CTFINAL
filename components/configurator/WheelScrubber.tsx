@@ -131,6 +131,7 @@ export function WheelScrubber() {
       name: activeProfile.name,
       category: "Alloy Wheels",
       categorySlug: "alloy-wheels",
+      collectionId: null,
       price: activeProfile.price,
       currency: "₹",
       rating: 4.9,

@@ -32,10 +32,17 @@ export interface MedusaStoreCategory {
   handle: string;
 }
 
+export interface MedusaStoreCollection {
+  id: string;
+  title: string;
+  handle: string;
+}
+
 export interface MedusaStoreProduct {
   id: string;
   title: string;
   handle: string;
+  collection_id?: string | null;
   description?: string | null;
   thumbnail?: string | null;
   images?: MedusaStoreImage[];
@@ -94,6 +101,7 @@ export function adaptStoreProduct(p: MedusaStoreProduct): Product {
     name: p.title,
     category: primaryCategory?.name ?? "General",
     categorySlug: primaryCategory?.handle ?? "general",
+    collectionId: p.collection_id ?? null,
     price: cheapest ? Math.round(cheapest.amount / 100) : 0,
     originalPrice: undefined,
     currency: currencySymbol(cheapest?.currency_code),

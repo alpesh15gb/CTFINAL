@@ -45,6 +45,12 @@ export async function listStoreCategories() {
   return (raw?.product_categories ?? raw?.productCategories ?? []) as unknown[];
 }
 
+export async function listStoreCollections() {
+  const res = await medusaClient.collections.list({ limit: 100 });
+  const raw = res as unknown as { collections?: unknown[] };
+  return (raw?.collections ?? []) as unknown[];
+}
+
 // Cart helpers
 export async function createCart() {
   try {

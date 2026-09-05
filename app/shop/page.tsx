@@ -31,11 +31,12 @@ import {
 } from "@/components/ui/select";
 import { ProductCard } from "@/components/product/ProductCard";
 import type { Category, Product } from "@/types";
-import { listStoreCategories, listStoreProducts } from "@/lib/medusa";
+import { listStoreCategories, listStoreCollections, listStoreProducts } from "@/lib/medusa";
 import {
   adaptStoreCategory,
   adaptStoreProduct,
   type MedusaStoreCategory,
+  type MedusaStoreCollection,
   type MedusaStoreProduct,
 } from "@/lib/store-adapter";
 import { useVehicle } from "@/hooks/useVehicle";
@@ -79,6 +80,7 @@ function ShopContent() {
   // always preferable to showing products we don't sell).
   const [catalog, setCatalog] = useState<Product[] | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [collections, setCollections] = useState<MedusaStoreCollection[]>([]);
   const [loadError, setLoadError] = useState(false);
   const [attempt, setAttempt] = useState(0);
 
@@ -88,9 +90,10 @@ function ShopContent() {
     setLoadError(false);
     (async () => {
       try {
-        const [rawProducts, rawCategories] = await Promise.all([
+        const [rawProducts, rawCategories, rawCollections] = await Promise.all([
           listStoreProducts({ limit: 100 }),
           listStoreCategories().catch(() => [] as unknown[]),
+          listStoreCollections().catch(() => [] as unknown[]),
         ]);
         if (cancelled) return;
         setCatalog(
@@ -99,6 +102,7 @@ function ShopContent() {
         setCategories(
           (rawCategories as MedusaStoreCategory[]).map(adaptStoreCategory)
         );
+        setCollections(rawCollections as MedusaStoreCollection[]);
       } catch (error) {
         console.error("[shop] failed to load live catalog:", error);
         if (!cancelled) setLoadError(true);
@@ -112,11 +116,14 @@ function ShopContent() {
   const products = useMemo(() => catalog ?? [], [catalog]);
 
   const categoryParam = searchParams.get("category");
+  const collectionParam = searchParams.get("collection");
   const sortParam = searchParams.get("sort") ?? "featured";
   const compatibleOnly = searchParams.get("compatible") === "true";
 
   const activeCategory =
     categories.find((c) => c.slug === categoryParam) ?? null;
+  const activeCollection =
+    collections.find((c) => c.handle === collectionParam) ?? null;
 
   const filtered = useMemo(() => {
     let list = [...products];
@@ -132,6 +139,10 @@ function ShopContent() {
 
     if (activeCategory) {
       list = list.filter((p) => p.categorySlug === activeCategory.slug);
+    }
+
+    if (activeCollection) {
+      list = list.filter((p) => p.collectionId === activeCollection.id);
     }
 
     if (selected && compatibleOnly) {
@@ -158,7 +169,7 @@ function ShopContent() {
     }
 
     return list;
-  }, [query, activeCategory, sortParam, selected, compatibleOnly]);
+  }, [query, activeCategory, activeCollection, sortParam, selected, compatibleOnly]);
 
   const updateParam = (key: string, value: string | null) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -206,6 +217,7 @@ function ShopContent() {
 
   const filterCount =
     (activeCategory ? 1 : 0) +
+    (activeCollection ? 1 : 0) +
     (query ? 1 : 0) +
     (compatibleOnly ? 1 : 0);
 
@@ -377,6 +389,7 @@ function ShopContent() {
             <div className="mb-4 flex items-center justify-between text-sm text-silver-muted">
               <span>
                 {filtered.length} product{filtered.length !== 1 ? "s" : ""}
+                {activeCollection ? ` by ${activeCollection.title}` : ""}
               </span>
               {filterCount > 0 && (
                 <button
