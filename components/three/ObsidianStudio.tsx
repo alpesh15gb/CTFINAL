@@ -12,6 +12,14 @@ import * as THREE from "three";
  * near-black floor. Scroll progress 0→1 drives light ramp + camera push.
  */
 
+/**
+ * Hero car model. Huracán (Eagle) body shells are the two giant
+ * PaletteMaterial002/003 meshes; 001 (BLEND) is glass; 005/006/007 carry
+ * emissive rear/front lighting and keep their original materials.
+ */
+const MODEL_PATH = "/models/huracan-eagle.glb";
+const IS_HURACAN = MODEL_PATH.includes("huracan");
+
 function smoothstep(t: number) {
   const c = Math.min(1, Math.max(0, t));
   return c * c * (3 - 2 * c);
@@ -25,6 +33,11 @@ class CanvasErrorBoundary extends Component<{ children: ReactNode }, { hasError:
   static getDerivedStateFromError() {
     return { hasError: true };
   }
+  componentDidCatch(error: unknown) {
+    // Never fail silently: a black hero is the worst possible failure mode.
+    // eslint-disable-next-line no-console
+    console.error("[ObsidianStudio] 3D hero failed:", error);
+  }
   render() {
     return this.state.hasError ? null : this.props.children;
   }
@@ -33,7 +46,7 @@ class CanvasErrorBoundary extends Component<{ children: ReactNode }, { hasError:
 function CarModel({ scrollProgress, reducedMotion }: { scrollProgress: MotionValue<number>; reducedMotion: boolean }) {
   const groupRef = useRef<THREE.Group>(null);
   const innerRef = useRef<THREE.Group>(null);
-  const { scene } = useGLTF("/models/hero-car.glb");
+  const { scene } = useGLTF(MODEL_PATH);
 
   const boundingBox = useRef(new THREE.Box3());
   const center = useRef(new THREE.Vector3());
@@ -116,7 +129,14 @@ function CarModel({ scrollProgress, reducedMotion }: { scrollProgress: MotionVal
         const name = (mesh.name || "").toLowerCase();
         const matName = (Array.isArray(mesh.material) ? mesh.material[0]?.name : mesh.material?.name || "").toLowerCase();
 
-        if (name.includes("mat_0") || name.includes("livery") || matName.includes("mat_0") || matName.includes("livery") || name.includes("body") || matName.includes("body")) {
+        if (IS_HURACAN) {
+          if (matName.includes("palettematerial002") || matName.includes("palettematerial003")) {
+            mesh.material = materials.paint;
+          } else if (matName.includes("palettematerial001")) {
+            mesh.material = materials.glass;
+          }
+          // else: keep original (emissive lights, textured trim, dark plastics)
+        } else if (name.includes("mat_0") || name.includes("livery") || matName.includes("mat_0") || matName.includes("livery") || name.includes("body") || matName.includes("body")) {
           mesh.material = materials.paint;
         } else if (name.includes("glass") || name.includes("window") || matName.includes("glass") || matName.includes("window")) {
           mesh.material = materials.glass;
@@ -149,7 +169,7 @@ function CarModel({ scrollProgress, reducedMotion }: { scrollProgress: MotionVal
       boundingBox.current.getCenter(center.current);
       boundingBox.current.getSize(size.current);
       const maxDim = Math.max(size.current.x, size.current.y, size.current.z);
-      const scale = 3.65 / maxDim;
+      const scale = 3.3 / maxDim;
       groupRef.current.scale.setScalar(scale);
       groupRef.current.position.set(0, 0, 0);
       if (innerRef.current) {
@@ -193,7 +213,8 @@ function StudioLights({ scrollProgress, reducedMotion }: { scrollProgress: Motio
     if (keyRef.current) keyRef.current.intensity = (0.04 + reveal * 1.6) * (0.12 + 0.88 * ramp);
     if (rimRef.current) rimRef.current.intensity = 0.12 + ramp * 2.4;
     if (fillRef.current) fillRef.current.intensity = 0.04 + reveal * 0.5;
-    if (stripRef.current) stripRef.current.intensity = ramp * 3.2;
+    // Ease the overhead strip off during the detail push so close paint doesn't blow out.
+    if (stripRef.current) stripRef.current.intensity = ramp * 3.2 * (1 - 0.65 * smoothstep((p - 0.62) / 0.38));
   });
 
   return (
@@ -415,4 +436,4 @@ export function ObsidianStudio({
   );
 }
 
-useGLTF.preload("/models/hero-car.glb");
+useGLTF.preload(MODEL_PATH);
