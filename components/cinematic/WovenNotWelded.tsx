@@ -2,7 +2,7 @@
 
 import { MaskText, ParallaxMedia, FilmGrain } from "./primitives";
 
-/** WOVEN, NOT WELDED — full-bleed rear three-quarter in smoke, poster statement. */
+/** PROTECT YOUR RIDE — full-bleed rear three-quarter in smoke, poster statement. */
 export function WovenNotWelded() {
   return (
     <section className="relative overflow-hidden bg-[#020202]">
@@ -18,7 +18,7 @@ export function WovenNotWelded() {
       <div className="site-container pointer-events-none absolute inset-0 flex flex-col justify-end pb-[9vh]">
         <MaskText
           className="campaign-title text-[clamp(4.5rem,11vw,12rem)]"
-          lines={["Woven,", <span key="n" className="text-white/85">not welded.</span>]}
+          lines={["Protect your ride.", <span key="n" className="text-white/85">Elevate your style.</span>]}
         />
         <p className="mt-5 font-mono text-[10px] uppercase tracking-[0.3em] text-white/55">
           Carbon monocoque / Hand-laid
