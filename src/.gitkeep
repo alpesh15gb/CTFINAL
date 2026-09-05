@@ -1,5 +1,11 @@
-// Placeholder so the `src/` directory is tracked by git. Medusa's
-// `develop`/`build` commands run `babel src -d dist`, which fails when the
-// directory is missing. Dotfiles are ignored by both babel and Medusa's
-// module loaders, so this file is never compiled or loaded. Add custom
-// backend code (api/, models/, services/, ...) here as needed.
+// Placeholder so the `src/` directory is tracked by git. Medusa's CLI runs
+// `babel src -d dist` on boot, which fails when the directory is missing.
+// Dotfiles are ignored by both babel and Medusa's module loaders, so this
+// file is never compiled or loaded. Add custom backend code
+// (api/, models/, services/, ...) here as needed.
+//
+// NOTE: do NOT add a root-level `babel.config.js` for backend sources —
+// Next.js disables its SWC compiler whenever one is present and the
+// storefront build breaks (`next/font` requires SWC). The empty `src/`
+// compiles to zero files, so no babel config is needed until real backend
+// sources exist; if that day comes, scope the config to the backend only.

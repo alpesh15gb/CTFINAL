@@ -8,7 +8,7 @@ RUN npm install -g @medusajs/medusa-cli
 COPY package.json package-lock.json ./
 RUN npm install --production=false
 
-COPY medusa-config.js babel.config.js ./
+COPY medusa-config.js ./
 COPY data/ ./data/
 COPY src/ ./src/
 
