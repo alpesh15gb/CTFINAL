@@ -9,9 +9,9 @@ import { EASE_CINEMATIC, FilmGrain, MaskText, SectionLabel } from "./primitives"
 const SERVICES = [
   { n: "01", title: "Performance Tuning", img: "https://images.unsplash.com/photo-1489824904134-891ab64532f1?q=80&w=1600&auto=format&fit=crop", note: "ECU / Intake / Exhaust mapping" },
   { n: "02", title: "Exhaust Systems", img: "https://images.unsplash.com/photo-1614026480209-cd9934144671?q=80&w=1600&auto=format&fit=crop", note: "Valved / Titanium / Carbon" },
-  { n: "03", title: "Aero", img: "https://images.unsplash.com/photo-1603584173870-7f23fdae1b7a?q=80&w=1600&auto=format&fit=crop", note: "Splitters / Wings / Diffusers" },
-  { n: "04", title: "Suspension", img: "https://images.unsplash.com/photo-1544636331-e26879cd4d9b?q=80&w=1600&auto=format&fit=crop", note: "Coilovers / Air / Alignment" },
-  { n: "05", title: "Bespoke Builds", img: "https://images.unsplash.com/photo-1617788138017-80ad40651399?q=80&w=1600&auto=format&fit=crop", note: "One of one commissions" },
+  { n: "03", title: "Audio", img: "https://images.unsplash.com/photo-1603584173870-7f23fdae1b7a?q=80&w=1600&auto=format&fit=crop", note: "Speakers / DSP / Subwoofers" },
+  { n: "04", title: "Wheels", img: "https://images.unsplash.com/photo-1544636331-e26879cd4d9b?q=80&w=1600&auto=format&fit=crop", note: "Alloys / Tires / Alignment" },
+  { n: "05", title: "Protection Films", img: "https://images.unsplash.com/photo-1617788138017-80ad40651399?q=80&w=1600&auto=format&fit=crop", note: "PPF / Ceramic / Sunfilm" },
 ];
 
 /**
