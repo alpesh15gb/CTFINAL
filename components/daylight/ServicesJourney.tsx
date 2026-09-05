@@ -3,9 +3,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { motion, useReducedMotion, useTransform } from "framer-motion";
+import { motion, useTransform } from "framer-motion";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
-import { Drift, MaskLines, Reveal, usePinnedProgress } from "./fx";
+import { Drift, MaskLines, Reveal, useMountedReducedMotion, usePinnedProgress } from "./fx";
 import { cn } from "@/lib/utils";
 
 const SERVICES = [
@@ -24,7 +24,7 @@ const SERVICES = [
 export function ServicesJourney() {
   const ref = useRef<HTMLElement>(null);
   const progress = usePinnedProgress(ref);
-  const reduce = useReducedMotion();
+  const reduce = useMountedReducedMotion();
   const trackRef = useRef<HTMLDivElement>(null);
   const [shift, setShift] = useState(0);
   const x = useTransform(progress, [0, 1], [0, -shift]);

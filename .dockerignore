@@ -5,3 +5,5 @@ node_modules
 npm-debug.log*
 scripts/screenshots
 nginx/certs
+REF.mp4
+.opencode/

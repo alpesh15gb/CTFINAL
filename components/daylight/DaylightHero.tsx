@@ -4,8 +4,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRef, useState } from "react";
 import { ArrowDown, ArrowRight } from "lucide-react";
-import { useReducedMotion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { useMountedReducedMotion } from "./fx";
 import {
   Drift,
   FadeWindow,
@@ -26,7 +26,7 @@ const HERO_IMG =
 export function DaylightHero() {
   const ref = useRef<HTMLElement>(null);
   const progress = usePinnedProgress(ref);
-  const reduce = useReducedMotion();
+  const reduce = useMountedReducedMotion();
   const [imgReady, setImgReady] = useState(false);
 
   return (

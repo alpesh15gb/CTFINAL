@@ -33,7 +33,7 @@ export default function CartPage() {
         <p className="mt-2 text-silver-muted">
           Start your build with premium upgrades.
         </p>
-        <Button asChild className="mt-6 bg-cyan text-black hover:bg-cyan-light">
+        <Button asChild className="mt-6 bg-red text-white hover:bg-red-deep">
           <Link href="/shop">Shop Now</Link>
         </Button>
       </main>
@@ -182,7 +182,7 @@ export default function CartPage() {
                 <span>Total</span>
                 <span>₹{total.toLocaleString("en-IN")}</span>
               </div>
-              <Button className="mt-6 w-full bg-cyan text-black hover:bg-cyan-light">
+              <Button className="mt-6 w-full bg-red text-white hover:bg-red-deep">
                 Proceed to Checkout
               </Button>
               <Button

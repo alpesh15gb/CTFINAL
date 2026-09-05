@@ -3,9 +3,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRef } from "react";
-import { motion, useReducedMotion, useTransform } from "framer-motion";
+import { motion, useTransform } from "framer-motion";
 import { ArrowRight } from "lucide-react";
-import { Reveal, useSectionProgress } from "./fx";
+import { Reveal, useMountedReducedMotion, useSectionProgress } from "./fx";
 
 /**
  * Finale — the single black chapter. Everything before it was daylight;
@@ -14,7 +14,7 @@ import { Reveal, useSectionProgress } from "./fx";
 export function FinaleCTA() {
   const ref = useRef<HTMLElement>(null);
   const progress = useSectionProgress(ref);
-  const reduce = useReducedMotion();
+  const reduce = useMountedReducedMotion();
   // Scroll-driven (not viewport-triggered): deterministic under instant
   // jumps, which whileInView+once mishandles.
   const y1 = useTransform(progress, [0.22, 0.42], ["112%", "0%"]);

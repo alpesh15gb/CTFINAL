@@ -4,7 +4,6 @@ import {
   animate,
   motion,
   useInView,
-  useReducedMotion,
   useScroll,
   useTransform,
   type MotionValue,
@@ -23,6 +22,27 @@ import {
  */
 
 export const EASE_CINEMATIC = [0.22, 1, 0.36, 1] as const;
+
+/**
+ * Reduced-motion that is safe for SSR: the server and the first client
+ * paint always agree (animated markup), the static final state only
+ * applies after mount. Prevents hydration mismatches.
+ *
+ * NOTE: implemented directly on matchMedia — framer-motion v13's
+ * useReducedMotion singleton does not update inside this tree, so it
+ * cannot be trusted here.
+ */
+export function useMountedReducedMotion(): boolean {
+  const [reduce, setReduce] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setReduce(mq.matches);
+    const onChange = () => setReduce(mq.matches);
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
+  return reduce;
+}
 
 /** Progress of `ref` travelling through the viewport (enter → leave). */
 export function useSectionProgress(ref: React.RefObject<HTMLElement | null>) {
@@ -57,7 +77,7 @@ export function Drift({
   children: ReactNode;
 }) {
   const y = useTransform(progress, [0, 1], [from, to]);
-  const reduce = useReducedMotion();
+  const reduce = useMountedReducedMotion();
   if (reduce) return <div className={className}>{children}</div>;
   return (
     <motion.div style={{ y }} className={className}>
@@ -81,7 +101,7 @@ export function Zoom({
   children: ReactNode;
 }) {
   const scale = useTransform(progress, [0, 1], [from, to]);
-  const reduce = useReducedMotion();
+  const reduce = useMountedReducedMotion();
   if (reduce) return <div className={className}>{children}</div>;
   return (
     <motion.div style={{ scale }} className={className}>
@@ -106,7 +126,7 @@ export function FadeWindow({
 }) {
   const opacity = useTransform(progress, [range[0], range[1]], [1, 0]);
   const yy = useTransform(progress, [range[0], range[1]], [0, y]);
-  const reduce = useReducedMotion();
+  const reduce = useMountedReducedMotion();
   if (reduce) return <div className={className}>{children}</div>;
   return (
     <motion.div style={{ opacity, y: yy }} className={className}>
@@ -127,7 +147,7 @@ export function Reveal({
   className?: string;
   children: ReactNode;
 }) {
-  const reduce = useReducedMotion();
+  const reduce = useMountedReducedMotion();
   if (reduce) return <div className={className}>{children}</div>;
   return (
     <motion.div
@@ -158,7 +178,7 @@ export function MaskLines({
   /** Above-the-fold hero: animate on mount instead of viewport detection. */
   animateOnMount?: boolean;
 }) {
-  const reduce = useReducedMotion();
+  const reduce = useMountedReducedMotion();
   if (reduce) {
     return (
       <div className={className}>
@@ -214,7 +234,7 @@ export function Marquee({
   className?: string;
   children: ReactNode;
 }) {
-  const reduce = useReducedMotion();
+  const reduce = useMountedReducedMotion();
   if (reduce) {
     return (
       <div className={`overflow-hidden ${className}`}>
@@ -251,7 +271,7 @@ export function CountUp({
 }) {
   const ref = useRef<HTMLSpanElement>(null);
   const inView = useInView(ref, { once: true, margin: "-40px" });
-  const reduce = useReducedMotion();
+  const reduce = useMountedReducedMotion();
   const [val, setVal] = useState(0);
 
   useEffect(() => {
