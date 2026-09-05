@@ -9,7 +9,7 @@ const STATS: Array<{ value: number; decimals?: number; prefix?: string; suffix?:
   { value: 38, prefix: "+", suffix: "%", label: "Power" },
 ];
 
-/** NUMBERS WRITTEN IN LIGHTNING — large typography separated by thin rules. No cards. */
+/** GET YOUR CAR ROLLING IN STYLE — large typography separated by thin rules. No cards. */
 export function NumbersLightning() {
   return (
     <section className="relative overflow-hidden bg-[#020202] py-28 md:py-44">
@@ -17,7 +17,7 @@ export function NumbersLightning() {
         <SectionLabel>Cartunez / Performance</SectionLabel>
         <MaskText
           className="campaign-title mt-6 text-[clamp(4.5rem,10vw,11rem)]"
-          lines={["Numbers", <span key="w" className="text-white/85">written in</span>, "lightning."]}
+          lines={["Get your car", <span key="w" className="text-white/85">rolling in</span>, "style!"]}
         />
         <div className="mt-16 grid grid-cols-2 border-t border-white/10 md:mt-24 lg:grid-cols-4">
           {STATS.map((s) => (
