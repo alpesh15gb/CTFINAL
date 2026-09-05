@@ -64,8 +64,7 @@ export function Philosophy() {
         <MaskText
           className="campaign-title text-[clamp(3.8rem,9vw,10rem)]"
           lines={[
-            <span key="w" className="text-white/70">We don&apos;t modify cars.</span>,
-            "We re-engineer",
+            <span key="w" className="text-white/70">We tune</span>,
             "the experience.",
           ]}
           stagger={0.12}
