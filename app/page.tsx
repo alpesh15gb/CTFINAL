@@ -10,7 +10,6 @@ import { Services } from "@/components/cinematic/Services";
 import { SelectedMachines } from "@/components/cinematic/SelectedMachines";
 import { CinematicBridge } from "@/components/cinematic/CinematicBridge";
 import { VehicleSelector } from "@/components/sections/VehicleSelector";
-import { WheelScrubber } from "@/components/configurator/WheelScrubber";
 import { Categories } from "@/components/sections/Categories";
 import { FeaturedProducts } from "@/components/sections/FeaturedProducts";
 import { BuildsShowcase } from "@/components/sections/BuildsShowcase";
@@ -56,7 +55,6 @@ export default function Home() {
       {/* HANDOFF — cinematic → commerce */}
       <CinematicBridge />
       <VehicleSelector />
-      <WheelScrubber />
       <Categories />
       <FeaturedProducts />
       <BuildsShowcase />
