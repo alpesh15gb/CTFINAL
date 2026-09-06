@@ -9,11 +9,11 @@ import { Drift, MaskLines, Reveal, useMountedReducedMotion, usePinnedProgress } 
 import { cn } from "@/lib/utils";
 
 const SERVICES = [
-  { n: "01", title: "Performance Tuning", note: "ECU / Intake / Exhaust mapping", img: "https://images.unsplash.com/photo-1489824904134-891ab64532f1?q=80&w=1600&auto=format&fit=crop" },
-  { n: "02", title: "Exhaust Systems", note: "Valved / Titanium / Carbon", img: "https://images.unsplash.com/photo-1614026480209-cd9934144671?q=80&w=1600&auto=format&fit=crop" },
-  { n: "03", title: "Audio", note: "Speakers / DSP / Subwoofers", img: "https://images.unsplash.com/photo-1603584173870-7f23fdae1b7a?q=80&w=1600&auto=format&fit=crop" },
-  { n: "04", title: "Wheels", note: "Alloys / Tires / Alignment", img: "https://images.unsplash.com/photo-1544636331-e26879cd4d9b?q=80&w=1600&auto=format&fit=crop" },
-  { n: "05", title: "Protection Films", note: "PPF / Ceramic / Sunfilm", img: "https://images.unsplash.com/photo-1617788138017-80ad40651399?q=80&w=1600&auto=format&fit=crop" },
+  { n: "01", title: "Performance Tuning", note: "ECU / Intake / Exhaust mapping", img: "https://images.unsplash.com/photo-1489824904134-891ab64532f1?q=80&w=1600&auto=format&fit=crop", shop: "/shop" },
+  { n: "02", title: "Exhaust Systems", note: "Valved / Titanium / Carbon", img: "https://images.unsplash.com/photo-1614026480209-cd9934144671?q=80&w=1600&auto=format&fit=crop", shop: "/shop" },
+  { n: "03", title: "Audio", note: "Speakers / DSP / Subwoofers", img: "https://images.unsplash.com/photo-1603584173870-7f23fdae1b7a?q=80&w=1600&auto=format&fit=crop", shop: "/shop?category=car-speakers" },
+  { n: "04", title: "Wheels", note: "Alloys / Tires / Alignment", img: "https://images.unsplash.com/photo-1544636331-e26879cd4d9b?q=80&w=1600&auto=format&fit=crop", shop: "/shop?category=wheels" },
+  { n: "05", title: "Protection Films", note: "PPF / Ceramic / Sunfilm", img: "https://images.unsplash.com/photo-1617788138017-80ad40651399?q=80&w=1600&auto=format&fit=crop", shop: "/shop" },
 ];
 
 /**
@@ -106,7 +106,7 @@ export function ServicesJourney() {
                     </p>
                   </div>
                   <Link
-                    href="/shop"
+                    href={s.shop}
                     aria-label={`${s.title} in the shop`}
                     className="shrink-0 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-red-deep hover:text-red"
                   >
@@ -183,7 +183,7 @@ function ServiceCard({ service: s }: { service: (typeof SERVICES)[number] }) {
             </p>
           </div>
           <Link
-            href="/shop"
+            href={s.shop}
             aria-label={`${s.title} in the shop`}
             className={cn(
               "flex h-11 w-11 shrink-0 items-center justify-center rounded-sm border border-ink/15",

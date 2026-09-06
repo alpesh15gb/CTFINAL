@@ -15,7 +15,11 @@ if (typeof window !== "undefined" && !MEDUSA_PUBLISHABLE_KEY) {
 export const medusaClient = new Medusa({
   baseUrl: MEDUSA_BACKEND_URL,
   maxRetries: 3,
-  apiKey: MEDUSA_PUBLISHABLE_KEY || undefined,
+  // NOTE: medusa-js v6 sends store auth via `x-publishable-api-key`, which
+  // comes from the `publishableApiKey` option — NOT `apiKey` (that's the
+  // admin `x-medusa-access-token`). Passing the pk_* key as `apiKey` sends
+  // no header on /store/* routes, so every live catalog fetch 401s.
+  publishableApiKey: MEDUSA_PUBLISHABLE_KEY || undefined,
 });
 
 // Product helpers (live Medusa store API — these throw on failure so callers
