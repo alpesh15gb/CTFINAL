@@ -1,4 +1,24 @@
 const express = require("express");
+const path = require("path");
+
+// Medusa v1 registers feature-flagged TypeORM columns (e.g.
+// Store.default_sales_channel) inside setImmediate(). Import scripts fetch
+// remote catalogs (network I/O) BEFORE calling bootstrapMedusa(), so those
+// deferred decorators run while the feature-flag router is still empty and
+// permanently skip registration. Later loaders() sets the flags to true,
+// but the metadata is already missing, causing:
+//   EntityPropertyNotFoundError: Property "default_sales_channel" was not found in "Store"
+// Pre-populate the router from medusa-config.js BEFORE requiring Medusa
+// loaders/models so the deferred decorators see the correct flags.
+try {
+  const ffInit =
+    require("@medusajs/medusa/dist/loaders/feature-flags").default;
+  const configModule = require(path.join(process.cwd(), "medusa-config.js"));
+  ffInit(configModule, undefined);
+} catch (_) {
+  // bootstrapMedusa() will initialize flags again inside loaders();
+  // this pre-load is only a best-effort ordering fix.
+}
 const loaders = require("@medusajs/medusa/dist/loaders").default;
 
 const USER_AGENT =
