@@ -1,4 +1,4 @@
-import { DaylightHero } from "@/components/daylight/DaylightHero";
+import { SceneHero } from "@/components/daylight/SceneHero";
 import { BrandTicker } from "@/components/daylight/BrandTicker";
 import { ProofStrip } from "@/components/daylight/ProofStrip";
 import { ServicesJourney } from "@/components/daylight/ServicesJourney";
@@ -8,14 +8,14 @@ import { VehicleSelector } from "@/components/sections/VehicleSelector";
 import { FinaleCTA } from "@/components/daylight/FinaleCTA";
 
 /**
- * DAYLIGHT STUDIO homepage (feat/daylight-studio).
- * P2: full chapter arc — hero, ticker, proof, services journey,
- * builds, shop preview, fitment, dark finale.
+ * Homepage — 3D observatory hero over the daylight chapters.
+ * Hero pins ~360svh (scroll drives a camera orbit around the Huracán);
+ * the rest of the film is the light theme.
  */
 export default function HomePage() {
   return (
     <main>
-      <DaylightHero />
+      <SceneHero />
       <BrandTicker />
       <ProofStrip />
       <ServicesJourney />
