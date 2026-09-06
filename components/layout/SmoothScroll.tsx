@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { usePathname } from "next/navigation";
 import Lenis from "lenis";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 export function SmoothScroll({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
   const reducedMotion = useReducedMotion();
   const lenisRef = useRef<Lenis | null>(null);
 
@@ -54,6 +56,19 @@ export function SmoothScroll({ children }: { children: React.ReactNode }) {
       lenisRef.current = null;
     };
   }, [reducedMotion]);
+
+  // New routes must open at the top. Next's native scrollTo on navigation
+  // loses to Lenis's rAF loop (Lenis snaps back to its stored offset), so
+  // product pages opened mid-shop-grid landed at the footer. Reset through
+  // Lenis itself. Hash-only navigations don't change pathname, so in-page
+  // anchors are unaffected.
+  useEffect(() => {
+    if (reducedMotion || !lenisRef.current) {
+      window.scrollTo(0, 0);
+      return;
+    }
+    lenisRef.current.scrollTo(0, { immediate: true });
+  }, [pathname, reducedMotion]);
 
   return <>{children}</>;
 }
