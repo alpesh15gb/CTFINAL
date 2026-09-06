@@ -182,8 +182,11 @@ export default function CartPage() {
                 <span>Total</span>
                 <span>₹{total.toLocaleString("en-IN")}</span>
               </div>
-              <Button className="mt-6 w-full bg-red text-white hover:bg-red-deep">
-                Proceed to Checkout
+              <Button
+                asChild
+                className="mt-6 w-full bg-red text-white hover:bg-red-deep"
+              >
+                <Link href="/checkout">Proceed to Checkout</Link>
               </Button>
               <Button
                 asChild

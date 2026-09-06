@@ -81,8 +81,10 @@ function metaStringArray(value: unknown): string[] {
 export function adaptStoreProduct(p: MedusaStoreProduct): Product {
   const variants = p.variants ?? [];
 
-  const allPrices = variants.flatMap((v) => v.prices ?? []);
-  const cheapest = allPrices.reduce<MedusaMoneyAmount | null>(
+  const allPrices = variants.flatMap((v) =>
+    (v.prices ?? []).map((p) => ({ ...p, variant_id: v.id }))
+  );
+  const cheapest = allPrices.reduce<(MedusaMoneyAmount & { variant_id: string }) | null>(
     (best, cur) => (!best || cur.amount < best.amount ? cur : best),
     null
   );
@@ -93,18 +95,29 @@ export function adaptStoreProduct(p: MedusaStoreProduct): Product {
   ].filter((url, idx, arr) => arr.indexOf(url) === idx);
 
   const meta = p.metadata ?? {};
+  // Live join first; fall back to the category snapshot the import scripts
+  // stamp into metadata (present on every imported product, create or update).
   const primaryCategory = p.categories?.[0];
+  const categoryName =
+    primaryCategory?.name ??
+    (typeof meta.category === "string" ? meta.category : undefined) ??
+    "General";
+  const categorySlug =
+    primaryCategory?.handle ??
+    (typeof meta.category_slug === "string" ? meta.category_slug : undefined) ??
+    "general";
 
   return {
     id: p.id,
     slug: p.handle,
     name: p.title,
-    category: primaryCategory?.name ?? "General",
-    categorySlug: primaryCategory?.handle ?? "general",
+    category: categoryName,
+    categorySlug: categorySlug,
     collectionId: p.collection_id ?? null,
     price: cheapest ? Math.round(cheapest.amount / 100) : 0,
     originalPrice: undefined,
     currency: currencySymbol(cheapest?.currency_code),
+    variantId: cheapest?.variant_id ?? null,
     rating: Number(meta.rating) || 0,
     reviewCount: Number(meta.reviewCount) || 0,
     // Empty compatibility = universal fit (backend carries no fitment info).

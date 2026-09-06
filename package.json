@@ -9,7 +9,8 @@
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "import:sahibacar": "node scripts/import-sahibacar.js",
-    "import:neowheels": "node scripts/import-neowheels.js"
+    "import:neowheels": "node scripts/import-neowheels.js",
+    "ensure:shipping": "node scripts/ensure-shipping.js"
   },
   "dependencies": {
     "@medusajs/admin": "^7.1.18",

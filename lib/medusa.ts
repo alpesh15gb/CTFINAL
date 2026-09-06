@@ -31,12 +31,18 @@ export async function listStoreProducts(options?: {
   const res = await medusaClient.products.list({
     limit: options?.limit ?? 100,
     offset: options?.offset ?? 0,
+    // Categories are NOT in the default store relations — without this
+    // expand every product arrives category-less and lands in "general".
+    expand: "categories",
   });
   return (res?.products ?? []) as unknown[];
 }
 
 export async function getStoreProductByHandle(handle: string) {
-  const { products } = await medusaClient.products.list({ handle });
+  const { products } = await medusaClient.products.list({
+    handle,
+    expand: "categories",
+  });
   return ((products ?? [])[0] ?? null) as unknown | null;
 }
 
