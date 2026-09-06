@@ -72,7 +72,6 @@ export function SceneHero() {
       <div className={styles.frame}>
         <div className={styles.grain} aria-hidden="true" />
         <div className={styles.eyebrow}>
-          <span><i /> Cartunez / The custom studio</span>
           <span className={styles.edition}>Built around you. Not the ordinary.</span>
         </div>
 
@@ -97,13 +96,8 @@ export function SceneHero() {
           )}
         </div>
 
-        <div className={styles.modelTag} aria-hidden="true">
-          <span className={styles.crosshair}>+</span>
-          <span>XE SV / Design study<br /><b>{staticMode ? "Signal Red" : finish.label}</b></span>
-        </div>
-
         <div className={styles.story}>
-          <p className={styles.chapterLabel}>0{currentChapter + 1} / {CHAPTERS[currentChapter].label}</p>
+          <p className={styles.chapterLabel}>0{currentChapter + 1}</p>
           <h2>{CHAPTERS[currentChapter].title}</h2>
           <p className={styles.description}>{CHAPTERS[currentChapter].copy}</p>
           <div className={styles.actions}>
@@ -130,7 +124,7 @@ export function SceneHero() {
             <a href="#hero-end" className={styles.scrollCue}><ArrowDown size={15} aria-hidden="true" /> Scroll to explore <span>/ Skip intro</span></a>
           ) : <span className={styles.scrollCue}>Designed to be different.</span>}
           <div className={styles.timeline} aria-hidden="true">
-            {CHAPTERS.map((item, index) => <span key={item.label} data-active={index === currentChapter}>0{index + 1} <b>{item.label}</b></span>)}
+            {CHAPTERS.map((item, index) => <span key={item.label} data-active={index === currentChapter}>0{index + 1}</span>)}
           </div>
           <a className={styles.credit} href="/models/ATTRIBUTION.md" target="_blank" rel="noreferrer">3D credits <ArrowUpRight size={11} aria-hidden="true" /></a>
         </div>
