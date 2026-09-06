@@ -85,9 +85,9 @@ export function SceneHero() {
           <span>Not</span> <span className={styles.outline}>stock.</span>
         </motion.h1>
 
-        <div className={styles.stage} role="img" aria-label={`Ferrari 458 design study in ${finish.label}${staticMode ? "" : ", with scroll-controlled camera angles"}`}>
+        <div className={styles.stage} role="img" aria-label={`Jaguar XE SV Project 8 design study in ${finish.label}${staticMode ? "" : ", with scroll-controlled camera angles"}`}>
           {/* The poster stays underneath WebGL during loading or context failure. */}
-          <img src="/images/hero-ferrari.webp" alt="" width={1183} height={504} fetchPriority="high" className={styles.poster} style={{ opacity: ready && !staticMode ? 0 : 1 }} />
+          <img src="/images/hero-jaguar.webp" alt="" width={1183} height={504} fetchPriority="high" className={styles.poster} style={{ opacity: ready && !staticMode ? 0 : 1 }} />
           {mounted && !staticMode && (
             <SceneBoundary onError={() => setFailed(true)}>
               <SceneStudio progress={scrub} finish={finish} active={inView && visible} onReady={() => setReady(true)} onError={() => setFailed(true)} />
@@ -97,7 +97,7 @@ export function SceneHero() {
 
         <div className={styles.modelTag} aria-hidden="true">
           <span className={styles.crosshair}>+</span>
-          <span>458 / Design study<br /><b>{staticMode ? "Signal Red" : finish.label}</b></span>
+          <span>XE SV / Design study<br /><b>{staticMode ? "Signal Red" : finish.label}</b></span>
         </div>
 
         <div className={styles.story}>

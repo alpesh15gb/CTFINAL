@@ -16,28 +16,45 @@ type SceneProps = {
 };
 
 function Vehicle({ finish, onReady }: Pick<SceneProps, "finish" | "onReady">) {
-  const { scene } = useGLTF("/models/ferrari-458.glb", "/draco/");
+  const { scene } = useGLTF("/models/jaguar.glb");
   const invalidate = useThree((state) => state.invalidate);
+  const paint = useMemo(
+    () =>
+      new THREE.MeshPhysicalMaterial({
+        color: new THREE.Color("#c91f16"),
+        metalness: 0.65,
+        roughness: 0.25,
+        clearcoat: 1,
+        clearcoatRoughness: 0.12,
+      }),
+    []
+  );
+  const glass = useMemo(
+    () =>
+      new THREE.MeshPhysicalMaterial({
+        color: new THREE.Color("#29363d"),
+        metalness: 0.25,
+        roughness: 0.12,
+        transparent: true,
+        opacity: 0.86,
+      }),
+    []
+  );
+  const targetColor = useRef(new THREE.Color("#c91f16"));
   // Clone materials as well as the scene; never repaint the loader's shared cache.
   const model = useMemo(() => {
     const clone = scene.clone(true);
     clone.traverse((object) => {
       if (!(object instanceof THREE.Mesh)) return;
-      const materials = (Array.isArray(object.material) ? object.material : [object.material]).map((material) => material.clone());
-      object.material = Array.isArray(object.material) ? materials : materials[0];
-      if (object.name === "body") {
-        materials.forEach((material) => material.dispose());
-        object.material = new THREE.MeshPhysicalMaterial({ color: "#c91f16", metalness: .65, roughness: .25, clearcoat: 1, clearcoatRoughness: .12 });
-      }
-      if (object.name.startsWith("rim_")) {
-        materials.forEach((material) => {
-          if (material instanceof THREE.MeshStandardMaterial) { material.color.set("#565b61"); material.metalness = 1; material.roughness = .24; }
-        });
-      }
-      if (object.name === "glass") {
-        materials.forEach((material) => {
-          if (material instanceof THREE.MeshStandardMaterial) { material.color.set("#29363d"); material.metalness = .25; material.roughness = .12; material.transparent = true; material.opacity = .86; }
-        });
+      const source = Array.isArray(object.material) ? object.material[0] : object.material;
+      const matName = (source?.name || "").toLowerCase();
+      if (matName.includes("paint_material1") || matName === "color_2" || matName.includes("coloured_material1")) {
+        object.material = paint;
+      } else if (matName.includes("window_material1") || matName.includes("red_glass")) {
+        object.material = glass;
+      } else {
+        const materials = (Array.isArray(object.material) ? object.material : [object.material]).map((material) => material.clone());
+        object.material = Array.isArray(object.material) ? materials : materials[0];
       }
     });
     const bounds = new THREE.Box3().setFromObject(clone);
@@ -47,13 +64,18 @@ function Vehicle({ finish, onReady }: Pick<SceneProps, "finish" | "onReady">) {
     clone.scale.setScalar(scale);
     clone.position.set(-center.x * scale, -bounds.min.y * scale + .015, -center.z * scale);
     return clone;
-  }, [scene]);
+  }, [scene, paint, glass]);
 
   useLayoutEffect(() => {
-    const body = model.getObjectByName("body") as THREE.Mesh<THREE.BufferGeometry, THREE.MeshPhysicalMaterial> | undefined;
-    body?.material.color.set(finish.hex);
+    targetColor.current.set(finish.hex);
+    paint.color.set(finish.hex);
     invalidate();
-  }, [finish, model, invalidate]);
+  }, [finish, paint, invalidate]);
+
+  useFrame((_, delta) => {
+    const k = Math.min(1, delta * 4);
+    paint.color.lerp(targetColor.current, k);
+  });
 
   useEffect(() => {
     onReady();
@@ -158,3 +180,5 @@ export function SceneStudio({ progress, finish, active, onReady, onError }: Scen
     </Canvas>
   );
 }
+
+useGLTF.preload("/models/jaguar.glb");

@@ -54,9 +54,9 @@ async function main() {
       if (process.argv.includes("--poster") && width === 1440) {
         const data = await evaluate(`document.querySelector('[data-hero] canvas').toDataURL('image/webp',.92).split(',')[1]`);
         fs.mkdirSync(path.resolve("public/images"), { recursive: true });
-        fs.writeFileSync(path.resolve("public/images/hero-ferrari.webp"), data, "base64");
+        fs.writeFileSync(path.resolve("public/images/hero-jaguar.webp"), data, "base64");
         console.log("Generated static poster from the opening 3D camera.");
-        await evaluate(`document.querySelector('[data-hero] img').src='/images/hero-ferrari.webp?generated='+Date.now()`);
+        await evaluate(`document.querySelector('[data-hero] img').src='/images/hero-jaguar.webp?generated='+Date.now()`);
       }
       const imageHashes = [];
       for (const progress of [0, .5, .9, 0]) {

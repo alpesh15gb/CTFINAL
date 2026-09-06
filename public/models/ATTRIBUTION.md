@@ -1,6 +1,19 @@
 # Asset Attribution
 
-## Ferrari 458 Italia
+## Jaguar XE SV Project 8 (current hero vehicle)
+
+- Local asset: `public/models/jaguar.glb`
+- Apparent title: Jaguar XE SV Project 8 (from embedded material names)
+- Source: user-provided file; original download source and license unknown
+- Changes for the design visualization: runtime body finish
+  (`Paint_Material1`, `color_2`, `Coloured_Material1`), glass materials,
+  lighting, and scene composition. `public/images/hero-jaguar.webp` is a
+  rendered derivative of this model, used as the loading and static fallback.
+
+Confirm you hold the rights to publish this model before production use.
+No Jaguar endorsement, sponsorship, or affiliation is implied.
+
+## Ferrari 458 Italia (previous hero vehicle, retained in repo)
 
 - Local asset: `public/models/ferrari-458.glb`
 - Title: Ferrari 458 Italia
