@@ -8,6 +8,13 @@ const nextConfig = {
     remotePatterns: [
       { protocol: "https", hostname: "images.unsplash.com" },
       { protocol: "https", hostname: "images.pexels.com" },
+      // Live supplier catalogs (Medusa imports hotlink source images).
+      // Without these, next/image answers 400 and no product photo renders.
+      { protocol: "https", hostname: "cdn.shopify.com" },
+      { protocol: "https", hostname: "sahibacar.in" },
+      { protocol: "https", hostname: "*.sahibacar.in" },
+      { protocol: "https", hostname: "neowheels.com" },
+      { protocol: "https", hostname: "*.neowheels.com" },
     ],
   },
 };

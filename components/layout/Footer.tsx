@@ -8,10 +8,10 @@ const footerLinks = [
     title: "Upgrade",
     links: [
       { label: "All products", href: "/shop" },
-      { label: "Exterior", href: "/shop?category=exterior" },
-      { label: "Interior", href: "/shop?category=interior" },
-      { label: "Lighting", href: "/shop?category=lighting" },
-      { label: "Performance", href: "/shop?category=performance" },
+      { label: "Wheels", href: "/shop?category=wheels" },
+      { label: "Android stereos", href: "/shop?category=android-stereos" },
+      { label: "Car speakers", href: "/shop?category=car-speakers" },
+      { label: "Reverse cameras", href: "/shop?category=reverse-cameras" },
     ],
   },
   {
