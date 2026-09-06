@@ -1,3 +1,9 @@
+// Skip the Admin UI plugin when running catalog import scripts.
+// Those scripts bootstrap Medusa via loaders() on hosts without an
+// admin build, where @medusajs/admin would otherwise log
+// "Could not find the admin UI build files" and exit the process.
+const isImport = process.argv.some((arg) => String(arg).includes("import-"));
+
 module.exports = {
   projectConfig: {
     redis_url: process.env.REDIS_URL || "redis://localhost:6379",
@@ -29,14 +35,19 @@ module.exports = {
       resolve: `medusa-payment-manual`,
       options: {},
     },
-    {
-      resolve: `@medusajs/admin`,
-      options: {
-        develop: {
-          open: false,
-        },
-        path: `/admin`,
-      },
-    },
+    // Admin UI is not needed for imports and breaks them when unbuilt.
+    ...(isImport
+      ? []
+      : [
+          {
+            resolve: `@medusajs/admin`,
+            options: {
+              develop: {
+                open: false,
+              },
+              path: `/admin`,
+            },
+          },
+        ]),
   ],
 };
