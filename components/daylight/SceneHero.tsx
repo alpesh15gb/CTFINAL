@@ -82,7 +82,9 @@ export function SceneHero() {
         <motion.div className={styles.speedLines} aria-hidden="true" style={staticMode ? undefined : { x: lineX }} />
 
         <motion.h1 className={styles.headline} style={staticMode ? undefined : { x: titleX, y: titleY, scale: titleScale }}>
-          <span>Not</span> <span className={styles.outline}>stock.</span>
+          <span>Get your</span>
+          <span className={styles.outline}>car rolling</span>
+          <span>in style.</span>
         </motion.h1>
 
         <div className={styles.stage} role="img" aria-label={`Jaguar XE SV Project 8 design study in ${finish.label}${staticMode ? "" : ", with scroll-controlled camera angles"}`}>

@@ -7,7 +7,10 @@
 .eyebrow > span:first-child { display: flex; gap: 10px; align-items: center; }
 .eyebrow i { height: 7px; width: 7px; background: #c6241c; }
 .edition { color: #5c5e56; }
-.headline { position: absolute; z-index: 1; top: 20%; left: 3%; margin: 0; white-space: nowrap; font: 700 clamp(70px, 11.6vw, 210px)/.95 var(--font-display), sans-serif; letter-spacing: -.065em; text-transform: uppercase; transform-origin: left center; }
+.headline { position: absolute; z-index: 1; top: 20%; left: 3%; right: 3%; margin: 0; font: 700 clamp(44px, 6.8vw, 118px)/.95 var(--font-display), sans-serif; letter-spacing: -.065em; text-transform: uppercase; transform-origin: left center; }
+.headline span { display: block; }
+.headline span:nth-child(2) { margin-left: 7%; }
+.headline span:nth-child(3) { margin-left: 3%; }
 .outline { color: transparent; -webkit-text-stroke: 1.5px #35362f; }
 .orbit { position: absolute; top: 28%; left: 31%; width: 65%; height: 48%; pointer-events: none; }
 .orbit span { position: absolute; inset: 0; border: 1px solid #babbae; border-radius: 50%; }
@@ -67,9 +70,10 @@
   .static { height: auto; }
   .frame { min-height: 620px; }
   .eyebrow { left: 5%; right: 5%; top: 102px; font-size: 8px; }
-  .headline { left: 5%; top: 20%; font-size: 18vw; line-height: .88; white-space: normal; }
+  .headline { left: 5%; right: 5%; top: 20%; font-size: 10vw; line-height: .9; white-space: normal; }
   .headline span { display: block; }
-  .headline span:nth-child(2) { margin-left: 13%; }
+  .headline span:nth-child(2) { margin-left: 10%; }
+  .headline span:nth-child(3) { margin-left: 4%; }
   .orbit { top: 39%; left: -8%; width: 115%; height: 25%; }
   .stage { left: -9%; right: -9%; top: 36%; bottom: 27%; }
   .speedLines { top: 50%; }
@@ -94,7 +98,7 @@
 @media (max-height: 650px) and (min-width: 601px) {
   .frame { min-height: 360px; }
   .eyebrow { top: 88px; font-size: 8px; }
-  .headline { top: 30%; font-size: 8vw; }
+  .headline { top: 28%; font-size: 4.6vw; }
   .stage { left: 32%; top: 24%; bottom: 12%; }
   .story { bottom: 14%; width: 39%; }
   .modelTag { display: none; }
