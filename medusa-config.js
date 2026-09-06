@@ -26,6 +26,15 @@ module.exports = {
       options: {},
     },
   },
+  featureFlags: {
+    // Required by scripts/import-*.js (categories + sales channels).
+    // product_categories defaults to false in Medusa v1; without this,
+    // productCategoryService / Store.default_sales_channel metadata breaks.
+    sales_channels: true,
+    product_categories: true,
+    publishable_api_keys: true,
+    order_editing: true,
+  },
   plugins: [
     {
       resolve: `medusa-fulfillment-manual`,
