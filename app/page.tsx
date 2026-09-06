@@ -8,9 +8,7 @@ import { VehicleSelector } from "@/components/sections/VehicleSelector";
 import { FinaleCTA } from "@/components/daylight/FinaleCTA";
 
 /**
- * Homepage — 3D observatory hero over the daylight chapters.
- * Hero pins ~360svh (scroll drives a camera orbit around the Huracán);
- * the rest of the film is the light theme.
+ * Homepage — scroll-directed design study, followed by the daylight chapters.
  */
 export default function HomePage() {
   return (
