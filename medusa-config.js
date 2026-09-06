@@ -54,7 +54,12 @@ module.exports = {
               develop: {
                 open: false,
               },
-              path: `/admin`,
+              // NOTE: must NOT be `/admin` — the admin API lives under
+              // `/admin/*` and the plugin's `GET <path>/*` SPA fallback is
+              // mounted before the core API routes, so serving the UI at
+              // `/admin` returns index.html for every admin API GET
+              // (login POST works, session check never does).
+              path: `/app`,
             },
           },
         ]),
