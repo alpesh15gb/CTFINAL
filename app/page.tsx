@@ -12,7 +12,7 @@ import { FinaleCTA } from "@/components/daylight/FinaleCTA";
  */
 export default function HomePage() {
   return (
-    <main>
+    <main className="home-performance">
       <SceneHero />
       <BrandTicker />
       <ProofStrip />

@@ -41,17 +41,18 @@ export function ProofStrip() {
   if (!figures || figures.every((f) => f.value === 0)) return null;
 
   return (
-    <section className="relative bg-background">
-      <div className="site-container grid grid-cols-1 gap-px overflow-hidden py-14 sm:grid-cols-3 md:py-20">
+    <section className="relative overflow-hidden border-y border-white/10 bg-[#0b0c0f]">
+      <div className="pointer-events-none absolute inset-0 precision-grid opacity-70" />
+      <div className="site-container relative grid grid-cols-1 gap-px overflow-hidden py-14 sm:grid-cols-3 md:py-20">
         {figures.map((fig, i) => (
           <Reveal key={fig.label} delay={i * 0.08}>
             <div className="flex flex-col items-center gap-2 text-center">
               <CountUp
                 to={fig.value}
                 suffix="+"
-                className="font-display text-5xl font-bold tracking-tight text-ink md:text-6xl"
+                className="font-display text-5xl font-bold tracking-tight text-white md:text-6xl"
               />
-              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.28em] text-red-deep">
+              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.28em] text-red-light">
                 {fig.label}
               </p>
             </div>

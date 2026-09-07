@@ -275,6 +275,25 @@
     user-select: none;
     pointer-events: none;
   }
+
+  /* The storefront card is reused on light shop pages; only its homepage
+     preview adopts the dark performance surface. */
+  .home-performance .premium-card {
+    border-color: rgba(255, 255, 255, 0.1);
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.025));
+  }
+
+  .home-performance .premium-card .text-foreground {
+    color: #f4f5f7;
+  }
+
+  .home-performance .premium-card .text-silver-muted {
+    color: #a7adb8;
+  }
+
+  .home-performance .premium-card .text-cyan-deep {
+    color: #8fd8fa;
+  }
 }
 
 @layer utilities {

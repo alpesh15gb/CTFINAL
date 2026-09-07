@@ -23,10 +23,10 @@ export function FinaleCTA() {
   const o2 = useTransform(progress, [0.28, 0.42], [0, 1]);
 
   return (
-    <section ref={ref} className="relative overflow-hidden bg-ink py-28 text-paper md:py-44">
+    <section ref={ref} className="relative overflow-hidden border-y border-red/30 bg-[#d92821] py-28 text-white md:py-44">
       <div
         aria-hidden
-        className="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,rgba(227,34,25,0.16),transparent_32rem),radial-gradient(circle_at_10%_85%,rgba(47,179,240,0.12),transparent_30rem)]"
+        className="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,rgba(255,255,255,0.2),transparent_30rem),radial-gradient(circle_at_10%_85%,rgba(0,0,0,0.22),transparent_36rem)]"
       />
       <div className="site-container relative">
         <Reveal>
@@ -52,9 +52,9 @@ export function FinaleCTA() {
           </span>
           <span className="clip-mask block">
             {reduce ? (
-              <span className="block text-red-light">Cartunez.</span>
+              <span className="block text-black">Cartunez.</span>
             ) : (
-              <motion.span style={{ y: y2, opacity: o2 }} className="block will-change-transform text-red-light">
+              <motion.span style={{ y: y2, opacity: o2 }} className="block will-change-transform text-black">
                 Cartunez.
               </motion.span>
             )}
@@ -62,7 +62,7 @@ export function FinaleCTA() {
         </div>
         <div className="mt-8 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
           <Reveal delay={0.1}>
-            <p className="max-w-md text-base leading-relaxed text-paper/70 md:text-lg">
+            <p className="max-w-md text-base leading-relaxed text-white/80 md:text-lg">
               Tell us what you drive. We&apos;ll spec the wheels, the sound,
               the shine and the light — fitted in Hyderabad, guaranteed to
               turn heads.
@@ -72,13 +72,13 @@ export function FinaleCTA() {
             <div className="flex flex-wrap items-center gap-3">
               <Link
                 href="/#vehicle-selector"
-                className="inline-flex min-h-12 items-center gap-2 rounded-sm bg-red px-6 font-mono text-xs font-bold uppercase tracking-[0.16em] text-white transition hover:bg-red-deep"
+                className="inline-flex min-h-12 items-center gap-2 rounded-sm bg-black px-6 font-mono text-xs font-bold uppercase tracking-[0.16em] text-white transition hover:bg-[#16181d]"
               >
                 Match my vehicle <ArrowRight className="h-4 w-4" aria-hidden />
               </Link>
               <Link
                 href="/shop"
-                className="inline-flex min-h-12 items-center rounded-sm border border-paper/25 px-6 font-mono text-xs font-bold uppercase tracking-[0.16em] text-paper transition hover:border-paper hover:bg-paper hover:text-ink"
+                className="inline-flex min-h-12 items-center rounded-sm border border-white/50 px-6 font-mono text-xs font-bold uppercase tracking-[0.16em] text-white transition hover:border-white hover:bg-white hover:text-black"
               >
                 Shop upgrades
               </Link>
@@ -86,7 +86,7 @@ export function FinaleCTA() {
           </Reveal>
         </div>
         <Reveal delay={0.25}>
-          <p className="mt-14 font-mono text-[10px] font-bold uppercase tracking-[0.3em] text-paper/40">
+          <p className="mt-14 font-mono text-[10px] font-bold uppercase tracking-[0.3em] text-white/60">
             Hyderabad — India / INR
           </p>
         </Reveal>
