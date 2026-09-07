@@ -200,7 +200,7 @@ function ShopContent() {
     }
 
     return list;
-  }, [query, activeCategory, activeCollection, sortParam, selected, compatibleOnly]);
+  }, [products, query, activeCategory, activeCollection, sortParam, selected, compatibleOnly]);
 
   const updateParam = (key: string, value: string | null) => {
     const params = new URLSearchParams(searchParams.toString());
