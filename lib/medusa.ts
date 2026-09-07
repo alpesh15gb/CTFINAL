@@ -37,9 +37,11 @@ export async function listStoreProducts(options?: {
   const params: Record<string, unknown> = {
     limit: options?.limit ?? 100,
     offset: options?.offset ?? 0,
-    // Categories are NOT in the default store relations — without this
-    // expand every product arrives category-less and lands in "general".
-    expand: "categories",
+    // NOTE: do NOT add expand=categories here. On this backend the expand
+    // path returns products with an EMPTY variants array (no prices, no
+    // variant IDs → every product shows ₹0 / Sold Out). Categories come from
+    // the metadata snapshot the imports stamp on every product instead
+    // (see adaptStoreProduct), which is present with default relations.
   };
   if (options?.category_id?.length) params.category_id = options.category_id;
   const res = await medusaClient.products.list(params as never);
@@ -53,10 +55,8 @@ export async function listStoreProducts(options?: {
 }
 
 export async function getStoreProductByHandle(handle: string) {
-  const { products } = await medusaClient.products.list({
-    handle,
-    expand: "categories",
-  });
+  // Same caveat as above: no expand — it wipes variants on this backend.
+  const { products } = await medusaClient.products.list({ handle });
   return ((products ?? [])[0] ?? null) as unknown | null;
 }
 
