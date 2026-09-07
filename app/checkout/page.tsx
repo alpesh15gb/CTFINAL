@@ -51,12 +51,21 @@ export default function CheckoutPage() {
 
   const [step, setStep] = useState<Step>("details");
   const [details, setDetails] = useState<Details>(EMPTY);
+  const [touched, setTouched] = useState<Partial<Record<keyof Details, boolean>>>({});
   const [cartId, setCartId] = useState<string | null>(null);
   const [options, setOptions] = useState<ShipOption[]>([]);
   const [optionId, setOptionId] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [orderId, setOrderId] = useState<string | null>(null);
+  // Store-calculated totals (paise) — the source of truth for what the
+  // customer pays. Shown at the payment step; local math is estimate only.
+  const [storeTotals, setStoreTotals] = useState<{
+    subtotal: number;
+    shipping_total: number;
+    tax_total: number;
+    total: number;
+  } | null>(null);
 
   const missingVariants = useMemo(
     () => items.filter((i) => !i.product.variantId),
@@ -132,18 +141,52 @@ export default function CheckoutPage() {
     );
   }
 
-  const set = (key: keyof Details, value: string) =>
+  const set = (key: keyof Details, value: string) => {
     setDetails((d) => ({ ...d, [key]: value }));
+    setTouched((t) => ({ ...t, [key]: true }));
+  };
+
+  const digits = (v: string) => v.replace(/\D/g, "").replace(/^(91|0)/, "");
+  const emailOk = /.+@.+\..+/.test(details.email.trim());
+  const phoneOk = /^[6-9]\d{9}$/.test(digits(details.phone));
+  const pinOk = /^\d{6}$/.test(details.postal_code.replace(/\D/g, ""));
+  const fieldError = (key: keyof Details): string | null => {
+    if (!touched[key]) return null;
+    switch (key) {
+      case "email":
+        return emailOk ? null : "Enter a valid email address.";
+      case "first_name":
+        return details.first_name.trim() ? null : "First name is required.";
+      case "phone":
+        return phoneOk ? null : "Enter a valid 10-digit mobile number.";
+      case "address_1":
+        return details.address_1.trim() ? null : "Address is required.";
+      case "city":
+        return details.city.trim() ? null : "City is required.";
+      case "postal_code":
+        return pinOk ? null : "Enter a valid 6-digit pincode.";
+      default:
+        return null;
+    }
+  };
 
   const detailsValid =
-    /.+@.+\..+/.test(details.email) &&
+    emailOk &&
     details.first_name.trim() !== "" &&
-    details.phone.trim() !== "" &&
+    phoneOk &&
     details.address_1.trim() !== "" &&
     details.city.trim() !== "" &&
-    details.postal_code.trim() !== "";
+    pinOk;
 
   async function submitDetails() {
+    setTouched({
+      email: true,
+      first_name: true,
+      phone: true,
+      address_1: true,
+      city: true,
+      postal_code: true,
+    });
     if (!cartId || !detailsValid || busy) return;
     setBusy(true);
     setError(null);
@@ -188,8 +231,23 @@ export default function CheckoutPage() {
     setBusy(true);
     setError(null);
     try {
-      await medusaClient.carts.addShippingMethod(cartId, {
+      // addShippingMethod returns the recalculated cart — capture the
+      // store totals so the payment step shows what will actually be paid,
+      // not just local estimates.
+      const { cart } = await medusaClient.carts.addShippingMethod(cartId, {
         option_id: optionId,
+      });
+      const totals = cart as unknown as {
+        subtotal?: number;
+        shipping_total?: number;
+        tax_total?: number;
+        total?: number;
+      };
+      setStoreTotals({
+        subtotal: totals.subtotal ?? total * 100,
+        shipping_total: totals.shipping_total ?? 0,
+        tax_total: totals.tax_total ?? 0,
+        total: totals.total ?? total * 100 + shippingCost,
       });
       await medusaClient.carts.createPaymentSessions(cartId);
       setStep("payment");
@@ -255,19 +313,29 @@ export default function CheckoutPage() {
     key: keyof Details,
     label: string,
     props?: React.InputHTMLAttributes<HTMLInputElement>
-  ) => (
-    <label className="block">
-      <span className="mb-1 block text-xs font-semibold uppercase tracking-widest text-silver-muted">
-        {label}
-      </span>
-      <Input
-        value={details[key]}
-        onChange={(e) => set(key, e.target.value)}
-        className="border-border bg-raised text-foreground"
-        {...props}
-      />
-    </label>
-  );
+  ) => {
+    const err = fieldError(key);
+    return (
+      <label className="block">
+        <span className="mb-1 block text-xs font-semibold uppercase tracking-widest text-silver-muted">
+          {label}
+        </span>
+        <Input
+          value={details[key]}
+          onChange={(e) => set(key, e.target.value)}
+          onBlur={() =>
+            setTouched((t) => ({ ...t, [key]: true }))
+          }
+          aria-invalid={err ? true : undefined}
+          className={`border-border bg-raised text-foreground ${
+            err ? "border-red" : ""
+          }`}
+          {...props}
+        />
+        {err && <span className="mt-1 block text-xs text-red">{err}</span>}
+      </label>
+    );
+  };
 
   return (
     <main className="min-h-screen bg-background pb-24 pt-28">
@@ -434,6 +502,10 @@ export default function CheckoutPage() {
                   >
                     {busy ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : storeTotals ? (
+                      `Place Order • ₹${paiseToRupees(
+                        storeTotals.total
+                      ).toLocaleString("en-IN")}`
                     ) : (
                       `Place Order • ₹${(
                         total + paiseToRupees(shippingCost)
@@ -441,6 +513,43 @@ export default function CheckoutPage() {
                     )}
                   </Button>
                 </div>
+                {storeTotals && (
+                  <div className="rounded-xl border border-border bg-raised p-4 text-sm">
+                    <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-silver-muted">
+                      Store-confirmed breakup
+                    </p>
+                    <div className="space-y-1 text-silver-muted">
+                      <div className="flex justify-between">
+                        <span>Subtotal</span>
+                        <span>
+                          ₹{paiseToRupees(storeTotals.subtotal).toLocaleString("en-IN")}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Shipping</span>
+                        <span>
+                          {storeTotals.shipping_total === 0
+                            ? "Free"
+                            : `₹${paiseToRupees(storeTotals.shipping_total).toLocaleString("en-IN")}`}
+                        </span>
+                      </div>
+                      {storeTotals.tax_total > 0 && (
+                        <div className="flex justify-between">
+                          <span>Tax</span>
+                          <span>
+                            ₹{paiseToRupees(storeTotals.tax_total).toLocaleString("en-IN")}
+                          </span>
+                        </div>
+                      )}
+                      <div className="flex justify-between font-medium text-foreground">
+                        <span>To pay on delivery</span>
+                        <span>
+                          ₹{paiseToRupees(storeTotals.total).toLocaleString("en-IN")}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </section>
             )}
           </div>
@@ -453,9 +562,10 @@ export default function CheckoutPage() {
             <Separator className="my-4 bg-border" />
             <div className="space-y-3 text-sm">
               {items.map((i) => (
-                <div key={i.product.id} className="flex justify-between gap-3">
+                <div key={`${i.product.id}::${i.product.variantId ?? ""}`} className="flex justify-between gap-3">
                   <span className="text-silver-muted">
-                    {i.product.name} × {i.quantity}
+                    {i.product.name}
+                    {i.product.variantLabel ? ` — ${i.product.variantLabel}` : ""} × {i.quantity}
                   </span>
                   <span className="shrink-0 text-foreground">
                     ₹{(i.product.price * i.quantity).toLocaleString("en-IN")}

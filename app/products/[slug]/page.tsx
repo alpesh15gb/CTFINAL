@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
+import { notFound } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
@@ -21,9 +22,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { listStoreProducts } from "@/lib/medusa";
+import { getStoreProductByHandle, listStoreProducts } from "@/lib/medusa";
 import {
   adaptStoreProduct,
+  type MedusaStoreCategory,
   type MedusaStoreProduct,
 } from "@/lib/store-adapter";
 import type { Product } from "@/types";
@@ -34,41 +36,194 @@ import { staggerContainer, fadeInUp } from "@/lib/animations";
 
 export const dynamic = "force-dynamic";
 
+interface RawOptionValue {
+  value: string;
+}
+
+interface RawProductOption {
+  id: string;
+  title: string;
+  values?: RawOptionValue[];
+}
+
+interface RawVariant {
+  id: string;
+  title?: string | null;
+  prices?: { amount: number; currency_code: string }[];
+  options?: { option_id: string; value: string }[];
+  inventory_quantity?: number | null;
+  allow_backorder?: boolean | null;
+  metadata?: Record<string, unknown> | null;
+}
+
+interface RawProduct extends MedusaStoreProduct {
+  options?: RawProductOption[];
+  variants?: RawVariant[];
+}
+
+function variantMatches(
+  variant: RawVariant,
+  selection: Record<string, string>
+): boolean {
+  const entries = Object.entries(selection);
+  if (!entries.length) return true;
+  return entries.every(([optionId, value]) =>
+    (variant.options ?? []).some(
+      (o) => String(o.option_id) === optionId && String(o.value) === value
+    )
+  );
+}
+
+function variantPrice(variant: RawVariant): {
+  price: number;
+  currency: string;
+} {
+  const prices = variant.prices ?? [];
+  const cheapest = prices.reduce<{ amount: number; currency_code: string } | null>(
+    (best, cur) => (!best || cur.amount < best.amount ? cur : best),
+    null
+  );
+  return {
+    price: cheapest ? Math.round(cheapest.amount / 100) : 0,
+    currency: cheapest?.currency_code ?? "inr",
+  };
+}
+
 export default function ProductDetailPage() {
   const params = useParams();
   const slug = typeof params.slug === "string" ? params.slug : "";
 
-  // Live catalog from Medusa (single fetch serves detail + related).
-  const [catalog, setCatalog] = useState<Product[] | null>(null);
+  // Live product by handle (single fetch — every catalog product is
+  // reachable, not just the first listing page).
+  const [raw, setRaw] = useState<RawProduct | null>(null);
+  const [related, setRelated] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const raw = await listStoreProducts({ limit: 100 });
-        if (!cancelled) {
-          setCatalog((raw as MedusaStoreProduct[]).map(adaptStoreProduct));
-        }
-      } catch (error) {
-        console.error("[product] failed to load live catalog:", error);
-        if (!cancelled) setLoadError(true);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  const product = catalog?.find((p) => p.slug === slug) ?? null;
 
   const { selected } = useVehicle();
   const { addItem } = useCart();
   const [quantity, setQuantity] = useState(1);
   const [added, setAdded] = useState(false);
   const [activeImage, setActiveImage] = useState(0);
+  const [selection, setSelection] = useState<Record<string, string>>({});
 
-  if (!loadError && catalog === null) {
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    setLoadError(false);
+    setRaw(null);
+    setRelated([]);
+    setQuantity(1);
+    setAdded(false);
+    setActiveImage(0);
+    setSelection({});
+    (async () => {
+      try {
+        const found = (await getStoreProductByHandle(slug)) as RawProduct | null;
+        if (cancelled) return;
+        if (!found) {
+          setLoading(false);
+          return;
+        }
+        setRaw(found);
+        // Preselect the cheapest variant's options so single-variant
+        // products need no interaction.
+        const variants = found.variants ?? [];
+        const priced = variants.filter((v) => (v.prices ?? []).length > 0);
+        const cheapest = priced.reduce<RawVariant | null>(
+          (best, cur) =>
+            !best ||
+            (cur.prices?.[0]?.amount ?? Infinity) <
+              (best.prices?.[0]?.amount ?? Infinity)
+              ? cur
+              : best,
+          null
+        );
+        const preset: Record<string, string> = {};
+        for (const o of cheapest?.options ?? []) {
+          preset[String(o.option_id)] = String(o.value);
+        }
+        setSelection(preset);
+        const categoryId = (found.categories as MedusaStoreCategory[] | undefined)?.[0]?.id;
+        if (categoryId) {
+          try {
+            const page = await listStoreProducts({
+              limit: 4,
+              category_id: [categoryId],
+            });
+            if (!cancelled) {
+              setRelated(
+                (page.products as MedusaStoreProduct[])
+                  .map(adaptStoreProduct)
+                  .filter((p) => p.id !== found.id)
+                  .slice(0, 3)
+              );
+            }
+          } catch {
+            // Related is a nice-to-have; the detail stands alone.
+          }
+        }
+        if (!cancelled) setLoading(false);
+      } catch (error) {
+        console.error("[product] failed to load product:", error);
+        if (!cancelled) {
+          setLoadError(true);
+          setLoading(false);
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [slug]);
+
+  const options = useMemo(() => raw?.options ?? [], [raw]);
+  const variants = useMemo(() => raw?.variants ?? [], [raw]);
+  const multiVariant = options.length > 0 && variants.length > 1;
+
+  const selectedVariant = useMemo<RawVariant | null>(() => {
+    if (!variants.length) return null;
+    const priced = variants.filter((v) => (v.prices ?? []).length > 0);
+    const pool = priced.length ? priced : variants;
+    return (
+      pool.find((v) => variantMatches(v, selection)) ?? pool[0] ?? null
+    );
+  }, [variants, selection]);
+
+  const base = useMemo(
+    () => (raw ? adaptStoreProduct(raw) : null),
+    [raw]
+  );
+
+  const product: Product | null = useMemo(() => {
+    if (!base || !selectedVariant) return base;
+    const { price, currency } = variantPrice(selectedVariant);
+    const comparePaise = Number(
+      selectedVariant.metadata?.compare_at_price ?? 0
+    );
+    const compareRupees =
+      Number.isFinite(comparePaise) && comparePaise > 0
+        ? Math.round(comparePaise / 100)
+        : undefined;
+    const label =
+      selectedVariant.title && selectedVariant.title !== "Default Title"
+        ? selectedVariant.title
+        : Object.values(selection).join(" / ") || undefined;
+    return {
+      ...base,
+      price,
+      currency,
+      variantId: selectedVariant.id,
+      variantLabel: label,
+      originalPrice:
+        compareRupees && compareRupees > price ? compareRupees : undefined,
+      inStock:
+        (selectedVariant.inventory_quantity ?? 1) > 0 ||
+        selectedVariant.allow_backorder === true,
+    };
+  }, [base, selectedVariant, selection]);
+
+  if (!loadError && loading) {
     return (
       <main className="min-h-screen bg-background pb-24 pt-28">
         <div className="mx-auto max-w-[1600px] px-4 md:px-8">
@@ -105,18 +260,7 @@ export default function ProductDetailPage() {
   }
 
   if (!product) {
-    return (
-      <main className="flex min-h-screen items-center justify-center bg-background pt-20">
-        <div className="text-center">
-          <h1 className="font-display text-4xl uppercase text-foreground">
-            Product Not Found
-          </h1>
-          <Button asChild className="mt-6 bg-cyan text-black hover:bg-cyan-light">
-            <Link href="/shop">Back to Shop</Link>
-          </Button>
-        </div>
-      </main>
-    );
+    notFound();
   }
 
   const fits = selected
@@ -127,17 +271,11 @@ export default function ProductDetailPage() {
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
     : null;
 
-  const related = (catalog ?? [])
-    .filter(
-      (p) =>
-        p.categorySlug === product.categorySlug && p.id !== product.id
-    )
-    .slice(0, 3);
-
   const gallery = product.images;
   const activeSrc = gallery[Math.min(activeImage, gallery.length - 1)];
 
   const handleAdd = () => {
+    if (!product.inStock) return;
     for (let i = 0; i < quantity; i++) {
       addItem(product);
     }
@@ -219,18 +357,66 @@ export default function ProductDetailPage() {
               <h1 className="mt-2 font-display text-4xl font-bold uppercase leading-tight text-foreground md:text-5xl">
                 {product.name}
               </h1>
-              <div className="mt-3 flex items-center gap-3">
-                <div className="flex items-center gap-1">
-                  <Star className="h-4 w-4 fill-cyan text-cyan-deep" />
-                  <span className="text-sm font-medium text-foreground">
-                    {product.rating}
+              {product.reviewCount > 0 && (
+                <div className="mt-3 flex items-center gap-3">
+                  <div className="flex items-center gap-1">
+                    <Star className="h-4 w-4 fill-cyan text-cyan-deep" />
+                    <span className="text-sm font-medium text-foreground">
+                      {product.rating}
+                    </span>
+                  </div>
+                  <span className="text-sm text-silver-muted">
+                    ({product.reviewCount} reviews)
                   </span>
                 </div>
-                <span className="text-sm text-silver-muted">
-                  ({product.reviewCount} reviews)
-                </span>
-              </div>
+              )}
             </div>
+
+            {/* Variant selector (only when the product has real options) */}
+            {multiVariant && (
+              <div className="space-y-4">
+                {options.map((option) => (
+                  <div key={option.id}>
+                    <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-foreground">
+                      {option.title}
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {(option.values ?? []).map((v) => {
+                        const active = selection[option.id] === v.value;
+                        return (
+                          <button
+                            key={v.value}
+                            type="button"
+                            onClick={() =>
+                              setSelection((s) => ({
+                                ...s,
+                                [option.id]: v.value,
+                              }))
+                            }
+                            aria-pressed={active}
+                            className={`min-h-11 rounded-md border px-4 text-sm transition-colors ${
+                              active
+                                ? "border-cyan-deep bg-cyan/10 text-foreground"
+                                : "border-border bg-raised text-silver-muted hover:border-silver hover:text-foreground"
+                            }`}
+                          >
+                            {v.value}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+                {product.variantLabel && (
+                  <p className="text-sm text-silver-muted">
+                    Selected:{" "}
+                    <span className="text-foreground">
+                      {product.variantLabel}
+                    </span>
+                  </p>
+                )}
+              </div>
+            )}
 
             {/* Fitment */}
             <div
@@ -313,6 +499,7 @@ export default function ProductDetailPage() {
               <Button
                 size="lg"
                 onClick={handleAdd}
+                disabled={!product.inStock}
                 className={`flex-1 gap-2 text-base uppercase tracking-wider ${
                   added
                     ? "bg-green-600 text-white hover:bg-green-600"
@@ -324,7 +511,11 @@ export default function ProductDetailPage() {
                 ) : (
                   <ShoppingBag className="h-5 w-5" />
                 )}
-                {added ? "Added to Cart" : "Add to Cart"}
+                {added
+                  ? "Added to Cart"
+                  : product.inStock
+                    ? "Add to Cart"
+                    : "Sold Out"}
               </Button>
 
               <Button

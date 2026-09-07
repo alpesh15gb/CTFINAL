@@ -28,6 +28,8 @@ export interface Product {
   // Cheapest purchasable Medusa variant — required to build a store cart.
   // Null for legacy cached items; those must be re-added from the shop.
   variantId: string | null;
+  // Human-readable spec of the selected variant (size / PCD / options).
+  variantLabel?: string;
   rating: number;
   reviewCount: number;
   compatibility: string[]; // vehicle slugs

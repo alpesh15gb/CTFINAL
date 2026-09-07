@@ -77,28 +77,36 @@ function ShopContent() {
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
   // Live catalog from Medusa — no local fallback (an empty/error state is
-  // always preferable to showing products we don't sell).
+  // always preferable to showing products we don't sell). Paged in 100s so
+  // the whole catalog (not just the first API page) is reachable.
+  const PAGE_SIZE = 100;
   const [catalog, setCatalog] = useState<Product[] | null>(null);
+  const [total, setTotal] = useState(0);
   const [categories, setCategories] = useState<Category[]>([]);
   const [collections, setCollections] = useState<MedusaStoreCollection[]>([]);
   const [loadError, setLoadError] = useState(false);
+  const [moreFailed, setMoreFailed] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
     setCatalog(null);
+    setTotal(0);
     setLoadError(false);
+    setMoreFailed(false);
     (async () => {
       try {
-        const [rawProducts, rawCategories, rawCollections] = await Promise.all([
-          listStoreProducts({ limit: 100 }),
+        const [page, rawCategories, rawCollections] = await Promise.all([
+          listStoreProducts({ limit: PAGE_SIZE }),
           listStoreCategories().catch(() => [] as unknown[]),
           listStoreCollections().catch(() => [] as unknown[]),
         ]);
         if (cancelled) return;
         setCatalog(
-          (rawProducts as MedusaStoreProduct[]).map(adaptStoreProduct)
+          (page.products as MedusaStoreProduct[]).map(adaptStoreProduct)
         );
+        setTotal(page.count);
         setCategories(
           (rawCategories as MedusaStoreCategory[]).map(adaptStoreCategory)
         );
@@ -112,6 +120,29 @@ function ShopContent() {
       cancelled = true;
     };
   }, [attempt]);
+
+  const loadMore = async () => {
+    if (!catalog || catalog.length >= total || loadingMore) return;
+    setLoadingMore(true);
+    setMoreFailed(false);
+    try {
+      const page = await listStoreProducts({
+        limit: PAGE_SIZE,
+        offset: catalog.length,
+      });
+      const seen = new Set(catalog.map((p) => p.id));
+      const fresh = (page.products as MedusaStoreProduct[])
+        .map(adaptStoreProduct)
+        .filter((p) => !seen.has(p.id));
+      setCatalog([...catalog, ...fresh]);
+      setTotal(page.count);
+    } catch (error) {
+      console.error("[shop] failed to load more:", error);
+      setMoreFailed(true);
+    } finally {
+      setLoadingMore(false);
+    }
+  };
 
   const products = useMemo(() => catalog ?? [], [catalog]);
 
@@ -388,7 +419,7 @@ function ShopContent() {
           <div>
             <div className="mb-4 flex items-center justify-between text-sm text-silver-muted">
               <span>
-                {filtered.length} product{filtered.length !== 1 ? "s" : ""}
+                {filtered.length} of {total} product{total !== 1 ? "s" : ""}
                 {activeCollection ? ` by ${activeCollection.title}` : ""}
               </span>
               {filterCount > 0 && (
@@ -422,6 +453,26 @@ function ShopContent() {
                 {filtered.map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}
+              </div>
+            )}
+
+            {catalog && catalog.length < total && (
+              <div className="mt-10 text-center">
+                {moreFailed && (
+                  <p className="mb-3 text-sm text-red">
+                    Couldn&apos;t load more products. Try again.
+                  </p>
+                )}
+                <Button
+                  onClick={loadMore}
+                  disabled={loadingMore}
+                  variant="outline"
+                  className="border-border bg-transparent text-foreground hover:border-cyan-deep hover:text-cyan-deep"
+                >
+                  {loadingMore
+                    ? "Loading…"
+                    : `Load more (${catalog.length} of ${total})`}
+                </Button>
               </div>
             )}
           </div>

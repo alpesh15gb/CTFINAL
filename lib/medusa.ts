@@ -24,18 +24,32 @@ export const medusaClient = new Medusa({
 
 // Product helpers (live Medusa store API — these throw on failure so callers
 // can distinguish "backend unreachable" from "no products").
+export interface StoreProductPage {
+  products: unknown[];
+  count: number;
+}
+
 export async function listStoreProducts(options?: {
   limit?: number;
   offset?: number;
-}) {
-  const res = await medusaClient.products.list({
+  category_id?: string[];
+}): Promise<StoreProductPage> {
+  const params: Record<string, unknown> = {
     limit: options?.limit ?? 100,
     offset: options?.offset ?? 0,
     // Categories are NOT in the default store relations — without this
     // expand every product arrives category-less and lands in "general".
     expand: "categories",
-  });
-  return (res?.products ?? []) as unknown[];
+  };
+  if (options?.category_id?.length) params.category_id = options.category_id;
+  const res = await medusaClient.products.list(params as never);
+  return {
+    products: ((res as unknown as { products?: unknown[] })?.products ??
+      []) as unknown[],
+    count:
+      (res as unknown as { count?: number })?.count ??
+      (((res as unknown as { products?: unknown[] })?.products ?? []).length),
+  };
 }
 
 export async function getStoreProductByHandle(handle: string) {
@@ -46,19 +60,41 @@ export async function getStoreProductByHandle(handle: string) {
   return ((products ?? [])[0] ?? null) as unknown | null;
 }
 
+// Tiny TTL cache for near-static reference data (categories, collections,
+// regions) so every page mount doesn't refetch them.
+const referenceCache = new Map<string, { at: number; value: unknown[] }>();
+const REFERENCE_TTL_MS = 5 * 60 * 1000;
+
+async function cachedReference(
+  key: string,
+  loader: () => Promise<unknown[]>
+): Promise<unknown[]> {
+  const hit = referenceCache.get(key);
+  if (hit && Date.now() - hit.at < REFERENCE_TTL_MS) return hit.value;
+  const value = await loader();
+  referenceCache.set(key, { at: Date.now(), value });
+  return value;
+}
+
 export async function listStoreCategories() {
-  const res = await medusaClient.productCategories.list({ limit: 100 });
-  const raw = res as unknown as {
-    product_categories?: unknown[];
-    productCategories?: unknown[];
-  };
-  return (raw?.product_categories ?? raw?.productCategories ?? []) as unknown[];
+  return cachedReference("categories", async () => {
+    const res = await medusaClient.productCategories.list({ limit: 100 });
+    const raw = res as unknown as {
+      product_categories?: unknown[];
+      productCategories?: unknown[];
+    };
+    return (raw?.product_categories ??
+      raw?.productCategories ??
+      []) as unknown[];
+  });
 }
 
 export async function listStoreCollections() {
-  const res = await medusaClient.collections.list({ limit: 100 });
-  const raw = res as unknown as { collections?: unknown[] };
-  return (raw?.collections ?? []) as unknown[];
+  return cachedReference("collections", async () => {
+    const res = await medusaClient.collections.list({ limit: 100 });
+    const raw = res as unknown as { collections?: unknown[] };
+    return (raw?.collections ?? []) as unknown[];
+  });
 }
 
 // Cart helpers

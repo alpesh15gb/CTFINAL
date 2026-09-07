@@ -10,11 +10,22 @@ import { Textarea } from "@/components/ui/textarea";
 import { staggerContainer, fadeInUp } from "@/lib/animations";
 
 export default function ContactPage() {
-  const [submitted, setSubmitted] = useState(false);
+  const [mailedTo, setMailedTo] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // No contact backend exists yet, so the form honestly hands the composed
+  // message to the visitor's own mail app instead of pretending to send it.
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setSubmitted(true);
+    const data = new FormData(e.currentTarget);
+    const name = String(data.get("name") ?? "");
+    const email = String(data.get("email") ?? "");
+    const subject = String(data.get("subject") ?? "Website enquiry");
+    const message = String(data.get("message") ?? "");
+    const body = `Name: ${name}\nEmail: ${email}\n\n${message}`;
+    window.location.href = `mailto:hello@cartunez.com?subject=${encodeURIComponent(
+      `[Cartunez] ${subject}`
+    )}&body=${encodeURIComponent(body)}`;
+    setMailedTo("hello@cartunez.com");
   };
 
   return (
@@ -87,13 +98,14 @@ export default function ContactPage() {
             variants={fadeInUp}
             className="rounded-xl border border-border bg-raised p-6 md:p-8"
           >
-            {submitted ? (
+            {mailedTo ? (
               <div className="py-12 text-center">
                 <h2 className="font-display text-2xl uppercase text-foreground">
-                  Message Sent
+                  Opening Your Mail App
                 </h2>
                 <p className="mt-2 text-silver-muted">
-                  We&apos;ll get back to you within 24 hours.
+                  Your message is addressed to {mailedTo} — just hit send
+                  there. Prefer talking? Call us at +91 98765 43210.
                 </p>
               </div>
             ) : (
@@ -146,7 +158,7 @@ export default function ContactPage() {
                   type="submit"
                   className="w-full gap-2 bg-red text-white hover:bg-red-deep"
                 >
-                  Send Message <Send className="h-4 w-4" />
+                  Send via Email <Send className="h-4 w-4" />
                 </Button>
               </form>
             )}

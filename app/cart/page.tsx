@@ -11,10 +11,12 @@ import {
   ShoppingBag,
   Wrench,
   Check,
+  Package,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useCart } from "@/hooks/useCart";
+import { cartItemKey } from "@/stores/cartStore";
 import { useVehicle } from "@/hooks/useVehicle";
 import { staggerContainer, fadeInUp } from "@/lib/animations";
 
@@ -73,17 +75,26 @@ export default function CartPage() {
                   : null;
                 return (
                   <div
-                    key={item.product.id}
+                    key={cartItemKey(item)}
                     className="flex flex-col gap-4 rounded-xl border border-border bg-raised p-4 sm:flex-row sm:items-center"
                   >
                     <div className="relative h-28 w-full shrink-0 overflow-hidden rounded-lg sm:w-36">
-                      <Image
-                        src={item.product.images[0]}
-                        alt={item.product.name}
-                        fill
-                        className="object-cover"
-                        sizes="144px"
-                      />
+                      {item.product.images[0] ? (
+                        <Image
+                          src={item.product.images[0]}
+                          alt={item.product.name}
+                          fill
+                          className="object-cover"
+                          sizes="144px"
+                        />
+                      ) : (
+                        <div className="flex h-full w-full flex-col items-center justify-center gap-2 bg-surface text-silver-muted">
+                          <Package className="h-8 w-8" aria-hidden="true" />
+                          <span className="font-mono text-[10px] uppercase tracking-[0.18em]">
+                            No image
+                          </span>
+                        </div>
+                      )}
                     </div>
 
                     <div className="flex-1">
@@ -97,7 +108,12 @@ export default function CartPage() {
                             className="font-display text-lg font-semibold uppercase text-foreground transition-colors hover:text-cyan-deep"
                           >
                             {item.product.name}
-                          </Link>
+                            </Link>
+                            {item.product.variantLabel && (
+                              <p className="mt-1 text-xs text-silver-muted">
+                                {item.product.variantLabel}
+                              </p>
+                            )}
                           {fits === true && (
                             <p className="mt-1 inline-flex items-center gap-1 text-xs text-cyan-deep">
                               <Check className="h-3 w-3" /> Fits your vehicle
@@ -120,7 +136,7 @@ export default function CartPage() {
                           <button
                             type="button"
                             onClick={() =>
-                              updateQuantity(item.product.id, item.quantity - 1)
+                              updateQuantity(cartItemKey(item), item.quantity - 1)
                             }
                             className="flex h-9 w-9 items-center justify-center text-foreground hover:text-cyan-deep"
                           >
@@ -132,7 +148,7 @@ export default function CartPage() {
                           <button
                             type="button"
                             onClick={() =>
-                              updateQuantity(item.product.id, item.quantity + 1)
+                              updateQuantity(cartItemKey(item), item.quantity + 1)
                             }
                             className="flex h-9 w-9 items-center justify-center text-foreground hover:text-cyan-deep"
                           >
@@ -140,11 +156,12 @@ export default function CartPage() {
                           </button>
                         </div>
 
-                        <button
-                          type="button"
-                          onClick={() => removeItem(item.product.id)}
-                          className="inline-flex items-center gap-1 text-sm text-silver-muted transition-colors hover:text-red"
-                        >
+                          <button
+                            type="button"
+                            onClick={() => removeItem(cartItemKey(item))}
+                            aria-label={`Remove ${item.product.name}`}
+                            className="inline-flex items-center gap-1 text-sm text-silver-muted transition-colors hover:text-red"
+                          >
                           <Trash2 className="h-4 w-4" /> Remove
                         </button>
                       </div>

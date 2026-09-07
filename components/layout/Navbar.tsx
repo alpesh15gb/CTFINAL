@@ -2,10 +2,10 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { motion, useMotionValueEvent, useScroll } from "framer-motion";
-import { ArrowRight, CarFront, Menu, Search, ShoppingBag, User, X } from "lucide-react";
+import { ArrowRight, CarFront, Menu, Search, ShoppingBag, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/hooks/useCart";
 import { Button } from "@/components/ui/button";
@@ -22,10 +22,16 @@ const navLinks = [
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  // Persisted cart state rehydrates after mount — hold the badge until then
+  // so SSR/first paint never mismatches or pops from 0.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   const pathname = usePathname();
   const { scrollY } = useScroll();
   const { totalItems } = useCart();
-  const cartCount = totalItems();
+  const cartCount = mounted ? totalItems() : 0;
 
   useMotionValueEvent(scrollY, "change", (latest) => {
     const next = latest > 32;
@@ -110,14 +116,6 @@ export function Navbar() {
             <Search className="h-[18px] w-[18px]" />
           </Link>
 
-          <Link
-            href="/account"
-            className="hidden h-11 w-11 items-center justify-center rounded-sm border border-transparent text-ink-soft transition-all hover:border-ink/15 hover:bg-ink/[0.05] hover:text-ink md:flex"
-            aria-label="Account"
-          >
-            <User className="h-[18px] w-[18px]" />
-          </Link>
-
           <CartSheet>
             <button
               type="button"
@@ -189,7 +187,6 @@ export function Navbar() {
                     </Link>
                   </Button>
                   <div className="flex items-center justify-center gap-8 font-mono text-[10px] uppercase tracking-wider text-ink-mute">
-                      <Link href="/account" className="min-h-11 py-3 hover:text-ink">Account</Link>
                       <Link href="/cart" className="min-h-11 py-3 hover:text-ink">Cart ({cartCount})</Link>
                   </div>
                 </div>

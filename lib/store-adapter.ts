@@ -17,8 +17,9 @@ export interface MedusaMoneyAmount {
 export interface MedusaStoreVariant {
   id: string;
   inventory_quantity?: number | null;
-  allow_backorder?: boolean;
+  allow_backorder?: boolean | null;
   prices?: MedusaMoneyAmount[];
+  metadata?: Record<string, unknown> | null;
 }
 
 export interface MedusaStoreImage {
@@ -81,13 +82,34 @@ function metaStringArray(value: unknown): string[] {
 export function adaptStoreProduct(p: MedusaStoreProduct): Product {
   const variants = p.variants ?? [];
 
-  const allPrices = variants.flatMap((v) =>
-    (v.prices ?? []).map((p) => ({ ...p, variant_id: v.id }))
+  // Cheapest priced variant wins the default price/variant (detail page can
+  // override with an explicit variant selection).
+  let cheapestVariant: MedusaStoreVariant | null = null;
+  let cheapestAmount = Infinity;
+  for (const v of variants) {
+    for (const price of v.prices ?? []) {
+      if (price.amount < cheapestAmount) {
+        cheapestAmount = price.amount;
+        cheapestVariant = v;
+      }
+    }
+  }
+  const cheapestPrice = cheapestVariant
+    ? (cheapestVariant.prices ?? []).reduce<MedusaMoneyAmount | null>(
+        (best, cur) => (!best || cur.amount < best.amount ? cur : best),
+        null
+      )
+    : null;
+  // Imports stamp the pre-discount MRP (paise) into variant metadata.
+  const comparePaise = Number(
+    (cheapestVariant?.metadata as Record<string, unknown> | undefined)
+      ?.compare_at_price ?? 0
   );
-  const cheapest = allPrices.reduce<(MedusaMoneyAmount & { variant_id: string }) | null>(
-    (best, cur) => (!best || cur.amount < best.amount ? cur : best),
-    null
-  );
+  const compareRupees =
+    Number.isFinite(comparePaise) && comparePaise > 0
+      ? Math.round(comparePaise / 100)
+      : undefined;
+  const price = cheapestPrice ? Math.round(cheapestPrice.amount / 100) : 0;
 
   const imageUrls = [
     ...(p.thumbnail ? [p.thumbnail] : []),
@@ -114,10 +136,11 @@ export function adaptStoreProduct(p: MedusaStoreProduct): Product {
     category: categoryName,
     categorySlug: categorySlug,
     collectionId: p.collection_id ?? null,
-    price: cheapest ? Math.round(cheapest.amount / 100) : 0,
-    originalPrice: undefined,
-    currency: currencySymbol(cheapest?.currency_code),
-    variantId: cheapest?.variant_id ?? null,
+    price,
+    originalPrice:
+      compareRupees && compareRupees > price ? compareRupees : undefined,
+    currency: currencySymbol(cheapestPrice?.currency_code),
+    variantId: cheapestVariant?.id ?? null,
     rating: Number(meta.rating) || 0,
     reviewCount: Number(meta.reviewCount) || 0,
     // Empty compatibility = universal fit (backend carries no fitment info).

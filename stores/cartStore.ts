@@ -2,11 +2,20 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { CartItem, Product } from "@/types";
 
+/** Stable identity for a cart line: same product, different variant = lines. */
+export function cartLineKey(product: Pick<Product, "id" | "variantId">) {
+  return `${product.id}::${product.variantId ?? ""}`;
+}
+
+export function cartItemKey(item: CartItem) {
+  return cartLineKey(item.product);
+}
+
 interface CartState {
   items: CartItem[];
   addItem: (product: Product, quantity?: number) => void;
-  removeItem: (productId: string) => void;
-  updateQuantity: (productId: string, quantity: number) => void;
+  removeItem: (lineKey: string) => void;
+  updateQuantity: (lineKey: string, quantity: number) => void;
   clearCart: () => void;
   totalItems: () => number;
   subtotal: () => number;
@@ -17,11 +26,14 @@ export const useCartStore = create<CartState>()(
     (set, get) => ({
       items: [],
       addItem: (product, quantity = 1) => {
-        const existing = get().items.find((i) => i.product.id === product.id);
+        const key = cartLineKey(product);
+        const existing = get().items.find(
+          (i) => cartItemKey(i) === key
+        );
         if (existing) {
           set({
             items: get().items.map((i) =>
-              i.product.id === product.id
+              cartItemKey(i) === key
                 ? { ...i, quantity: i.quantity + quantity }
                 : i
             ),
@@ -30,17 +42,19 @@ export const useCartStore = create<CartState>()(
           set({ items: [...get().items, { product, quantity }] });
         }
       },
-      removeItem: (productId) => {
-        set({ items: get().items.filter((i) => i.product.id !== productId) });
+      removeItem: (lineKey) => {
+        set({
+          items: get().items.filter((i) => cartItemKey(i) !== lineKey),
+        });
       },
-      updateQuantity: (productId, quantity) => {
+      updateQuantity: (lineKey, quantity) => {
         if (quantity < 1) {
-          get().removeItem(productId);
+          get().removeItem(lineKey);
           return;
         }
         set({
           items: get().items.map((i) =>
-            i.product.id === productId ? { ...i, quantity } : i
+            cartItemKey(i) === lineKey ? { ...i, quantity } : i
           ),
         });
       },
@@ -54,3 +68,13 @@ export const useCartStore = create<CartState>()(
     }
   )
 );
+
+// Keep tabs in sync: another tab editing the cart rehydrates this one instead
+// of silently diverging and overwriting on next write.
+if (typeof window !== "undefined") {
+  window.addEventListener("storage", (event) => {
+    if (event.key === "cartunez-cart") {
+      void useCartStore.persist.rehydrate();
+    }
+  });
+}

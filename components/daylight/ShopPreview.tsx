@@ -22,9 +22,11 @@ export function ShopPreview() {
   useEffect(() => {
     let cancelled = false;
     listStoreProducts({ limit: 4 })
-      .then((raw) => {
+      .then((page) => {
         if (!cancelled) {
-          setItems((raw as MedusaStoreProduct[]).map(adaptStoreProduct));
+          setItems(
+            (page.products as MedusaStoreProduct[]).map(adaptStoreProduct)
+          );
         }
       })
       .catch((error) => {
