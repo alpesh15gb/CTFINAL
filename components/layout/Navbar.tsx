@@ -29,7 +29,6 @@ export function Navbar() {
     setMounted(true);
   }, []);
   const pathname = usePathname();
-  const isHome = pathname === "/";
   const { scrollY } = useScroll();
   const { totalItems } = useCart();
   const cartCount = mounted ? totalItems() : 0;
@@ -52,20 +51,16 @@ export function Navbar() {
       className={cn(
         "fixed inset-x-0 top-0 z-50 border-b transition-all duration-500",
         scrolled
-          ? isHome
-            ? "border-white/10 bg-[#090a0d]/90 shadow-[0_18px_55px_rgba(0,0,0,0.35)] backdrop-blur-xl"
-            : "border-ink/10 bg-paper/90 shadow-[0_18px_55px_rgba(20,20,23,0.10)] backdrop-blur-xl"
-          : isHome
-            ? "border-transparent bg-gradient-to-b from-[#090a0d]/90 to-transparent"
-            : "border-transparent bg-gradient-to-b from-paper/85 to-transparent"
+          ? "border-ink/10 bg-paper/90 shadow-[0_18px_55px_rgba(20,20,23,0.10)] backdrop-blur-xl"
+          : "border-transparent bg-gradient-to-b from-paper/85 to-transparent"
       )}
     >
       <div className="hidden overflow-hidden bg-ink/[0.04] transition-all duration-500 lg:block">
-        <div className={cn("site-container flex h-7 items-center justify-between font-mono text-[9px] uppercase tracking-[0.2em]", isHome ? "text-white/50" : "text-ink-mute")}>
+        <div className="site-container flex h-7 items-center justify-between font-mono text-[9px] uppercase tracking-[0.2em] text-ink-mute">
           <span>Vehicle-specific upgrades / verified fitment</span>
           <div className="flex items-center gap-6">
             <span>India / INR</span>
-            <Link href="/contact" className={cn("transition-colors", isHome ? "hover:text-white" : "hover:text-ink")}>
+            <Link href="/contact" className="transition-colors hover:text-ink">
               Expert consultation
             </Link>
           </div>
@@ -97,10 +92,10 @@ export function Navbar() {
               aria-current={isActive(link.href) ? "page" : undefined}
               className={cn(
                 "group relative flex min-h-11 items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.18em] transition-colors",
-                isActive(link.href) ? (isHome ? "text-white" : "text-ink") : (isHome ? "text-white/60 hover:text-white" : "text-ink-soft hover:text-ink")
+                isActive(link.href) ? "text-ink" : "text-ink-soft hover:text-ink"
               )}
             >
-              <span className={cn("text-[8px]", isHome ? "text-white/35" : "text-ink-mute/70")}>0{index + 1}</span>
+              <span className="text-[8px] text-ink-mute/70">0{index + 1}</span>
               {link.label}
               <span
                 className={cn(
@@ -115,7 +110,7 @@ export function Navbar() {
         <div className="flex items-center gap-1.5 md:gap-2">
           <Link
             href="/shop"
-            className={cn("hidden h-11 w-11 items-center justify-center rounded-sm border border-transparent transition-all md:flex", isHome ? "text-white/65 hover:border-white/20 hover:bg-white/10 hover:text-white" : "text-ink-soft hover:border-ink/15 hover:bg-ink/[0.05] hover:text-ink")}
+            className="hidden h-11 w-11 items-center justify-center rounded-sm border border-transparent text-ink-soft transition-all hover:border-ink/15 hover:bg-ink/[0.05] hover:text-ink md:flex"
             aria-label="Search products"
           >
             <Search className="h-[18px] w-[18px]" />
@@ -124,7 +119,7 @@ export function Navbar() {
           <CartSheet>
             <button
               type="button"
-              className={cn("relative flex h-11 w-11 cursor-pointer items-center justify-center rounded-sm border border-transparent transition-all", isHome ? "text-white/65 hover:border-white/20 hover:bg-white/10 hover:text-white" : "text-ink-soft hover:border-ink/15 hover:bg-ink/[0.05] hover:text-ink")}
+              className="relative flex h-11 w-11 cursor-pointer items-center justify-center rounded-sm border border-transparent text-ink-soft transition-all hover:border-ink/15 hover:bg-ink/[0.05] hover:text-ink"
               aria-label={`Cart with ${cartCount} item${cartCount === 1 ? "" : "s"}`}
             >
               <ShoppingBag className="h-[18px] w-[18px]" />

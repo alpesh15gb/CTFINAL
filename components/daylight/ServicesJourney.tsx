@@ -41,7 +41,7 @@ export function ServicesJourney() {
 
   if (reduce) {
     return (
-      <section className="bg-[#0b0c0f] py-24 md:py-32">
+      <section className="bg-surface py-24 md:py-32">
         <div className="site-container">
           <SectionHead />
           <div className="mt-12 grid gap-5 md:grid-cols-2">
@@ -57,18 +57,18 @@ export function ServicesJourney() {
   return (
     <>
       {/* Desktop: pinned horizontal journey */}
-      <section ref={ref} className="relative hidden h-[420vh] bg-[#0b0c0f] lg:block">
+      <section ref={ref} className="relative hidden h-[420vh] bg-surface lg:block">
         <div className="sticky top-0 flex h-svh min-h-[620px] flex-col justify-center overflow-hidden">
           <div className="site-container mb-10 flex items-end justify-between">
             <div>
-              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.3em] text-red-light">
+              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.3em] text-red-deep">
                 02 / What we do
               </p>
-              <h2 className="font-display mt-4 text-6xl font-bold uppercase leading-[0.9] tracking-tight text-white">
+              <h2 className="font-display mt-4 text-6xl font-bold uppercase leading-[0.9] tracking-tight text-ink">
                 Five crafts.
               </h2>
             </div>
-            <p className="flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.24em] text-white/50">
+            <p className="flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.24em] text-ink-mute">
               Scroll to travel <ArrowRight className="h-4 w-4 text-red" aria-hidden />
             </p>
           </div>
@@ -76,7 +76,7 @@ export function ServicesJourney() {
             {SERVICES.map((s, i) => (
               <article
                 key={s.n}
-                className="group relative w-[62vw] max-w-[760px] shrink-0 overflow-hidden rounded-sm border border-white/10 bg-[#16181d]"
+                className="group relative w-[62vw] max-w-[760px] shrink-0 overflow-hidden rounded-sm bg-raised"
               >
                 <div className="relative aspect-[16/10] overflow-hidden">
                   <Drift progress={progress} from={36 - i * 6} to={-36 + i * 6} className="absolute inset-0">
@@ -98,17 +98,17 @@ export function ServicesJourney() {
                 </div>
                 <div className="flex items-center justify-between gap-4 p-5 md:p-6">
                   <div>
-                    <h3 className="font-display text-2xl font-bold uppercase tracking-tight text-white md:text-3xl">
+                    <h3 className="font-display text-2xl font-bold uppercase tracking-tight text-ink md:text-3xl">
                       {s.title}
                     </h3>
-                    <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.22em] text-white/50">
+                    <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.22em] text-ink-mute">
                       {s.note}
                     </p>
                   </div>
                   <Link
                     href={s.shop}
                     aria-label={`${s.title} in the shop`}
-                    className="shrink-0 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-red-light hover:text-white"
+                    className="shrink-0 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-red-deep hover:text-red"
                   >
                     Shop →
                   </Link>
@@ -119,7 +119,7 @@ export function ServicesJourney() {
             <div className="flex w-[30vw] shrink-0 items-center justify-center">
               <Link
                 href="/shop"
-                className="inline-flex min-h-12 items-center gap-2 rounded-sm bg-red px-6 font-mono text-xs font-bold uppercase tracking-[0.16em] text-white transition hover:bg-red-light"
+                className="inline-flex min-h-12 items-center gap-2 rounded-sm bg-ink px-6 font-mono text-xs font-bold uppercase tracking-[0.16em] text-paper transition hover:bg-red"
               >
                 All upgrades <ArrowRight className="h-4 w-4" aria-hidden />
               </Link>
@@ -129,7 +129,7 @@ export function ServicesJourney() {
       </section>
 
       {/* Mobile / tablet: calm stack */}
-      <section className="bg-[#0b0c0f] py-24 md:py-32 lg:hidden">
+      <section className="bg-surface py-24 md:py-32 lg:hidden">
         <div className="site-container">
           <SectionHead />
           <div className="mt-12 grid gap-5 sm:grid-cols-2">
@@ -146,10 +146,10 @@ export function ServicesJourney() {
 function SectionHead() {
   return (
     <Reveal>
-      <p className="font-mono text-[10px] font-bold uppercase tracking-[0.3em] text-red-light">
+      <p className="font-mono text-[10px] font-bold uppercase tracking-[0.3em] text-red-deep">
         02 / What we do
       </p>
-      <h2 className="font-display mt-4 text-5xl font-bold uppercase leading-[0.9] tracking-tight text-white md:text-7xl">
+      <h2 className="font-display mt-4 text-5xl font-bold uppercase leading-[0.9] tracking-tight text-ink md:text-7xl">
         Five crafts.
       </h2>
     </Reveal>
@@ -159,7 +159,7 @@ function SectionHead() {
 function ServiceCard({ service: s }: { service: (typeof SERVICES)[number] }) {
   return (
     <Reveal className="h-full">
-      <article className="group flex h-full flex-col overflow-hidden rounded-sm border border-white/10 bg-[#16181d]">
+      <article className="group flex h-full flex-col overflow-hidden rounded-sm bg-raised">
         <div className="relative aspect-[16/10] overflow-hidden">
           <Image
             src={s.img}
@@ -175,10 +175,10 @@ function ServiceCard({ service: s }: { service: (typeof SERVICES)[number] }) {
         </div>
         <div className="flex flex-1 items-center justify-between gap-4 p-5">
           <div>
-            <h3 className="font-display text-xl font-bold uppercase tracking-tight text-white">
+            <h3 className="font-display text-xl font-bold uppercase tracking-tight text-ink">
               {s.title}
             </h3>
-            <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.22em] text-white/50">
+            <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.22em] text-ink-mute">
               {s.note}
             </p>
           </div>
@@ -186,8 +186,8 @@ function ServiceCard({ service: s }: { service: (typeof SERVICES)[number] }) {
             href={s.shop}
             aria-label={`${s.title} in the shop`}
             className={cn(
-              "flex h-11 w-11 shrink-0 items-center justify-center rounded-sm border border-white/20",
-              "text-white transition hover:border-red hover:bg-red hover:text-white"
+              "flex h-11 w-11 shrink-0 items-center justify-center rounded-sm border border-ink/15",
+              "text-ink transition hover:border-red hover:bg-red hover:text-white"
             )}
           >
             <ArrowUpRight className="h-4 w-4" aria-hidden />
@@ -201,7 +201,7 @@ function ServiceCard({ service: s }: { service: (typeof SERVICES)[number] }) {
 export function ServicesHeading() {
   return (
     <MaskLines
-      className="font-display text-6xl font-bold uppercase leading-[0.9] tracking-tight text-white"
+      className="font-display text-6xl font-bold uppercase leading-[0.9] tracking-tight text-ink"
       lines={["Five crafts."]}
     />
   );

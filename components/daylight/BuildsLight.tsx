@@ -18,25 +18,24 @@ export function BuildsLight() {
   const featured = builds.slice(0, 3);
 
   return (
-    <section ref={ref} className="relative overflow-hidden bg-[#111318] py-24 md:py-36">
-      <div className="pointer-events-none absolute inset-0 atmo-carbon opacity-70" />
-      <div className="site-container relative">
+    <section ref={ref} className="relative overflow-hidden bg-background py-24 md:py-36">
+      <div className="site-container">
         <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
           <div>
             <Reveal>
-              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.3em] text-red-light">
+              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.3em] text-red-deep">
                 03 / Proof on wheels
               </p>
             </Reveal>
             <MaskLines
-              className="font-display mt-4 text-5xl font-bold uppercase leading-[0.9] tracking-tight text-white md:text-8xl"
+              className="font-display mt-4 text-5xl font-bold uppercase leading-[0.9] tracking-tight text-ink md:text-8xl"
               lines={["Built,", "not bought."]}
             />
           </div>
           <Reveal delay={0.15}>
             <Link
               href="/builds"
-              className="inline-flex min-h-12 items-center gap-2 rounded-sm border border-white/30 px-6 font-mono text-xs font-bold uppercase tracking-[0.16em] text-white transition hover:border-red hover:bg-red hover:text-white"
+              className="inline-flex min-h-12 items-center gap-2 rounded-sm border border-ink/20 px-6 font-mono text-xs font-bold uppercase tracking-[0.16em] text-ink transition hover:border-ink hover:bg-ink hover:text-paper"
             >
               All builds <ArrowRight className="h-4 w-4" aria-hidden />
             </Link>
@@ -80,18 +79,18 @@ export function BuildsLight() {
                 </div>
               </Link>
               <Reveal delay={0.1} className="lg:col-span-5">
-                <p className="font-mono text-[10px] font-bold tracking-[0.3em] text-white/45">
+                <p className="font-mono text-[10px] font-bold tracking-[0.3em] text-ink-mute">
                   / {String(i + 1).padStart(2, "0")}
                 </p>
-                <h3 className="font-display mt-3 text-4xl font-bold uppercase leading-[0.9] tracking-tight text-white md:text-6xl">
+                <h3 className="font-display mt-3 text-4xl font-bold uppercase leading-[0.9] tracking-tight text-ink md:text-6xl">
                   {build.title}
                 </h3>
-                <p className="mt-3 font-mono text-xs uppercase tracking-[0.2em] text-white/60">
+                <p className="mt-3 font-mono text-xs uppercase tracking-[0.2em] text-ink-soft">
                   {build.vehicle} — {build.upgradeCount} upgrades
                 </p>
                 <Link
                   href={`/builds/${build.slug}`}
-                  className="mt-6 inline-flex items-center gap-2 font-mono text-xs font-bold uppercase tracking-[0.18em] text-red-light transition hover:text-white"
+                  className="mt-6 inline-flex items-center gap-2 font-mono text-xs font-bold uppercase tracking-[0.18em] text-red-deep transition hover:text-red"
                 >
                   View build <ArrowUpRight className="h-4 w-4" aria-hidden />
                 </Link>
