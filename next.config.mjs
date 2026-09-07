@@ -4,6 +4,9 @@ const nextConfig = {
   output: "standalone",
   images: {
     formats: ["image/avif", "image/webp"],
+    // Cache optimized images for a day (default is 60s) — supplier
+    // originals are slow to refetch, so repeat views must not re-transform.
+    minimumCacheTTL: 86400,
     deviceSizes: [360, 390, 430, 640, 750, 768, 828, 1024, 1080, 1200, 1280, 1440, 1920],
     remotePatterns: [
       { protocol: "https", hostname: "images.unsplash.com" },

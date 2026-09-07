@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -77,19 +77,72 @@ function ShopContent() {
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
   // Live catalog from Medusa — no local fallback (an empty/error state is
-  // always preferable to showing products we don't sell). Paged in 100s so
-  // the whole catalog (not just the first API page) is reachable.
+  // always preferable to showing products we don't sell).
+  //
+  // Paging + filtering strategy: the category is filtered SERVER-side
+  // (category_id) so a category view is complete without loading all 900+
+  // products; pages append via auto-load as you scroll. Search text, sort,
+  // and fitment stay client-side over the loaded pool.
   const PAGE_SIZE = 100;
   const [catalog, setCatalog] = useState<Product[] | null>(null);
   const [total, setTotal] = useState(0);
   const [categories, setCategories] = useState<Category[]>([]);
   const [collections, setCollections] = useState<MedusaStoreCollection[]>([]);
+  const [catsDone, setCatsDone] = useState(false);
   const [loadError, setLoadError] = useState(false);
   const [moreFailed, setMoreFailed] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [attempt, setAttempt] = useState(0);
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+  // Active server filter for appends + dedupe key for first-page loads.
+  const filterRef = useRef<{ category_id?: string[] }>({});
+  const pageKeyRef = useRef("");
 
+  const categoryParam = searchParams.get("category");
+  const collectionParam = searchParams.get("collection");
+  const sortParam = searchParams.get("sort") ?? "featured";
+  const compatibleOnly = searchParams.get("compatible") === "true";
+
+  const activeCategory =
+    categories.find((c) => c.slug === categoryParam) ?? null;
+  const activeCollection =
+    collections.find((c) => c.handle === collectionParam) ?? null;
+
+  // Reference data once per attempt (cached 5 min in lib/medusa).
   useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const [rawCategories, rawCollections] = await Promise.all([
+          listStoreCategories().catch(() => [] as unknown[]),
+          listStoreCollections().catch(() => [] as unknown[]),
+        ]);
+        if (cancelled) return;
+        setCategories(
+          (rawCategories as MedusaStoreCategory[]).map(adaptStoreCategory)
+        );
+        setCollections(rawCollections as MedusaStoreCollection[]);
+      } finally {
+        if (!cancelled) setCatsDone(true);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [attempt]);
+
+  // First page: waits for category-id resolution when ?category= is set so
+  // the server filter is correct from the start.
+  useEffect(() => {
+    if (categoryParam && !catsDone) return;
+    const catId = categoryParam
+      ? categories.find((c) => c.slug === categoryParam)?.id
+      : undefined;
+    const key = `${attempt}|${categoryParam ?? ""}|${catId ?? ""}`;
+    if (pageKeyRef.current === key) return;
+    pageKeyRef.current = key;
+    filterRef.current = catId ? { category_id: [catId] } : {};
+
     let cancelled = false;
     setCatalog(null);
     setTotal(0);
@@ -97,20 +150,15 @@ function ShopContent() {
     setMoreFailed(false);
     (async () => {
       try {
-        const [page, rawCategories, rawCollections] = await Promise.all([
-          listStoreProducts({ limit: PAGE_SIZE }),
-          listStoreCategories().catch(() => [] as unknown[]),
-          listStoreCollections().catch(() => [] as unknown[]),
-        ]);
+        const page = await listStoreProducts({
+          limit: PAGE_SIZE,
+          ...filterRef.current,
+        });
         if (cancelled) return;
         setCatalog(
           (page.products as MedusaStoreProduct[]).map(adaptStoreProduct)
         );
         setTotal(page.count);
-        setCategories(
-          (rawCategories as MedusaStoreCategory[]).map(adaptStoreCategory)
-        );
-        setCollections(rawCollections as MedusaStoreCollection[]);
       } catch (error) {
         console.error("[shop] failed to load live catalog:", error);
         if (!cancelled) setLoadError(true);
@@ -119,7 +167,8 @@ function ShopContent() {
     return () => {
       cancelled = true;
     };
-  }, [attempt]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [attempt, categoryParam, catsDone, categories]);
 
   const loadMore = async () => {
     if (!catalog || catalog.length >= total || loadingMore) return;
@@ -129,6 +178,7 @@ function ShopContent() {
       const page = await listStoreProducts({
         limit: PAGE_SIZE,
         offset: catalog.length,
+        ...filterRef.current,
       });
       const seen = new Set(catalog.map((p) => p.id));
       const fresh = (page.products as MedusaStoreProduct[])
@@ -144,17 +194,26 @@ function ShopContent() {
     }
   };
 
+  // Auto-append next pages as the sentinel scrolls into view (manual
+  // "Load more" below remains as a fallback).
+  const loadMoreRef = useRef(loadMore);
+  loadMoreRef.current = loadMore;
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el || typeof IntersectionObserver === "undefined") return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          void loadMoreRef.current();
+        }
+      },
+      { rootMargin: "900px" }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [catalog, total]);
+
   const products = useMemo(() => catalog ?? [], [catalog]);
-
-  const categoryParam = searchParams.get("category");
-  const collectionParam = searchParams.get("collection");
-  const sortParam = searchParams.get("sort") ?? "featured";
-  const compatibleOnly = searchParams.get("compatible") === "true";
-
-  const activeCategory =
-    categories.find((c) => c.slug === categoryParam) ?? null;
-  const activeCollection =
-    collections.find((c) => c.handle === collectionParam) ?? null;
 
   const filtered = useMemo(() => {
     let list = [...products];
@@ -458,6 +517,7 @@ function ShopContent() {
 
             {catalog && catalog.length < total && (
               <div className="mt-10 text-center">
+                <div ref={sentinelRef} aria-hidden="true" className="h-1" />
                 {moreFailed && (
                   <p className="mb-3 text-sm text-red">
                     Couldn&apos;t load more products. Try again.
@@ -467,7 +527,7 @@ function ShopContent() {
                   onClick={loadMore}
                   disabled={loadingMore}
                   variant="outline"
-                  className="border-border bg-transparent text-foreground hover:border-cyan-deep hover:text-cyan-deep"
+                  className="mt-4 border-border bg-transparent text-foreground hover:border-cyan-deep hover:text-cyan-deep"
                 >
                   {loadingMore
                     ? "Loading…"

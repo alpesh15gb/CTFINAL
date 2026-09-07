@@ -66,8 +66,7 @@ function currencySymbol(code?: string): string {
 }
 
 /** Accepts a string array or a comma-separated string (Medusa metadata). */
-function metaStringArray(value: unknown): string[] {
-  if (Array.isArray(value)) {
+function metaStringArray(value: unknown): string[] {  if (Array.isArray(value)) {
     return value.filter((v): v is string => typeof v === "string");
   }
   if (typeof value === "string") {
@@ -77,6 +76,21 @@ function metaStringArray(value: unknown): string[] {
       .filter(Boolean);
   }
   return [];
+}
+
+/**
+ * Cap Shopify CDN originals to a bounded width (e.g. multi-MB `photo-output`
+ * files become `_1600x` variants). Shopify serves these resized bytes
+ * directly, so both the upstream fetch and the Next optimizer transform get
+ * dramatically faster. Non-Shopify hosts and unrecognized shapes pass
+ * through untouched.
+ */
+function boundedSourceImage(url: string, width = 1600): string {
+  const match = String(url || "").match(
+    /^(https:\/\/cdn\.shopify\.com\/\S+?)(?:_\d+x)?\.(jpg|jpeg|png|webp)(\?.*)?$/i
+  );
+  if (!match) return url;
+  return `${match[1]}_${width}x.${match[2]}${match[3] ?? ""}`;
 }
 
 export function adaptStoreProduct(p: MedusaStoreProduct): Product {
@@ -114,7 +128,9 @@ export function adaptStoreProduct(p: MedusaStoreProduct): Product {
   const imageUrls = [
     ...(p.thumbnail ? [p.thumbnail] : []),
     ...(p.images ?? []).map((img) => img.url).filter(Boolean),
-  ].filter((url, idx, arr) => arr.indexOf(url) === idx);
+  ]
+    .map((url) => boundedSourceImage(url))
+    .filter((url, idx, arr) => arr.indexOf(url) === idx);
 
   const meta = p.metadata ?? {};
   // Live join first; fall back to the category snapshot the import scripts
