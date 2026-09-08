@@ -21,7 +21,7 @@ export default function NotFound() {
       </p>
       <h1
         style={{
-          fontFamily: "'Barlow Condensed','Arial Narrow',Impact,sans-serif",
+          fontFamily: "var(--font-display),system-ui,sans-serif",
           fontSize: "clamp(48px,8vw,96px)",
           margin: 0,
           lineHeight: 1,

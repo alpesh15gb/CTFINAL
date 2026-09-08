@@ -169,7 +169,7 @@ export default function ShopPage() {
                       <h3
                         style={{
                           fontFamily:
-                            "'Barlow Condensed','Arial Narrow',Impact,sans-serif",
+                            "var(--font-display),system-ui,sans-serif",
                           fontSize: 26,
                           margin: "0 0 6px",
                           lineHeight: 1,
