@@ -170,7 +170,7 @@ export default function ShopPage() {
                         style={{
                           fontFamily:
                             "var(--font-display),system-ui,sans-serif",
-                          fontSize: 26,
+                          fontSize: 30,
                           margin: "0 0 6px",
                           lineHeight: 1,
                         }}

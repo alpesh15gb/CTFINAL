@@ -22,7 +22,7 @@ export default function NotFound() {
       <h1
         style={{
           fontFamily: "var(--font-display),system-ui,sans-serif",
-          fontSize: "clamp(48px,8vw,96px)",
+          fontSize: "clamp(58px,9.5vw,116px)",
           margin: 0,
           lineHeight: 1,
         }}

@@ -55,7 +55,7 @@ export default function ProductPage({
             <p className="section-label">
               <span className="cyan">01 /</span> PRODUCT
             </p>
-            <h2 style={{ fontFamily: "var(--font-display),system-ui,sans-serif", fontSize: 48 }}>
+            <h2 style={{ fontFamily: "var(--font-display),system-ui,sans-serif", fontSize: 58 }}>
               NOT ON THE LIFT RIGHT NOW.
             </h2>
             <p style={{ color: "#b9c0c6" }}>
@@ -125,7 +125,7 @@ export default function ProductPage({
               <h1
                 style={{
                   fontFamily: "var(--font-display),system-ui,sans-serif",
-                  fontSize: "clamp(44px,6vw,84px)",
+                  fontSize: "clamp(54px,7vw,102px)",
                   lineHeight: 0.9,
                   margin: "0 0 12px",
                 }}
