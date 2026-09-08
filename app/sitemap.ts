@@ -3,21 +3,7 @@ import type { MetadataRoute } from "next";
 const BASE = "https://cartunez.in";
 
 // Static routes only — product URLs are catalog-driven and resolved live.
-const ROUTES = [
-  "/",
-  "/shop",
-  "/cart",
-  "/checkout",
-  "/builds",
-  "/about",
-  "/contact",
-  "/shipping",
-  "/returns",
-  "/installation",
-  "/faqs",
-  "/privacy",
-  "/terms",
-];
+const ROUTES = ["/", "/shop"];
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();

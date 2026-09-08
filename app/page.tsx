@@ -1,26 +1,8 @@
-import { SceneHero } from "@/components/daylight/SceneHero";
-import { BrandTicker } from "@/components/daylight/BrandTicker";
-import { ProofStrip } from "@/components/daylight/ProofStrip";
-import { ServicesJourney } from "@/components/daylight/ServicesJourney";
-import { BuildsLight } from "@/components/daylight/BuildsLight";
-import { ShopPreview } from "@/components/daylight/ShopPreview";
-import { VehicleSelector } from "@/components/sections/VehicleSelector";
-import { FinaleCTA } from "@/components/daylight/FinaleCTA";
-
-/**
- * Homepage — scroll-directed design study, followed by the daylight chapters.
- */
-export default function HomePage() {
-  return (
-    <main>
-      <SceneHero />
-      <BrandTicker />
-      <ProofStrip />
-      <ServicesJourney />
-      <BuildsLight />
-      <ShopPreview />
-      <VehicleSelector />
-      <FinaleCTA />
-    </main>
-  );
-}
+import { MotionProvider } from '@/components/motion-provider';
+import { Header,Contact,Footer } from '@/components/site-content';
+import { Hero } from '@/components/hero';
+import { Intro } from '@/components/intro';
+import { Journey } from '@/components/journey';
+import { Upgrades } from '@/components/upgrades';
+import { Navigation } from '@/components/navigation';
+export default function Home(){return <MotionProvider><a className="skip-link" href="#upgrades">Skip to upgrades</a><Header/><main><Hero/><Intro/><Journey/><Upgrades/><Contact/></main><Navigation/><Footer/></MotionProvider>}

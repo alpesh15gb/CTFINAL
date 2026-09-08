@@ -1,0 +1,4 @@
+'use client';
+import { useRef,useState } from 'react';
+import { motion,useScroll,useMotionValueEvent } from 'framer-motion';
+export function Navigation(){const {scrollY,scrollYProgress}=useScroll();const [shown,setShown]=useState(false);const last=useRef(false);useMotionValueEvent(scrollY,'change',y=>{const contact=document.getElementById('visit');const value=y>window.innerHeight*.75&&(!contact||contact.getBoundingClientRect().top>window.innerHeight*.35);if(last.current!==value){last.current=value;setShown(value)}});return <><motion.div className="progress next-progress" aria-hidden="true" style={{scaleX:scrollYProgress}}/><nav className={'quick-nav '+(shown?'shown':'')} aria-label="Quick navigation"><a href="#journey">The experience</a><span/><a href="/shop">Shop</a><span/><a href="#upgrades">Upgrades</a><a className="quick-contact" href="https://wa.me/919949695030" target="_blank" rel="noopener">Start your build ↗</a></nav></>}

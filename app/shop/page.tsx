@@ -1,621 +1,213 @@
 "use client";
 
-import { Suspense, useEffect, useMemo, useRef, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import Image from "next/image";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
+import { Header, Footer } from "@/components/site-content";
+import { listStoreProducts } from "@/lib/medusa";
 import {
-  Search,
-  SlidersHorizontal,
-  X,
-  ChevronDown,
-  CarFront,
-  ArrowRight,
-} from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { ProductCard } from "@/components/product/ProductCard";
-import type { Category, Product } from "@/types";
-import { listStoreCategories, listStoreCollections, listStoreProducts } from "@/lib/medusa";
-import {
-  adaptStoreCategory,
   adaptStoreProduct,
-  type MedusaStoreCategory,
-  type MedusaStoreCollection,
   type MedusaStoreProduct,
 } from "@/lib/store-adapter";
-import { useVehicle } from "@/hooks/useVehicle";
-import { staggerContainer, fadeInUp } from "@/lib/animations";
+import type { Product } from "@/types";
 
-const sortOptions = [
-  { value: "featured", label: "Featured" },
-  { value: "price-asc", label: "Price: Low to High" },
-  { value: "price-desc", label: "Price: High to Low" },
-  { value: "rating", label: "Top Rated" },
-];
+const WA = (subject: string) =>
+  "https://wa.me/919949695030?text=" +
+  encodeURIComponent(`Hi Cartunez, I'm interested in ${subject}. Can you help with options for my car?`);
 
+/**
+ * Shop — live Medusa catalog in the Cartunez dark studio language.
+ * Client-fetched against NEXT_PUBLIC_MEDUSA_BACKEND_URL; WhatsApp CTA per
+ * product so enquiries keep working even without checkout.
+ */
 export default function ShopPage() {
-  return (
-    <Suspense fallback={<ShopSkeleton />}>
-      <ShopContent />
-    </Suspense>
-  );
-}
+  const [items, setItems] = useState<Product[] | null>(null);
+  const [failed, setFailed] = useState(false);
 
-function ShopSkeleton() {
-  return (
-    <main className="min-h-screen bg-background pb-24 pt-28">
-      <div className="mx-auto max-w-[1600px] px-4 md:px-8">
-        <div className="h-12 w-48 animate-pulse rounded bg-raised" />
-        <div className="mt-8 h-64 rounded-xl bg-raised" />
-      </div>
-    </main>
-  );
-}
-
-function ShopContent() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const { selected, clearVehicle } = useVehicle();
-
-  const [query, setQuery] = useState(searchParams.get("q") ?? "");
-  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
-
-  // Live catalog from Medusa — no local fallback (an empty/error state is
-  // always preferable to showing products we don't sell).
-  //
-  // Paging + filtering strategy: the category is filtered SERVER-side
-  // (category_id) so a category view is complete without loading all 900+
-  // products; pages append via auto-load as you scroll. Search text, sort,
-  // and fitment stay client-side over the loaded pool.
-  const PAGE_SIZE = 100;
-  const [catalog, setCatalog] = useState<Product[] | null>(null);
-  const [total, setTotal] = useState(0);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [collections, setCollections] = useState<MedusaStoreCollection[]>([]);
-  const [catsDone, setCatsDone] = useState(false);
-  const [loadError, setLoadError] = useState(false);
-  const [moreFailed, setMoreFailed] = useState(false);
-  const [loadingMore, setLoadingMore] = useState(false);
-  const [attempt, setAttempt] = useState(0);
-  const sentinelRef = useRef<HTMLDivElement | null>(null);
-  // Active server filter for appends + dedupe key for first-page loads.
-  const filterRef = useRef<{ category_id?: string[] }>({});
-  const pageKeyRef = useRef("");
-
-  const categoryParam = searchParams.get("category");
-  const collectionParam = searchParams.get("collection");
-  const sortParam = searchParams.get("sort") ?? "featured";
-  const compatibleOnly = searchParams.get("compatible") === "true";
-
-  const activeCategory =
-    categories.find((c) => c.slug === categoryParam) ?? null;
-  const activeCollection =
-    collections.find((c) => c.handle === collectionParam) ?? null;
-
-  // Reference data once per attempt (cached 5 min in lib/medusa).
   useEffect(() => {
     let cancelled = false;
-    (async () => {
-      try {
-        const [rawCategories, rawCollections] = await Promise.all([
-          listStoreCategories().catch(() => [] as unknown[]),
-          listStoreCollections().catch(() => [] as unknown[]),
-        ]);
+    listStoreProducts({ limit: 100 })
+      .then((page) => {
         if (cancelled) return;
-        setCategories(
-          (rawCategories as MedusaStoreCategory[]).map(adaptStoreCategory)
-        );
-        setCollections(rawCollections as MedusaStoreCollection[]);
-      } finally {
-        if (!cancelled) setCatsDone(true);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [attempt]);
-
-  // First page: waits for category-id resolution when ?category= is set so
-  // the server filter is correct from the start.
-  useEffect(() => {
-    if (categoryParam && !catsDone) return;
-    const catId = categoryParam
-      ? categories.find((c) => c.slug === categoryParam)?.id
-      : undefined;
-    const key = `${attempt}|${categoryParam ?? ""}|${catId ?? ""}`;
-    if (pageKeyRef.current === key) return;
-    pageKeyRef.current = key;
-    filterRef.current = catId ? { category_id: [catId] } : {};
-
-    let cancelled = false;
-    setCatalog(null);
-    setTotal(0);
-    setLoadError(false);
-    setMoreFailed(false);
-    (async () => {
-      try {
-        const page = await listStoreProducts({
-          limit: PAGE_SIZE,
-          ...filterRef.current,
-        });
-        if (cancelled) return;
-        setCatalog(
-          (page.products as MedusaStoreProduct[]).map(adaptStoreProduct)
-        );
-        setTotal(page.count);
-      } catch (error) {
-        console.error("[shop] failed to load live catalog:", error);
-        if (!cancelled) setLoadError(true);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [attempt, categoryParam, catsDone, categories]);
-
-  const loadMore = async () => {
-    if (!catalog || catalog.length >= total || loadingMore) return;
-    setLoadingMore(true);
-    setMoreFailed(false);
-    try {
-      const page = await listStoreProducts({
-        limit: PAGE_SIZE,
-        offset: catalog.length,
-        ...filterRef.current,
-      });
-      const seen = new Set(catalog.map((p) => p.id));
-      const fresh = (page.products as MedusaStoreProduct[])
-        .map(adaptStoreProduct)
-        .filter((p) => !seen.has(p.id));
-      setCatalog([...catalog, ...fresh]);
-      setTotal(page.count);
-    } catch (error) {
-      console.error("[shop] failed to load more:", error);
-      setMoreFailed(true);
-    } finally {
-      setLoadingMore(false);
-    }
-  };
-
-  // Auto-append next pages as the sentinel scrolls into view (manual
-  // "Load more" below remains as a fallback).
-  const loadMoreRef = useRef(loadMore);
-  loadMoreRef.current = loadMore;
-  useEffect(() => {
-    const el = sentinelRef.current;
-    if (!el || typeof IntersectionObserver === "undefined") return;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries.some((e) => e.isIntersecting)) {
-          void loadMoreRef.current();
+        setItems((page.products as MedusaStoreProduct[]).map(adaptStoreProduct));
+      })
+      .catch((error) => {
+        console.error("[shop] failed to load live products:", error);
+        if (!cancelled) {
+          setFailed(true);
+          setItems([]);
         }
-      },
-      { rootMargin: "900px" }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [catalog, total]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
-  const products = useMemo(() => catalog ?? [], [catalog]);
-
-  const filtered = useMemo(() => {
-    let list = [...products];
-
-    if (query.trim()) {
-      const q = query.toLowerCase();
-      list = list.filter(
-        (p) =>
-          p.name.toLowerCase().includes(q) ||
-          p.category.toLowerCase().includes(q)
-      );
-    }
-
-    if (activeCategory) {
-      list = list.filter((p) => p.categorySlug === activeCategory.slug);
-    }
-
-    if (activeCollection) {
-      list = list.filter((p) => p.collectionId === activeCollection.id);
-    }
-
-    if (selected && compatibleOnly) {
-      // Products without fitment info are treated as universal fit.
-      list = list.filter(
-        (p) =>
-          p.compatibility.length === 0 ||
-          p.compatibility.includes(selected.slug)
-      );
-    }
-
-    switch (sortParam) {
-      case "price-asc":
-        list.sort((a, b) => a.price - b.price);
-        break;
-      case "price-desc":
-        list.sort((a, b) => b.price - a.price);
-        break;
-      case "rating":
-        list.sort((a, b) => b.rating - a.rating);
-        break;
-      default:
-        break;
-    }
-
-    return list;
-  }, [products, query, activeCategory, activeCollection, sortParam, selected, compatibleOnly]);
-
-  const updateParam = (key: string, value: string | null) => {
-    const params = new URLSearchParams(searchParams.toString());
-    if (value === null || value === "") {
-      params.delete(key);
-    } else {
-      params.set(key, value);
-    }
-    router.push(`/shop?${params.toString()}`, { scroll: false });
-  };
-
-  const resetFilters = () => {
-    setQuery("");
-    router.push("/shop", { scroll: false });
-  };
-
-  if (loadError) {
-    return (
-      <main className="min-h-screen bg-background pb-24 pt-28">
-        <div className="mx-auto max-w-[1600px] px-4 md:px-8">
-          <div className="flex flex-col items-center justify-center rounded-xl border border-border bg-raised py-24 text-center">
-            <Search className="h-10 w-10 text-silver-muted" />
-            <h3 className="mt-4 font-display text-2xl uppercase text-foreground">
-              Store unavailable
-            </h3>
-            <p className="mt-2 max-w-xs text-silver-muted">
-              We couldn&apos;t reach the live catalog. Check your connection
-              and try again.
-            </p>
-            <Button
-              onClick={() => setAttempt((a) => a + 1)}
-              className="mt-6 bg-cyan text-black hover:bg-cyan-light"
-            >
-              Retry
-            </Button>
-          </div>
-        </div>
-      </main>
-    );
-  }
-
-  if (catalog === null) {
-    return <ShopSkeleton />;
-  }
-
-  const filterCount =
-    (activeCategory ? 1 : 0) +
-    (activeCollection ? 1 : 0) +
-    (query ? 1 : 0) +
-    (compatibleOnly ? 1 : 0);
-
-  return (
-    <main className="relative min-h-screen bg-background pb-24 pt-28">
-      <div className="mx-auto max-w-[1600px] px-4 md:px-8">
-        {/* Header */}
-        <motion.div
-          initial="hidden"
-          animate="visible"
-          variants={staggerContainer}
-          className="mb-8"
-        >
-          <motion.h1
-            variants={fadeInUp}
-            className="font-display text-5xl font-bold uppercase tracking-tight text-foreground md:text-6xl"
-          >
-            Shop
-          </motion.h1>
-
-          {selected ? (
-            <motion.div
-              variants={fadeInUp}
-              className="mt-4 flex flex-col gap-4 rounded-lg border border-border bg-raised p-4 md:flex-row md:items-center md:justify-between"
-            >
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full border border-cyan-deep/40 text-cyan-deep">
-                  <CarFront className="h-5 w-5" />
-                </div>
-                <div>
-                  <p className="text-xs uppercase tracking-widest text-silver-muted">
-                    Shopping For
-                  </p>
-                  <p className="font-display text-lg uppercase text-foreground">
-                    {selected.year} {selected.brand} {selected.model}{" "}
-                    {selected.variant}
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant={compatibleOnly ? "default" : "outline"}
-                  size="sm"
-                  onClick={() =>
-                    updateParam("compatible", compatibleOnly ? null : "true")
-                  }
-                  className={
-                    compatibleOnly
-                      ? "bg-cyan text-black hover:bg-cyan-light"
-                      : "border-border bg-transparent text-foreground hover:border-cyan-deep hover:text-cyan-deep"
-                  }
-                >
-                  Fits {selected.model} only
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={clearVehicle}
-                  className="text-silver-muted hover:text-foreground"
-                >
-                  Change Vehicle
-                </Button>
-              </div>
-            </motion.div>
-          ) : (
-            <motion.div
-              variants={fadeInUp}
-              className="mt-4 flex items-center gap-2 text-silver-muted"
-            >
-              <CarFront className="h-4 w-4" />
-              <span className="text-sm">
-                Select your vehicle for fitment-matched results.
-              </span>
-              <Link
-                href="/#vehicle-selector"
-                className="inline-flex items-center gap-1 text-sm font-medium text-cyan-deep hover:underline"
-              >
-                Find My Car <ArrowRight className="h-3 w-3" />
-              </Link>
-            </motion.div>
-          )}
-        </motion.div>
-
-        {/* Controls */}
-        <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div className="relative flex-1 md:max-w-md">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-silver-muted" />
-            <Input
-              type="search"
-              placeholder="Search products..."
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              className="border-border bg-raised pl-10 text-foreground placeholder:text-silver-muted focus-visible:ring-cyan"
-            />
-          </div>
-
-          <div className="flex items-center gap-3">
-            <Select
-              value={sortParam}
-              onValueChange={(v) => updateParam("sort", v)}
-            >
-              <SelectTrigger className="w-[180px] border-border bg-raised text-foreground">
-                <SelectValue placeholder="Sort by" />
-              </SelectTrigger>
-              <SelectContent className="border-border bg-raised text-foreground">
-                {sortOptions.map((opt) => (
-                  <SelectItem key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <Sheet
-              open={mobileFiltersOpen}
-              onOpenChange={setMobileFiltersOpen}
-            >
-              <SheetTrigger asChild>
-                <Button
-                  variant="outline"
-                  className="border-border bg-transparent text-foreground hover:border-cyan-deep hover:text-cyan-deep md:hidden"
-                >
-                  <SlidersHorizontal className="mr-2 h-4 w-4" />
-                  Filters
-                  {filterCount > 0 && (
-                    <Badge className="ml-2 bg-cyan text-black">{filterCount}</Badge>
-                  )}
-                </Button>
-              </SheetTrigger>
-              <SheetContent
-                side="bottom"
-                className="h-[80vh] border-border bg-raised text-foreground"
-              >
-                <SheetHeader>
-                  <SheetTitle className="text-left font-display uppercase tracking-wide text-foreground">
-                    Filters
-                  </SheetTitle>
-                </SheetHeader>
-                <div className="mt-6 space-y-6">
-                  <FilterContent
-                    categories={categories}
-                    activeCategory={activeCategory}
-                    updateParam={updateParam}
-                    resetFilters={resetFilters}
-                    selected={selected}
-                    compatibleOnly={compatibleOnly}
-                  />
-                </div>
-              </SheetContent>
-            </Sheet>
-          </div>
-        </div>
-
-        <div className="grid gap-8 lg:grid-cols-[240px_1fr]">
-          {/* Desktop filters */}
-          <aside className="hidden space-y-8 md:block">
-            <FilterContent
-              categories={categories}
-              activeCategory={activeCategory}
-              updateParam={updateParam}
-              resetFilters={resetFilters}
-              selected={selected}
-              compatibleOnly={compatibleOnly}
-            />
-          </aside>
-
-          {/* Results */}
-          <div>
-            <div className="mb-4 flex items-center justify-between text-sm text-silver-muted">
-              <span>
-                {filtered.length} of {total} product{total !== 1 ? "s" : ""}
-                {activeCollection ? ` by ${activeCollection.title}` : ""}
-              </span>
-              {filterCount > 0 && (
-                <button
-                  onClick={resetFilters}
-                  className="inline-flex items-center gap-1 text-cyan-deep hover:underline"
-                >
-                  <X className="h-3 w-3" /> Reset filters
-                </button>
-              )}
-            </div>
-
-            {filtered.length === 0 ? (
-              <div className="flex flex-col items-center justify-center rounded-xl border border-border bg-raised py-24 text-center">
-                <Search className="h-10 w-10 text-silver-muted" />
-                <h3 className="mt-4 font-display text-2xl uppercase text-foreground">
-                  No products found
-                </h3>
-                <p className="mt-2 max-w-xs text-silver-muted">
-                  Try adjusting filters or search terms.
-                </p>
-                <Button
-                  onClick={resetFilters}
-                  className="mt-6 bg-cyan text-black hover:bg-cyan-light"
-                >
-                  Reset Filters
-                </Button>
-              </div>
-            ) : (
-              <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-                {filtered.map((product) => (
-                  <ProductCard key={product.id} product={product} />
-                ))}
-              </div>
-            )}
-
-            {catalog && catalog.length < total && (
-              <div className="mt-10 text-center">
-                <div ref={sentinelRef} aria-hidden="true" className="h-1" />
-                {moreFailed && (
-                  <p className="mb-3 text-sm text-red">
-                    Couldn&apos;t load more products. Try again.
-                  </p>
-                )}
-                <Button
-                  onClick={loadMore}
-                  disabled={loadingMore}
-                  variant="outline"
-                  className="mt-4 border-border bg-transparent text-foreground hover:border-cyan-deep hover:text-cyan-deep"
-                >
-                  {loadingMore
-                    ? "Loading…"
-                    : `Load more (${catalog.length} of ${total})`}
-                </Button>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    </main>
-  );
-}
-
-function FilterContent({
-  categories,
-  activeCategory,
-  updateParam,
-  resetFilters,
-  selected,
-  compatibleOnly,
-}: {
-  categories: Category[];
-  activeCategory: Category | null;
-  updateParam: (key: string, value: string | null) => void;
-  resetFilters: () => void;
-  selected: ReturnType<typeof useVehicle>["selected"];
-  compatibleOnly: boolean;
-}) {
   return (
     <>
-      <div className="space-y-3">
-        <h3 className="text-xs font-semibold uppercase tracking-widest text-foreground">
-          Categories
-        </h3>
-        <div className="space-y-1">
-          <button
-            onClick={() => updateParam("category", null)}
-            className={`block w-full text-left text-sm transition-colors ${
-              !activeCategory
-                ? "font-medium text-cyan-deep"
-                : "text-silver-muted hover:text-foreground"
-            }`}
-          >
-            All Categories
-          </button>
-          {categories.map((cat) => (
-            <button
-              key={cat.slug}
-              onClick={() => updateParam("category", cat.slug)}
-              className={`block w-full text-left text-sm transition-colors ${
-                activeCategory?.slug === cat.slug
-                  ? "font-medium text-cyan-deep"
-                  : "text-silver-muted hover:text-foreground"
-              }`}
+      <Header />
+      <main style={{ paddingTop: 108 }}>
+        <section className="section" style={{ paddingTop: 60 }}>
+          <div className="section-label">
+            <span className="cyan">01 /</span> LIVE CATALOG
+          </div>
+          <div className="upgrades-heading">
+            <h2>
+              STRAIGHT OFF
+              <br />
+              THE LIFT.
+            </h2>
+            <p>
+              Live stock from our store.
+              <br />
+              Ask us what fits your car.
+            </p>
+          </div>
+
+          {items === null && (
+            <div
+              style={{
+                display: "grid",
+                gap: 16,
+                gridTemplateColumns: "repeat(auto-fill,minmax(240px,1fr))",
+                marginTop: 40,
+              }}
             >
-              {cat.name}
-            </button>
-          ))}
-        </div>
-      </div>
+              {[0, 1, 2, 3, 4, 5].map((i) => (
+                <div
+                  key={i}
+                  aria-hidden
+                  style={{
+                    height: 340,
+                    borderRadius: 8,
+                    background:
+                      "linear-gradient(135deg,#14181c,#0b0e11)",
+                    border: "1px solid #ffffff14",
+                    animation: "pulse 1.6s ease-in-out infinite",
+                  }}
+                />
+              ))}
+            </div>
+          )}
 
-      {selected && (
-        <div className="space-y-3">
-          <h3 className="text-xs font-semibold uppercase tracking-widest text-foreground">
-            Fitment
-          </h3>
-          <label className="flex cursor-pointer items-center gap-3 text-sm text-silver-muted">
-            <input
-              type="checkbox"
-              checked={compatibleOnly}
-              onChange={(e) =>
-                updateParam("compatible", e.target.checked ? "true" : null)
-              }
-              className="h-4 w-4 accent-cyan"
-            />
-            Fits my {selected.model}
-          </label>
-        </div>
-      )}
+          {items !== null && items.length === 0 && (
+            <p style={{ color: "#b9c0c6", marginTop: 40 }}>
+              {failed
+                ? "Could not reach the live store right now. Message us on WhatsApp and we'll share current stock."
+                : "No products live at the moment — check back soon."}{" "}
+              <a
+                className="text-link"
+                href="https://wa.me/919949695030"
+                target="_blank"
+                rel="noopener"
+              >
+                Chat on WhatsApp ↗
+              </a>
+            </p>
+          )}
 
-      <Button
-        onClick={resetFilters}
-        variant="outline"
-        className="w-full border-border bg-transparent text-foreground hover:border-cyan-deep hover:text-cyan-deep"
-      >
-        Reset Filters
-      </Button>
+          {items !== null && items.length > 0 && (
+            <div
+              style={{
+                display: "grid",
+                gap: 16,
+                gridTemplateColumns: "repeat(auto-fill,minmax(240px,1fr))",
+                marginTop: 40,
+              }}
+            >
+              {items.map((p) => (
+                <article
+                  key={p.id}
+                  style={{
+                    border: "1px solid #ffffff14",
+                    borderRadius: 8,
+                    overflow: "hidden",
+                    background: "#101316",
+                  }}
+                >
+                  <Link
+                    href={`/products/${p.slug}`}
+                    aria-label={`View ${p.name}`}
+                    style={{ display: "block", position: "relative", aspectRatio: "4/3" }}
+                  >
+                    {p.images[0] ? (
+                      <Image
+                        src={p.images[0]}
+                        alt={p.name}
+                        fill
+                        sizes="(max-width:768px) 100vw, 33vw"
+                        style={{ objectFit: "cover" }}
+                      />
+                    ) : (
+                      <span
+                        style={{
+                          display: "flex",
+                          height: "100%",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          color: "#858b92",
+                          fontSize: 12,
+                          letterSpacing: "0.2em",
+                        }}
+                      >
+                        CARTUNEZ
+                      </span>
+                    )}
+                  </Link>
+                  <div style={{ padding: 18 }}>
+                    <p
+                      style={{
+                        fontSize: 10,
+                        letterSpacing: "0.22em",
+                        color: "#08bcec",
+                        margin: "0 0 8px",
+                      }}
+                    >
+                      {p.category}
+                    </p>
+                    <Link href={`/products/${p.slug}`}>
+                      <h3
+                        style={{
+                          fontFamily:
+                            "'Barlow Condensed','Arial Narrow',Impact,sans-serif",
+                          fontSize: 26,
+                          margin: "0 0 6px",
+                          lineHeight: 1,
+                        }}
+                      >
+                        {p.name}
+                      </h3>
+                    </Link>
+                    <p style={{ margin: "0 0 14px", color: "#f2f3f3" }}>
+                      {p.currency}
+                      {p.price.toLocaleString("en-IN")}{" "}
+                      <span
+                        style={{
+                          fontSize: 11,
+                          letterSpacing: "0.14em",
+                          color: p.inStock ? "#7ee2a8" : "#858b92",
+                        }}
+                      >
+                        {p.inStock ? "IN STOCK" : "SOLD OUT"}
+                      </span>
+                    </p>
+                    <a
+                      className="text-link"
+                      href={WA(p.name)}
+                      target="_blank"
+                      rel="noopener"
+                    >
+                      Enquire on WhatsApp ↗
+                    </a>
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
+        </section>
+      </main>
+      <Footer />
+      <style>{`@keyframes pulse{0%,100%{opacity:1}50%{opacity:.45}}`}</style>
     </>
   );
 }

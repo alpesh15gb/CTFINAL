@@ -1,29 +1,60 @@
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
 
 export default function NotFound() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-background px-4 pt-20 text-center">
-      <p className="font-mono text-xs uppercase tracking-[0.25em] text-silver-muted">
+    <main
+      style={{
+        minHeight: "100svh",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 16,
+        background: "#080a0c",
+        color: "#f2f3f3",
+        textAlign: "center",
+        padding: 24,
+      }}
+    >
+      <p style={{ fontSize: 12, letterSpacing: "0.25em", color: "#858b92" }}>
         404
       </p>
-      <h1 className="mt-4 font-display text-4xl uppercase text-foreground">
-        Page Not Found
+      <h1
+        style={{
+          fontFamily: "'Barlow Condensed','Arial Narrow',Impact,sans-serif",
+          fontSize: "clamp(48px,8vw,96px)",
+          margin: 0,
+          lineHeight: 1,
+        }}
+      >
+        LOST THE TRAIL.
       </h1>
-      <p className="mt-2 max-w-sm text-silver-muted">
+      <p style={{ color: "#b9c0c6", maxWidth: 420 }}>
         This page was moved, removed, or never existed.
       </p>
-      <div className="mt-6 flex flex-wrap justify-center gap-3">
-        <Button asChild className="bg-red text-white hover:bg-red-deep">
-          <Link href="/">Back Home</Link>
-        </Button>
-        <Button
-          asChild
-          variant="outline"
-          className="border-border bg-transparent text-foreground hover:border-cyan-deep hover:text-cyan-deep"
+      <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+        <Link
+          href="/"
+          style={{
+            border: "1px solid #08bcec",
+            borderRadius: 30,
+            padding: "14px 24px",
+            fontSize: 14,
+          }}
         >
-          <Link href="/shop">Shop Now</Link>
-        </Button>
+          Back home
+        </Link>
+        <Link
+          href="/shop"
+          style={{
+            border: "1px solid #ffffff60",
+            borderRadius: 30,
+            padding: "14px 24px",
+            fontSize: 14,
+          }}
+        >
+          Shop upgrades
+        </Link>
       </div>
     </main>
   );
