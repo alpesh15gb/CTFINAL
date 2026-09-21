@@ -67,6 +67,10 @@ Global: Lenis `lerp: 0.1`, entrances `power3.out`. Zero empty-black viewports; r
 - Service panels: real studio imagery on `surface`, rounded-2xl, object-cover.
 - Product images: Medusa-served, 4:5 or square, rounded-xl.
 
+## Shop (REQ-SHOP-1)
+
+Quick-commerce patterns translated to the dark brand: sticky chrome (search field + scrollable category chips, `top-[72px] md:top-20`, `bg-ink/95` blur), 2-col mobile / 4-col desktop card grid (`surface` cards, square images, 11px category meta, 2-line clamped titles, price + bordered `ADD` button that fills signal on add), floating cart bar (`fixed inset-x-2 bottom-2`, signal fill, items · subtotal → Build List) rendered server-side from the cart cookie and refreshed after adds. Products filter client-side (title + category) for instant response.
+
 ## Layout
 
 Card content max width 1200px, 24px gutters (16px mobile). Sections separated by generous rhythm (96–160px), hairline dividers only where the reference has them. Navbar: logo badge left, sentence-case links center-right, `Cart (n)` link, gradient pill `Book a Build →`. Mobile: full-screen rounded overlay menu with staggered links (Lenis stopped while open).

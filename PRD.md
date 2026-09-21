@@ -27,7 +27,7 @@ Cartunez is a premium car customization studio — Shop 12 & 13, S.P. Road, Secu
 - **REQ-SEC-4** Capture CTA: input + gradient pill, submit deep-links WhatsApp. Studio address/hours/contact live in the footer. (Signature-packages and recent-builds sections removed per owner, 2026-09-22.)
 
 ### Commerce
-- **REQ-SHOP-1** /shop: product listing filterable by category.
+- **REQ-SHOP-1** /shop: quick-commerce listing (Blinkit/Zepto patterns, dark theme) — sticky search + horizontally-scrollable category chips, dense 2-col (mobile) / 4-col (desktop) cards with bordered ADD buttons wired to the cart, client-side instant filtering, floating cart bar (items · total → Build List).
 - **REQ-SHOP-2** PDP: gallery, description, INR price, add-to-cart.
 - **REQ-SHOP-3** Cart: line management, persisted via Medusa cart ID cookie.
 - **REQ-SHOP-4** Checkout: address → shipping → Razorpay payment (INR) → order placed in Medusa.
