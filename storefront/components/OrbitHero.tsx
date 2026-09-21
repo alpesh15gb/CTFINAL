@@ -60,6 +60,7 @@ export default function OrbitHero() {
     const boot = async () => {
       const THREE = await import("three")
       const { GLTFLoader } = await import("three/examples/jsm/loaders/GLTFLoader.js")
+      const { MeshoptDecoder } = await import("three/examples/jsm/libs/meshopt_decoder.module.js")
       if (disposed) return
 
       const stage = stageRef.current!
@@ -123,7 +124,9 @@ export default function OrbitHero() {
 
       // car — normalize scale/ground. The Temerario is an authored model with
       // its own materials/textures, so we render it as-is under studio lights.
-      new GLTFLoader().load(
+      const loader = new GLTFLoader()
+      loader.setMeshoptDecoder(MeshoptDecoder)
+      loader.load(
         "/models/lamborghini-temerario-widebody.glb",
         (gltf) => {
           const car = gltf.scene
