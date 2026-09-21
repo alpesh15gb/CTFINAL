@@ -82,12 +82,7 @@ export default async function ProductPage({
               {product.title}
             </h1>
             {price != null && (
-              <p className="mt-4 text-2xl font-semibold">
-                {formatINR(price)}
-                <span className="ml-2 align-middle text-[13px] font-normal text-muted">
-                  incl. fitting at studio
-                </span>
-              </p>
+              <p className="mt-4 text-2xl font-semibold">{formatINR(price)}</p>
             )}
             <p className="mt-5 text-[15px] leading-relaxed text-muted">
               {product.description}
@@ -98,12 +93,11 @@ export default async function ProductPage({
             </div>
 
             <ul className="mt-10 space-y-4 border-t hairline pt-8">
-              {[
-                <>
-                  Free installation at our S.P. Road studio, or insured pan-India courier.
-                </>,
-                <>Fitted by Cartunez technicians — no outsourced labour.</>,
-                <>
+              <li className="flex items-start gap-3 text-sm text-muted">
+                <span className="check-dot mt-0.5 text-[10px] text-white" aria-hidden>
+                  ✓
+                </span>
+                <span>
                   WhatsApp{" "}
                   <a
                     href="https://wa.me/919949695030"
@@ -114,15 +108,8 @@ export default async function ProductPage({
                     +91 99496 95030
                   </a>{" "}
                   for fitment questions.
-                </>,
-              ].map((row, i) => (
-                <li key={i} className="flex items-start gap-3 text-sm text-muted">
-                  <span className="check-dot mt-0.5 text-[10px] text-white" aria-hidden>
-                    ✓
-                  </span>
-                  <span>{row}</span>
-                </li>
-              ))}
+                </span>
+              </li>
             </ul>
           </div>
         </div>
