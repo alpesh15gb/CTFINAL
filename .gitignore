@@ -1,0 +1,24 @@
+node_modules/
+.next/
+.medusa/
+out/
+dist/
+*.log
+
+# secrets (REQ-INF-3) — .env.example files are the template of record
+.env
+.env.local
+.env.production
+!.env.example
+
+# runtime data
+medusa/static/
+medusa/uploads-seed/*.png
+
+# generated source imagery (converted webps live in storefront/public)
+vibe_images/
+
+# os/editor
+.DS_Store
+Thumbs.db
+*.tsbuildinfo

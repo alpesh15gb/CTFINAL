@@ -1,0 +1,84 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: cartunez-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: cartunez
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-cartunez_dev_pw}
+      POSTGRES_DB: medusa
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cartunez -d medusa"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: cartunez-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  medusa:
+    build: ../medusa
+    container_name: cartunez-medusa
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://cartunez:${POSTGRES_PASSWORD:-cartunez_dev_pw}@postgres:5432/medusa
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET:?set in infra/.env}
+      COOKIE_SECRET: ${COOKIE_SECRET:?set in infra/.env}
+      BACKEND_URL: ${BACKEND_URL:-http://localhost:9000}
+      STORE_CORS: ${STORE_CORS:-http://localhost:3000}
+      ADMIN_CORS: ${ADMIN_CORS:-http://localhost:9000}
+      AUTH_CORS: ${AUTH_CORS:-http://localhost:9000}
+      RAZORPAY_KEY_ID: ${RAZORPAY_KEY_ID:-rzp_test_REPLACE_ME}
+      RAZORPAY_KEY_SECRET: ${RAZORPAY_KEY_SECRET:-REPLACE_ME}
+      RAZORPAY_WEBHOOK_SECRET: ${RAZORPAY_WEBHOOK_SECRET:-REPLACE_ME}
+    ports:
+      - "9000:9000"
+    volumes:
+      - medusa-uploads:/app/static
+
+  storefront:
+    build:
+      context: ../storefront
+      args:
+        NEXT_PUBLIC_MEDUSA_BACKEND_URL: ${PUBLIC_BACKEND_URL:-http://localhost:9000}
+        NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY: ${NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY:-}
+        NEXT_PUBLIC_RAZORPAY_KEY_ID: ${RAZORPAY_KEY_ID:-rzp_test_REPLACE_ME}
+        NEXT_PUBLIC_WHATSAPP_NUMBER: ${NEXT_PUBLIC_WHATSAPP_NUMBER:-919949695030}
+    container_name: cartunez-storefront
+    restart: unless-stopped
+    depends_on:
+      - medusa
+    environment:
+      # Server components fetch via the internal docker network at runtime
+      NEXT_PUBLIC_MEDUSA_BACKEND_URL: http://medusa:9000
+      NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY: ${NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY:-}
+      NEXT_PUBLIC_RAZORPAY_KEY_ID: ${RAZORPAY_KEY_ID:-rzp_test_REPLACE_ME}
+      NEXT_PUBLIC_WHATSAPP_NUMBER: ${NEXT_PUBLIC_WHATSAPP_NUMBER:-919949695030}
+    ports:
+      - "3000:3000"
+
+volumes:
+  pgdata:
+  redisdata:
+  medusa-uploads:
