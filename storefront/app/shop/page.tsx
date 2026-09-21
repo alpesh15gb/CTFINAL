@@ -1,7 +1,7 @@
 import Link from "next/link"
-import { storeFetch, getRegionId, formatINR } from "@/lib/store"
-import { getCart } from "@/app/actions/cart"
+import { storeFetch, getRegionId } from "@/lib/store"
 import ShopBrowser from "@/components/shop/ShopBrowser"
+import CartBar from "@/components/shop/CartBar"
 import Footer from "@/components/Footer"
 
 export const dynamic = "force-dynamic"
@@ -21,19 +21,16 @@ export default async function ShopPage() {
     image: string
   }[] = []
   let live = true
-  let cartItems = 0
-  let cartTotal = 0
   try {
     const regionId = await getRegionId()
     const fields = encodeURIComponent("+categories.*,+variants.calculated_price.*")
-    const [cats, prods, cart] = await Promise.all([
+    const [cats, prods] = await Promise.all([
       storeFetch<{ product_categories: any[] }>("/product-categories?limit=50", {}, 300),
       storeFetch<{ products: any[] }>(
         `/products?limit=60&region_id=${regionId}&fields=${fields}`,
         {},
         60
       ),
-      getCart(),
     ])
     categories = cats.product_categories.map((c) => ({ id: c.id, name: c.name }))
     products = prods.products.map((p: any) => ({
@@ -46,8 +43,6 @@ export default async function ShopPage() {
       variantId: p.variants?.[0]?.id,
       image: p.thumbnail ?? p.images?.[0]?.url ?? "/images/services/audio.webp",
     }))
-    cartItems = cart?.items?.reduce((n: number, i: any) => n + (i.quantity ?? 1), 0) ?? 0
-    cartTotal = cart?.subtotal ?? cart?.total ?? 0
   } catch {
     live = false
   }
@@ -86,17 +81,7 @@ export default async function ShopPage() {
       </div>
 
       {/* floating cart bar — appears once the build list has items */}
-      {live && cartItems > 0 && (
-        <Link
-          href="/cart"
-          className="fixed inset-x-2 bottom-2 z-40 flex items-center justify-between rounded-2xl bg-signal px-5 py-3.5 text-white shadow-[0_16px_48px_rgba(225,6,0,0.35)] transition-transform hover:-translate-y-0.5 md:inset-x-4 md:bottom-4"
-        >
-          <span className="text-sm font-semibold">
-            {cartItems} {cartItems === 1 ? "item" : "items"} · {formatINR(cartTotal)}
-          </span>
-          <span className="text-sm font-semibold">View Build List →</span>
-        </Link>
-      )}
+      <CartBar />
 
       <Footer />
     </main>
