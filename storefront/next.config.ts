@@ -2,6 +2,8 @@ import type { NextConfig } from "next"
 
 const nextConfig: NextConfig = {
   output: "standalone",
+  // dev gets its own distDir so `next build` can never clobber a running dev server
+  ...(process.env.NEXT_DEV ? { distDir: ".next-dev" } : {}),
   images: {
     remotePatterns: [
       { protocol: "http", hostname: "localhost", port: "9000" },

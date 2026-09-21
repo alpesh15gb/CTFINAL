@@ -41,7 +41,7 @@ Archivo remains only inside the logo asset. Loaded via `next/font/google`, `disp
 
 ## Page sections (home) — mapped 1:1 from the reference
 
-1. **Hero:** badge pill (`Now booking · Hyderabad studio`), h1 two lines, two-line subcopy, secondary + primary pill CTAs; below, a signal eclipse-glow arc rising behind a **Studio Panel** (dashboard analog): tab bar, 4 stat tiles with sparklines, "In the bay" image tile + "Latest builds" rows. Ghost: hero h1.
+1. **Hero (interactive "Studio Light"):** badge pill (`Now booking · Hyderabad studio`), h1 two lines, subcopy, paint-the-light swatches (Satin Red / Volt Blue / Pearl White), secondary + primary pill CTAs; behind it all, the Thar scene sits in darkness with a cursor-driven spotlight (masked full-brightness layer) revealing it; swatches hue-shift the lit paint; below, a signal eclipse-glow arc rises behind the **Studio Panel** (dashboard analog): tab bar, 4 stat tiles with sparklines, "In the bay" image tile + "Latest builds" rows. Ghost: hero h1.
 2. **Trust marquee:** microcopy line + uniform gray capability wordmarks, infinite drift, velocity-reactive. Ghost: none (subtle).
 3. **Bento grid:** centered h2 + subcopy; 2 stat mini-cards + 1 gradient feature tile + 1 wide activity card. Ghost: h2.
 4. **Capabilities:** centered h2 + subcopy; two alternating rows — glassy image panel left/right, copy + signal check list + text-link. Ghost: h2.
@@ -59,7 +59,8 @@ Global: Lenis `lerp: 0.1`, entrances `power3.out`. Zero empty-black viewports; r
 - **MOT-3 Marquee:** base drift 0.6px/frame + smoothed scroll velocity (max +4px/frame), wraps at half track.
 - **MOT-4 Cards:** hover lift (translateY -4px) + image scale 1.0→1.05; arrow chip nudges diagonally.
 - **MOT-5 Glow:** hero eclipse breathes (slow scale/opacity loop) behind the Studio Panel.
-- **MOT-6 Reduced motion:** static page, ghosts hidden, marquee static.
+- **MOT-6 Reduced motion:** static page, ghosts hidden, marquee static, hero renders a single moderately-lit frame with no lamp.
+- **MOT-7 Studio Light:** hero lamp = radial mask (`circle 380px`) on a full-brightness duplicate of the scene, position eased (lerp 0.07) toward the cursor; auto Lissajous sweep when idle >3.5s or on touch; scene tilts ≤7°/4° with the light; TintSwatches dispatch `hero-tint` → bloom color + per-swatch filter on the lit layer (`Satin Red` saturate(1.2), `Volt Blue` hue-rotate(200deg) saturate(1.25), `Pearl White` saturate(0.18) brightness(1.18)).
 
 ## Imagery
 

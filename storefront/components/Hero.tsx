@@ -1,5 +1,7 @@
 import Link from "next/link"
 import Rise from "./Rise"
+import HeroLight from "./HeroLight"
+import TintSwatches from "./TintSwatches"
 
 const WA = `https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "919949695030"}`
 
@@ -26,7 +28,10 @@ function Spark({ points }: { points: string }) {
 
 export default function Hero() {
   return (
-    <section id="hero" data-ghost="hero" className="relative px-6 pb-20 pt-28 text-center md:pt-36">
+    <section id="hero" data-ghost="hero" className="relative px-6 pb-20 pt-28 text-center md:pt-32">
+      <HeroLight />
+
+      <div className="relative">
       <Rise>
         <span className="badge-pill">
           <span className="h-1.5 w-1.5 rounded-full bg-signal" />
@@ -50,7 +55,13 @@ export default function Hero() {
       </Rise>
 
       <Rise delay={200}>
-        <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+        <div className="mt-7">
+          <TintSwatches />
+        </div>
+      </Rise>
+
+      <Rise delay={240}>
+        <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
           <Link href="/shop" className="btn-secondary">
             Explore Builds <span aria-hidden>→</span>
           </Link>
@@ -153,6 +164,7 @@ export default function Hero() {
             </div>
           </div>
         </Rise>
+      </div>
       </div>
     </section>
   )
