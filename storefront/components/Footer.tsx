@@ -3,8 +3,12 @@ export default function Footer() {
     <footer className="border-t hairline">
       <div className="mx-auto flex max-w-[1440px] flex-col items-start justify-between gap-8 px-6 py-16 md:flex-row md:items-end">
         <div>
-          <p className="font-display text-4xl font-900 uppercase tracking-[0.2em]">Cartunez</p>
-          <p className="eyebrow mt-4">Built around you · Not for everyone</p>
+          <img
+            src="/images/cartunez-logo.png"
+            alt="Cartunez"
+            className="h-24 w-24 [mix-blend-mode:screen]"
+          />
+          <p className="eyebrow mt-4">Get your car rolling in style.</p>
         </div>
         <div className="flex gap-10 text-sm text-muted">
           <div className="flex flex-col gap-2">

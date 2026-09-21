@@ -7,6 +7,12 @@ import { ScrollTrigger } from "gsap/ScrollTrigger"
 
 gsap.registerPlugin(ScrollTrigger)
 
+declare global {
+  interface Window {
+    __lenis?: Lenis
+  }
+}
+
 export default function SmoothScroll({
   children,
 }: {
@@ -17,6 +23,7 @@ export default function SmoothScroll({
     if (reduced) return
 
     const lenis = new Lenis({ lerp: 0.1 }) // DESIGN_SYSTEM: global lerp
+    window.__lenis = lenis
     lenis.on("scroll", ScrollTrigger.update)
 
     const tick = (time: number) => lenis.raf(time * 1000)
@@ -40,6 +47,7 @@ export default function SmoothScroll({
     return () => {
       document.removeEventListener("click", onClick)
       gsap.ticker.remove(tick)
+      delete window.__lenis
       lenis.destroy()
     }
   }, [])

@@ -34,6 +34,7 @@ export default function RootLayout({
           <Navbar />
           {children}
         </SmoothScroll>
+        <div aria-hidden className="grain" />
       </body>
     </html>
   )

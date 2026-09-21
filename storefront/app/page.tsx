@@ -2,6 +2,7 @@ import HeroScroll from "@/components/HeroScroll"
 import Philosophy from "@/components/Philosophy"
 import Pillars from "@/components/Pillars"
 import FeaturedProducts from "@/components/FeaturedProducts"
+import Marquee from "@/components/Marquee"
 import ServicesGrid from "@/components/ServicesGrid"
 import ConversionBanner from "@/components/ConversionBanner"
 import Visit from "@/components/Visit"
@@ -17,6 +18,7 @@ export default function HomePage() {
       <Philosophy />
       <Pillars />
       <FeaturedProducts />
+      <Marquee />
       <ServicesGrid />
       <ConversionBanner />
       <Visit />

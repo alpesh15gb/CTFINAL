@@ -8,6 +8,8 @@
   --color-paper: #f5f4f0;
   --color-muted: #8a8a93;
   --color-signal: #e10600;
+  /* Brand blue sampled from cartunez-logo.png (wings + TUNEZ wordmark) */
+  --color-volt: #02bbfc;
 
   --font-display: var(--font-archivo), system-ui, sans-serif;
   --font-body: var(--font-inter), system-ui, sans-serif;
@@ -43,6 +45,11 @@ body {
   color: var(--color-muted);
 }
 
+/* color utilities must out-rank the eyebrow default (same layer) */
+.eyebrow.text-paper { color: var(--color-paper); }
+.eyebrow.text-signal { color: var(--color-signal); }
+.eyebrow.text-volt { color: var(--color-volt); }
+
 .display-xl {
   font-family: var(--font-display);
   font-weight: 900;
@@ -63,6 +70,53 @@ body {
 
 .text-signal {
   color: var(--color-signal);
+}
+
+.text-volt {
+  color: var(--color-volt);
+}
+
+/* MOT-6 film grain: GPU-only steps jitter on an oversized fixed layer */
+.grain {
+  position: fixed;
+  inset: -100%;
+  z-index: 45;
+  pointer-events: none;
+  opacity: 0.055;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation: grain-jump 0.8s steps(5) infinite;
+}
+
+@keyframes grain-jump {
+  0% { transform: translate3d(0, 0, 0); }
+  20% { transform: translate3d(-6%, 4%, 0); }
+  40% { transform: translate3d(4%, -7%, 0); }
+  60% { transform: translate3d(-3%, 6%, 0); }
+  80% { transform: translate3d(7%, 2%, 0); }
+  100% { transform: translate3d(0, 0, 0); }
+}
+
+@keyframes veil-pulse {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
+}
+
+@keyframes cue-drop {
+  0% { transform: scaleY(0); transform-origin: top; }
+  45% { transform: scaleY(1); transform-origin: top; }
+  55% { transform: scaleY(1); transform-origin: bottom; }
+  100% { transform: scaleY(0); transform-origin: bottom; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .grain {
+    animation: none;
+  }
+}
+
+.text-outline {
+  color: transparent;
+  -webkit-text-stroke: 1px var(--color-muted);
 }
 
 .hairline {
