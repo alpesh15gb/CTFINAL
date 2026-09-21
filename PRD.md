@@ -18,8 +18,8 @@ Cartunez is a premium car customization studio — Shop 12 & 13, S.P. Road, Secu
 
 ## 3. Requirements
 
-### Hero + marketing sections (single page — reference of record: pinterestreference.mp4, revised 2026-09-22)
-- **REQ-HERO-1** Hero: badge pill, sentence-case headline, subcopy, pill CTAs, signal eclipse-glow behind a "Studio Panel" dashboard (stat tiles, in-bay image, latest-build rows). The scroll-scrubbed image sequence is retired (superseded by the reference).
+### Hero + marketing sections (single page — hero direction: WebGL orbit per owner, 2026-09-22; overall presentation: pinterestreference.mp4)
+- **REQ-HERO-1** Hero: WebGL orbit — pinned 520vh scrub drives a three.js camera around a CC0 low-poly SUV in a rim-lit dark studio; mouse parallax; act copy windows with velocity skew; preloader counter → curtain → camera dolly; paint-the-light swatches recolor the rim/underglow live; HUD on desktop; mobile runs the same scrub with portrait framing; reduced-motion renders one static angle. Hand-off into the Studio Panel (badge pill, headline CTAs live in the intro act).
 - **REQ-HERO-2** Site presents as a floating rounded card over an ink backdrop; each section's key content echoes as a giant dimmed ghost behind the card, crossfading per section (DESIGN_SYSTEM REF-1 / MOT-1).
 - **REQ-SEC-1** Trust marquee: uniform gray capability wordmarks, velocity-reactive drift.
 - **REQ-SEC-2** Bento grid: service stat mini-cards + gradient feature tile + studio-log activity card.

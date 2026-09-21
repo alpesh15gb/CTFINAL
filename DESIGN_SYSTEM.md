@@ -41,7 +41,7 @@ Archivo remains only inside the logo asset. Loaded via `next/font/google`, `disp
 
 ## Page sections (home) — mapped 1:1 from the reference
 
-1. **Hero (interactive "Studio Light"):** badge pill (`Now booking · Hyderabad studio`), h1 two lines, subcopy, paint-the-light swatches (Satin Red / Volt Blue / Pearl White), secondary + primary pill CTAs; behind it all, the Thar scene sits in darkness with a cursor-driven spotlight (masked full-brightness layer) revealing it; swatches hue-shift the lit paint; below, a signal eclipse-glow arc rises behind the **Studio Panel** (dashboard analog): tab bar, 4 stat tiles with sparklines, "In the bay" image tile + "Latest builds" rows. Ghost: hero h1.
+1. **Hero (interactive "Orbit" — WebGL):** badge pill, h1 two lines, subcopy, paint-the-light swatches (Satin Red / Volt Blue / Pearl White), pill CTAs; behind it all a three.js studio — a CC0 low-poly SUV (`storefront/public/models/studio-suv.glb`, Quaternius via poly.pizza) as a near-black satin body shaped by a tintable red rim spot + cool white rim + underglow, soft shadow on a dark floor, fog into `ink`. Scroll scrubs a pinned 520vh camera orbit (200°→340°, mid dolly-in, height dip); the mouse adds ±parallax; act copy (Style./Sound./Performance./Make it yours.) rides pinned windows with velocity skew; desktop HUD shows orbit degrees + scrub bar (hidden on mobile, where portrait framing pulls the camera back ×1.5 and FOV widens to 47). Preloader counter is wired to real model progress, lifts as a two-panel curtain, then the camera dollies in. Hand-off: pin ends into the Studio Panel section (eclipse glow + dashboard analog). Ghost: hero h1.
 2. **Trust marquee:** microcopy line + uniform gray capability wordmarks, infinite drift, velocity-reactive. Ghost: none (subtle).
 3. **Bento grid:** centered h2 + subcopy; 2 stat mini-cards + 1 gradient feature tile + 1 wide activity card. Ghost: h2.
 4. **Capabilities:** centered h2 + subcopy; two alternating rows — glassy image panel left/right, copy + signal check list + text-link. Ghost: h2.
@@ -59,8 +59,8 @@ Global: Lenis `lerp: 0.1`, entrances `power3.out`. Zero empty-black viewports; r
 - **MOT-3 Marquee:** base drift 0.6px/frame + smoothed scroll velocity (max +4px/frame), wraps at half track.
 - **MOT-4 Cards:** hover lift (translateY -4px) + image scale 1.0→1.05; arrow chip nudges diagonally.
 - **MOT-5 Glow:** hero eclipse breathes (slow scale/opacity loop) behind the Studio Panel.
-- **MOT-6 Reduced motion:** static page, ghosts hidden, marquee static, hero renders a single moderately-lit frame with no lamp.
-- **MOT-7 Studio Light:** hero lamp = radial mask (`circle 380px`) on a full-brightness duplicate of the scene, position eased (lerp 0.07) toward the cursor; auto Lissajous sweep when idle >3.5s or on touch; scene tilts ≤7°/4° with the light; TintSwatches dispatch `hero-tint` → bloom color + per-swatch filter on the lit layer (`Satin Red` saturate(1.2), `Volt Blue` hue-rotate(200deg) saturate(1.25), `Pearl White` saturate(0.18) brightness(1.18)).
+- **MOT-6 Reduced motion:** static page, ghosts hidden, marquee static, hero renders a single static studio angle with all copy stacked.
+- **MOT-7 Orbit scrub:** hero pinned at 520vh; sticky stage + rAF live-measured progress (same pattern as MOT-1 originally). Camera: azimuth 200°→340°, radius `7.4 − 1.9·sin(pπ)` (×1.5 portrait), height dips mid-scrub, all lerped 0.09 for scrub feel; intro dolly mixes in after the preloader curtain. Velocity skew ±5° on act copy. Swatches dispatch `hero-tint` → rim spot + underglow recolor. three.js is dynamically imported so it never loads on server pages that don't need it; DPR capped (1.5 mobile / 2 desktop); model ≈3.3k triangles so 60fps holds on mobile hardware.
 
 ## Imagery
 

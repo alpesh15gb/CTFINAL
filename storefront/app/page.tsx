@@ -1,4 +1,4 @@
-import Hero from "@/components/Hero"
+import OrbitHero from "@/components/OrbitHero"
 import Marquee from "@/components/Marquee"
 import BentoStats from "@/components/BentoStats"
 import FeatureRows from "@/components/FeatureRows"
@@ -13,7 +13,7 @@ export const revalidate = 300
 export default function HomePage() {
   return (
     <main>
-      <Hero />
+      <OrbitHero />
       <Marquee />
       <BentoStats />
       <FeatureRows />
