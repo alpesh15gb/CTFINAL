@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react"
 
-// MOT-6 — infinite capability marquee; scroll velocity drives its speed so
+// MOT-3 — uniform gray wordmark strip; scroll velocity drives its speed so
 // it surges as you scroll and settles when you stop.
 const ITEMS = [
   "Stage 1–3 ECU Tunes",
@@ -43,24 +43,25 @@ export default function Marquee() {
   }, [])
 
   return (
-    <section aria-hidden className="overflow-hidden border-y hairline py-7">
-      <div ref={trackRef} className="flex w-max items-center gap-10 will-change-transform">
-        {[0, 1].map((halfIdx) => (
-          <div key={halfIdx} className="flex items-center gap-10">
-            {ITEMS.map((item, i) => (
-              <span key={i} className="flex items-center gap-10">
-                <span
-                  className={`whitespace-nowrap font-display text-2xl font-800 uppercase tracking-wide md:text-4xl ${
-                    i % 2 === 0 ? "text-paper/90" : "text-outline"
-                  }`}
-                >
-                  {item}
+    <section aria-label="Capabilities" className="border-y hairline py-10">
+      <p className="text-center text-[13px] text-muted">
+        Trusted by enthusiasts across Telangana — one car at a time
+      </p>
+      <div className="mt-6 overflow-hidden" aria-hidden>
+        <div ref={trackRef} className="flex w-max items-center gap-12 will-change-transform">
+          {[0, 1].map((halfIdx) => (
+            <div key={halfIdx} className="flex items-center gap-12">
+              {ITEMS.map((item) => (
+                <span key={item} className="flex items-center gap-12">
+                  <span className="whitespace-nowrap text-lg font-medium tracking-tight text-white/30 md:text-2xl">
+                    {item}
+                  </span>
+                  <span className="h-1 w-1 rounded-full bg-white/15" />
                 </span>
-                <span className="h-1.5 w-1.5 rotate-45 bg-signal" />
-              </span>
-            ))}
-          </div>
-        ))}
+              ))}
+            </div>
+          ))}
+        </div>
       </div>
     </section>
   )

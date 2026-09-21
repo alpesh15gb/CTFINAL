@@ -18,18 +18,15 @@ Cartunez is a premium car customization studio — Shop 12 & 13, S.P. Road, Secu
 
 ## 3. Requirements
 
-### Hero scroll experience
-- **REQ-HERO-1** Pinned full-viewport canvas scrubbing an image sequence bound to scroll progress; eased crossfade between frames; `object-fit: cover` behavior on any viewport.
-- **REQ-HERO-2** Text overlays at scroll boundaries: `AUTOMOTIVE CUSTOMIZATION · HYDERABAD` → `STYLE.` → `SOUND.` → `PERFORMANCE.` → CTA ("Build Yours" → /shop + WhatsApp). Windows defined in DESIGN_SYSTEM.md `MOT-1`.
-- **REQ-HERO-3** Frames preloaded with progressive reveal — first frame paints immediately, sequence refines as frames arrive. Never a black empty viewport (REQ-QUAL-1).
-
-### Marketing sections (single page)
-- **REQ-SEC-1** Philosophy: "A car gets you there. Character makes it yours."
-- **REQ-SEC-2** Three pillars: The Personal Space / The Sensory Experience / The Driving Character.
-- **REQ-SEC-3** "SMALL DETAILS. BIG DIFFERENCE." — featured products fetched live from Medusa store API.
-- **REQ-SEC-4** Services grid: upholstery, audio/infotainment, lighting, alloys, ECU remap.
-- **REQ-SEC-5** Conversion banner: "GOOD TASTE. GREAT DRIVES. START HERE." → WhatsApp deep link + /shop CTA.
-- **REQ-SEC-6** Visit: address, hours, map embed, contact.
+### Hero + marketing sections (single page — reference of record: pinterestreference.mp4, revised 2026-09-22)
+- **REQ-HERO-1** Hero: badge pill, sentence-case headline, subcopy, pill CTAs, signal eclipse-glow behind a "Studio Panel" dashboard (stat tiles, in-bay image, latest-build rows). The scroll-scrubbed image sequence is retired (superseded by the reference).
+- **REQ-HERO-2** Site presents as a floating rounded card over an ink backdrop; each section's key content echoes as a giant dimmed ghost behind the card, crossfading per section (DESIGN_SYSTEM REF-1 / MOT-1).
+- **REQ-SEC-1** Trust marquee: uniform gray capability wordmarks, velocity-reactive drift.
+- **REQ-SEC-2** Bento grid: service stat mini-cards + gradient feature tile + studio-log activity card.
+- **REQ-SEC-3** Capability rows: alternating glassy image panels with check lists + text links.
+- **REQ-SEC-4** Signature packages: 3-tier pricing cards, highlighted center, prices live from Medusa by handle (static fallback).
+- **REQ-SEC-5** Recent builds: product image cards with arrow chips + glass title overlays (live Medusa data).
+- **REQ-SEC-6** Capture CTA: input + gradient pill, submit deep-links WhatsApp. Studio address/hours/contact live in the footer.
 
 ### Commerce
 - **REQ-SHOP-1** /shop: product listing filterable by category.

@@ -1,53 +1,73 @@
 # Design System — Cartunez
 
-Presentation layer contract. Implements PRD.md §3 (REQ-HERO-*, REQ-SEC-*, REQ-QUAL-*). Motion IDs `MOT-*` are referenced from code comments.
+Presentation layer contract. Reference of record: `pinterestreference.mp4` (RedSun-style dark presentation — site inside a floating rounded card, giant dimmed ghost echoes behind). Implements PRD.md §3 as revised 2026-09-22. Motion IDs `MOT-*` are referenced from code comments.
+
+## Presentation frame (REF-1)
+
+The whole site presents as the reference does: a floating rounded card over an ink backdrop, with each section's key content echoed as a giant, dimmed "ghost" behind the card.
+
+- Outer backdrop `#060607`. Page card: inset 16px (6px mobile), radius 28px, fill `#0D0D0F`, hairline `rgba(255,255,255,0.07)`. Implemented as a fixed bezel overlay that paints everything outside the card via giant box-shadow (StageFrame).
+- Navbar is fixed to the card's top edge (same inset/radius), translucent blur.
+- GhostLayer: fixed behind the card. Per section, its heading/price/shapes render at 2–4× scale, opacity ~0.07–0.12; crossfades as sections pass. Only the margins reveal it — exactly like the reference.
 
 ## Palette
 
 | Token | Hex | Use |
 |---|---|---|
-| `ink` | `#0A0A0B` | page background |
-| `surface` | `#131316` | cards, panels |
-| `line` | `#232329` | hairline borders |
+| `backdrop` | `#060607` | outside the card |
+| `stage` | `#0D0D0F` | card fill / page background |
+| `surface` | `#141417` | cards, panels |
+| `surface-2` | `#1B1B1F` | nested tiles, inputs |
+| `line` | `rgba(255,255,255,0.07)` | hairlines (dark glass borders) |
 | `paper` | `#F5F4F0` | primary text |
 | `muted` | `#8A8A93` | secondary text |
-| `signal` | `#E10600` | accent — CTAs, rim-light echo, single-word highlights |
-| `volt` | `#02BBFC` | brand blue sampled from cartunez-logo.png — used only for the `SOUND.` hero word and logo contexts; never for CTAs |
+| `signal` | `#E10600` | accent — CTAs, highlights, echoes |
+| `signal-hot` | `#FF3B2E` | gradient end for CTAs |
+| `volt` | `#02BBFC` | brand blue from cartunez-logo.png — logo contexts + one hero word only |
 
-Accent is used sparingly: one element per viewport max. Sharp corners (radius 0–4px) everywhere — performance-car aesthetic, no soft consumer rounding.
+Buttons: pill radius-full. Primary = gradient `signal → signal-hot`, white text, soft glow shadow. Secondary = `surface-2` pill with hairline. Badge pills: `surface-2`/hairline with a signal dot.
 
 ## Typography
 
-- **Display:** Archivo (weight 800–900, uppercase, tracking -0.02em, expanded feel) — hero words, section headlines. Fluid: `clamp(2.75rem, 9vw, 8.5rem)`.
-- **Eyebrow:** Archivo 600 uppercase, tracking +0.35em, 11–12px, `muted` or `signal`.
-- **Body:** Inter 400/500, 16–18px, `muted` on `ink`.
+Reference is sentence-case, medium-weight, tight tracking — no uppercase display.
 
-Loaded via `next/font/google` subsets, `display: swap`.
+- **Display (h1):** Inter 600, `clamp(2.5rem, 4.5vw, 4rem)`, tracking -0.03em, sentence case, line-height 1.1.
+- **Section (h2):** Inter 600, `clamp(1.75rem, 3vw, 2.75rem)`, tracking -0.02em.
+- **Card (h3):** Inter 600, 1.25–1.5rem.
+- **Body:** Inter 400, 15–16px, `muted`.
+- **Micro/labels:** 12–13px, 500, `muted`; uppercase only inside pills where reference uses it.
+
+Archivo remains only inside the logo asset. Loaded via `next/font/google`, `display: swap`.
+
+## Page sections (home) — mapped 1:1 from the reference
+
+1. **Hero:** badge pill (`Now booking · Hyderabad studio`), h1 two lines, two-line subcopy, secondary + primary pill CTAs; below, a signal eclipse-glow arc rising behind a **Studio Panel** (dashboard analog): tab bar, 4 stat tiles with sparklines, "In the bay" image tile + "Latest builds" rows. Ghost: hero h1.
+2. **Trust marquee:** microcopy line + uniform gray capability wordmarks, infinite drift, velocity-reactive. Ghost: none (subtle).
+3. **Bento grid:** centered h2 + subcopy; 2 stat mini-cards + 1 gradient feature tile + 1 wide activity card. Ghost: h2.
+4. **Capabilities:** centered h2 + subcopy; two alternating rows — glassy image panel left/right, copy + signal check list + text-link. Ghost: h2.
+5. **Packages (pricing analog):** centered h2 + subcopy; 3 price cards, center highlighted with signal border + gradient CTA; feature check lists; live prices from Medusa by handle with static fallback. Ghost: giant `₹`.
+6. **Recent builds:** 3 image cards with arrow chip + title overlay. Ghost: 3 rounded card silhouettes.
+7. **CTA capture:** h2 left, email-style input + gradient pill button (submit deep-links WhatsApp), panel with signal glow underneath. Ghost: h2.
+8. **Footer:** brand column + `Main Pages` / `Studio` / `Social` link columns, copyright bar. Ghost: giant link column text.
 
 ## Motion spec
 
-Global: Lenis `lerp: 0.1`, GSAP ScrollTrigger `scrub: 1` for pinned scenes, `power3.out` for entrances. All pinned scenes must have ≥200vh scroll distance per beat so motion reads cinematic, not twitchy.
+Global: Lenis `lerp: 0.1`, entrances `power3.out`. Zero empty-black viewports; reduced-motion collapses all of the below to opacity-only or static.
 
-- **MOT-1 Hero sequence (REQ-HERO-1/2):** 600vh pin. Frame index = `progress × (N−1)`. Each cut pushes the outgoing frame in (zoom 1→1.035) while the incoming frame settles back — a continuous forward camera move. Canvas camera: slow dolly `scale 1→1.07` + slight vertical drift across the pin; scroll-velocity skew (±4° max, eased decay) on an oversized `inset -8%` wrapper so no edge ever shows. Canvas grade: `saturate(1.1) contrast(1.05) brightness(0.98)`. Overlay windows (% of pinned progress):
-  | Window | Copy |
-  |---|---|
-  | 0–12% | `AUTOMOTIVE CUSTOMIZATION · HYDERABAD` (eyebrow; signal rule line scales in 0–10%) |
-  | 18–34% | `STYLE.` (paper) |
-  | 40–56% | `SOUND.` (volt) |
-  | 62–78% | `PERFORMANCE.` (paper) |
-  | 86–100% | CTA block: "MAKE IT YOURS" + buttons (buttons trail the headline; holds to pin end) |
-  Hero words enter as per-character masked cascades (translateY 1.15em→0 + ≤6° rotate, overflow-hidden line masks, stagger compressed so long words finish before exit) and exit upward as one block. CTA headline cascades per word. HUD right-center: frame readout `01 / 14` + signal scrub bar. Scroll cue fades out by 4.5%. Zero empty-black viewports: vignette + bottom fade to `ink` under the pinned canvas.
-- **MOT-2 Section entrances:** headline lines revealed with clip-path inset animation + 40px rise, staggered 80ms per line, triggered at `top 75%`.
-- **MOT-3 Pillars (REQ-SEC-2):** three panels, each pins briefly; index number `01/02/03` parallaxes at 0.5× scroll speed.
-- **MOT-4 Product cards (REQ-SEC-3):** image scale 1.0→1.06 on hover, `signal` underline sweep on title.
-- **MOT-5 Reduced motion (REQ-QUAL-4):** no pin, first hero frame static, all overlay copy stacked visible, entrances become simple opacity. Film grain freezes.
-- **MOT-6 Marquee:** infinite capability strip between Featured Products and Services; base drift 0.6px/frame accelerated by smoothed scroll velocity (max +4px/frame), wraps at half track width. Alternating solid `paper/90` and outline-stroke display type with signal diamonds.
-- **MOT-7 Film grain:** fixed full-viewport `feTurbulence` layer, opacity ~0.055, GPU-only `steps(5)` transform jitter — sits at z-45 under the navbar.
+- **MOT-1 Ghost echo:** GhostLayer crossfades per section (rAF live measurement), slight 0.9→1 scale drift on the active ghost.
+- **MOT-2 Entrances:** sections rise 24px + fade at `top 80%`; no clip-path (reference is softer).
+- **MOT-3 Marquee:** base drift 0.6px/frame + smoothed scroll velocity (max +4px/frame), wraps at half track.
+- **MOT-4 Cards:** hover lift (translateY -4px) + image scale 1.0→1.05; arrow chip nudges diagonally.
+- **MOT-5 Glow:** hero eclipse breathes (slow scale/opacity loop) behind the Studio Panel.
+- **MOT-6 Reduced motion:** static page, ghosts hidden, marquee static.
 
 ## Imagery
 
-Hero frames: 16:9 WebP, target ≤180KB each, matte-black modified SUV in dark studio with red rim lighting (ADR-6). Section imagery: real-service close-ups generated in the same grade. Product images: on `surface` background, 4:5.
+- Eclipse glow: pure CSS (layered radial gradients + blur), signal red.
+- Studio Panel build image: hero sequence frame 01 (Thar in the bay).
+- Service panels: real studio imagery on `surface`, rounded-2xl, object-cover.
+- Product images: Medusa-served, 4:5 or square, rounded-xl.
 
 ## Layout
 
-Max content width 1440px, 24px gutters (16px mobile). Sections separated by `line` hairlines, generous vertical rhythm (120–200px). Navbar: fixed, transparent → `ink`/blur after first scroll, cartunez-logo.png badge (`mix-blend-mode: screen` — logo's black ground disappears on `ink`) + links Experience / Upgrades / Visit / Shop; mobile gets a full-screen menu overlay with staggered display-type links (Lenis stopped while open).
+Card content max width 1200px, 24px gutters (16px mobile). Sections separated by generous rhythm (96–160px), hairline dividers only where the reference has them. Navbar: logo badge left, sentence-case links center-right, `Cart (n)` link, gradient pill `Book a Build →`. Mobile: full-screen rounded overlay menu with staggered links (Lenis stopped while open).

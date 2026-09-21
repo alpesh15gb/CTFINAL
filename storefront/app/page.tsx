@@ -1,27 +1,25 @@
-import HeroScroll from "@/components/HeroScroll"
-import Philosophy from "@/components/Philosophy"
-import Pillars from "@/components/Pillars"
-import FeaturedProducts from "@/components/FeaturedProducts"
+import Hero from "@/components/Hero"
 import Marquee from "@/components/Marquee"
-import ServicesGrid from "@/components/ServicesGrid"
-import ConversionBanner from "@/components/ConversionBanner"
-import Visit from "@/components/Visit"
+import BentoStats from "@/components/BentoStats"
+import FeatureRows from "@/components/FeatureRows"
+import Packages from "@/components/Packages"
+import WorkCards from "@/components/WorkCards"
+import CtaCapture from "@/components/CtaCapture"
 import Footer from "@/components/Footer"
 
-// ISR so featured products refresh from Medusa at runtime (not baked at build)
+// ISR so Medusa-backed sections refresh at runtime (not baked at build)
 export const revalidate = 300
 
 export default function HomePage() {
   return (
     <main>
-      <HeroScroll />
-      <Philosophy />
-      <Pillars />
-      <FeaturedProducts />
+      <Hero />
       <Marquee />
-      <ServicesGrid />
-      <ConversionBanner />
-      <Visit />
+      <BentoStats />
+      <FeatureRows />
+      <Packages />
+      <WorkCards />
+      <CtaCapture />
       <Footer />
     </main>
   )
