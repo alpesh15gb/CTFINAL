@@ -10,7 +10,7 @@ const ROWS = [
     link: "See interior work",
     image: "/images/services/upholstery.webp",
     alt: "Custom black leather upholstery with red stitching",
-    chip: "Fitted in-house · 3–5 day turnaround",
+    chip: "Fitted in-house",
   },
   {
     title: "The sensory experience",
@@ -28,7 +28,7 @@ export default function FeatureRows() {
     <section id="capabilities" data-ghost="capabilities" className="px-6 py-24 md:py-32">
       <div className="mx-auto max-w-[1200px]">
         <Rise className="text-center">
-          <h2 className="headline-2">Studio capabilities.</h2>
+          <h2 className="headline-2">Our works.</h2>
           <p className="mx-auto mt-4 max-w-xl text-[15px] leading-relaxed text-muted">
             Explore the frontier of what your car can feel like. Our latest
             capabilities redefine the boundaries of a daily drive.

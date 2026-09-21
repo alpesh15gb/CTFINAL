@@ -5,8 +5,7 @@ import Link from "next/link"
 
 const LINKS = [
   { href: "/#hero", label: "Home" },
-  { href: "/#capabilities", label: "Capabilities" },
-  { href: "/#packages", label: "Packages" },
+  { href: "/#capabilities", label: "Works" },
   { href: "/shop", label: "Shop" },
   { href: "/cart", label: "Build List" },
 ]

@@ -9,7 +9,7 @@ const COLS: { title: string; links: { label: string; href: string; external?: bo
       { label: "Home", href: "/" },
       { label: "Shop", href: "/shop" },
       { label: "Build list", href: "/cart" },
-      { label: "Packages", href: "/#packages" },
+      { label: "Our works", href: "/#capabilities" },
     ],
   },
   {

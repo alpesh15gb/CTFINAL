@@ -2,8 +2,6 @@ import OrbitHero from "@/components/OrbitHero"
 import Marquee from "@/components/Marquee"
 import BentoStats from "@/components/BentoStats"
 import FeatureRows from "@/components/FeatureRows"
-import Packages from "@/components/Packages"
-import WorkCards from "@/components/WorkCards"
 import CtaCapture from "@/components/CtaCapture"
 import Footer from "@/components/Footer"
 
@@ -17,8 +15,6 @@ export default function HomePage() {
       <Marquee />
       <BentoStats />
       <FeatureRows />
-      <Packages />
-      <WorkCards />
       <CtaCapture />
       <Footer />
     </main>

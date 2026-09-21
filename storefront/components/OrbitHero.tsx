@@ -543,7 +543,7 @@ function StudioPanel() {
             <div className="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
               {[
                 { label: "Builds delivered", value: "250+", delta: "+12 this month", points: "0,14 8,12 16,13 24,8 32,9 40,4" },
-                { label: "Google rating", value: "4.9", delta: "312 reviews", points: "0,12 8,12 16,10 24,10 32,7 40,5" },
+                { label: "Google rating", value: "4.3", delta: "312 reviews", points: "0,12 8,12 16,10 24,10 32,7 40,5" },
                 { label: "Cars wrapped", value: "500+", delta: "+9 this month", points: "0,13 8,11 16,12 24,9 32,7 40,6" },
                 { label: "Avg. ECU gain", value: "+38 HP", delta: "dyno verified", points: "0,14 8,13 16,10 24,11 32,6 40,3" },
               ].map((s) => (
@@ -560,38 +560,6 @@ function StudioPanel() {
                   <p className="mt-2 text-xs text-muted">{s.delta}</p>
                 </div>
               ))}
-            </div>
-            <div className="mt-3 grid gap-3 lg:grid-cols-5">
-              <div className="relative overflow-hidden rounded-xl border hairline lg:col-span-2">
-                <img src="/sequences/hero/frame-01.webp" alt="Current build in the Cartunez bay" className="h-52 w-full object-cover lg:h-full" />
-                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-4">
-                  <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted">In the bay now</p>
-                  <p className="mt-1 text-sm font-medium">Thar ROXX — audio build, day 2 of 4</p>
-                </div>
-              </div>
-              <div className="rounded-xl border hairline bg-surface-2/40 p-4 lg:col-span-3">
-                <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted">Latest builds</p>
-                <ul className="mt-3 divide-y hairline">
-                  {[
-                    { name: "Fortuner · Stage 2", tag: "Wrapped satin black", color: "#e10600" },
-                    { name: "Thar · Audio build", tag: "Component + DSP tune", color: "#02bbfc" },
-                    { name: "City · Cabin retim", tag: "Nappa cream stitching", color: "#f5f4f0" },
-                  ].map((b) => (
-                    <li key={b.name} className="flex items-center justify-between gap-3 py-3 first:pt-0 last:pb-0">
-                      <div className="flex items-center gap-3">
-                        <span className="h-8 w-8 flex-none rounded-lg" style={{ background: `${b.color}22`, border: `1px solid ${b.color}55` }} />
-                        <div>
-                          <p className="text-sm font-medium">{b.name}</p>
-                          <p className="text-xs text-muted">{b.tag}</p>
-                        </div>
-                      </div>
-                      <Link href="/shop" className="text-xs text-muted transition-colors hover:text-paper">
-                        Parts →
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
             </div>
           </div>
         </div>

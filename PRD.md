@@ -22,11 +22,9 @@ Cartunez is a premium car customization studio — Shop 12 & 13, S.P. Road, Secu
 - **REQ-HERO-1** Hero: WebGL orbit — pinned 520vh scrub drives a three.js camera around an owner-supplied Lamborghini Temerario widebody GLB in a rim-lit dark studio; mouse parallax; act copy windows with velocity skew; preloader counter → curtain → camera dolly; paint-the-light swatches recolor the rim/underglow live; HUD on desktop; mobile runs the same scrub with portrait framing; reduced-motion renders one static angle. Hand-off into the Studio Panel (badge pill, headline CTAs live in the intro act).
 - **REQ-HERO-2** Site presents as a floating rounded card over an ink backdrop; each section's key content echoes as a giant dimmed ghost behind the card, crossfading per section (DESIGN_SYSTEM REF-1 / MOT-1).
 - **REQ-SEC-1** Trust marquee: uniform gray capability wordmarks, velocity-reactive drift.
-- **REQ-SEC-2** Bento grid: service stat mini-cards + gradient feature tile + studio-log activity card.
-- **REQ-SEC-3** Capability rows: alternating glassy image panels with check lists + text links.
-- **REQ-SEC-4** Signature packages: 3-tier pricing cards, highlighted center, prices live from Medusa by handle (static fallback).
-- **REQ-SEC-5** Recent builds: product image cards with arrow chips + glass title overlays (live Medusa data).
-- **REQ-SEC-6** Capture CTA: input + gradient pill, submit deep-links WhatsApp. Studio address/hours/contact live in the footer.
+- **REQ-SEC-2** Bento grid: ECU & Performance card (Diesel Tronic + Powertronic ECU rows), Interiors card with dark interior imagery, red gradient feature tile.
+- **REQ-SEC-3** "Our works": alternating glassy image rows with check lists + text links (no turnaround claims).
+- **REQ-SEC-4** Capture CTA: input + gradient pill, submit deep-links WhatsApp. Studio address/hours/contact live in the footer. (Signature-packages and recent-builds sections removed per owner, 2026-09-22.)
 
 ### Commerce
 - **REQ-SHOP-1** /shop: product listing filterable by category.

@@ -25,21 +25,7 @@ const GHOSTS: { key: string; node: React.ReactNode }[] = [
     key: "capabilities",
     node: (
       <span className="whitespace-nowrap text-[10vw] font-semibold tracking-[-0.03em]">
-        Capabilities.
-      </span>
-    ),
-  },
-  {
-    key: "packages",
-    node: <span className="text-[44vw] font-semibold leading-none tracking-[-0.05em]">₹</span>,
-  },
-  {
-    key: "builds",
-    node: (
-      <span className="flex gap-[4vw]">
-        <i className="block h-[52vh] w-[24vw] rounded-[2.5vw] bg-white/4" />
-        <i className="block h-[52vh] w-[24vw] rounded-[2.5vw] bg-white/4" />
-        <i className="block h-[52vh] w-[24vw] rounded-[2.5vw] bg-white/4" />
+        Our works.
       </span>
     ),
   },
