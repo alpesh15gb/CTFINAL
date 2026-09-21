@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react"
 import Link from "next/link"
-import type { Material, Mesh, MeshStandardMaterial } from "three"
+import type { Material, Mesh } from "three"
 
 const WA = `https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "919949695030"}`
 
@@ -88,7 +88,8 @@ export default function OrbitHero() {
       scene.fog = new THREE.Fog(0x0d0d0f, 9, 26)
 
       const camera = new THREE.PerspectiveCamera(36, 1, 0.1, 60)
-      const target = new THREE.Vector3(0, 0.85, 0)
+      // supercar sits low — keep the orbit's look-at near its beltline
+      const target = new THREE.Vector3(0, 0.55, 0)
 
       scene.add(new THREE.HemisphereLight(0x2a2a31, 0x0a0a0b, 0.55))
 
@@ -120,10 +121,10 @@ export default function OrbitHero() {
       floor.receiveShadow = true
       scene.add(floor)
 
-      // car — normalize scale/ground, recolor to studio spec
-      let bodyMat: MeshStandardMaterial | null = null
+      // car — normalize scale/ground. The Temerario is an authored model with
+      // its own materials/textures, so we render it as-is under studio lights.
       new GLTFLoader().load(
-        "/models/studio-suv.glb",
+        "/models/lamborghini-temerario-widebody.glb",
         (gltf) => {
           const car = gltf.scene
           const box = new THREE.Box3().setFromObject(car)
@@ -138,27 +139,6 @@ export default function OrbitHero() {
             const mesh = o as Mesh
             if (!mesh.isMesh) return
             mesh.castShadow = true
-            const mats = Array.isArray(mesh.material) ? mesh.material : [mesh.material]
-            for (const m of mats as MeshStandardMaterial[]) {
-              const n = (m.name || "").toLowerCase()
-              if (/glass|window/.test(n)) {
-                m.color.set(0x0a0a0c)
-                m.metalness = 0.9
-                m.roughness = 0.12
-              } else if (/body|paint|main|car/.test(n) || !bodyMat) {
-                if (!bodyMat || /body|paint|main|car/.test(n)) {
-                  bodyMat = m
-                  // near-black satin body — the rim lights do the talking
-                  m.color.set(0x101013)
-                  m.metalness = 0.85
-                  m.roughness = 0.38
-                  m.flatShading = true
-                }
-              } else {
-                m.color.multiplyScalar(0.35)
-                m.roughness = Math.min(m.roughness + 0.25, 1)
-              }
-            }
           })
           scene.add(car)
           markReady()
@@ -458,7 +438,7 @@ export default function OrbitHero() {
 
           {/* preloader + curtain */}
           {phase !== "live" && !reduced && (
-            <div className="absolute inset-0 z-30">
+            <div data-phase={phase} className="absolute inset-0 z-30">
               <div
                 className={`absolute inset-x-0 top-0 h-1/2 bg-ink transition-transform duration-[850ms] ease-[cubic-bezier(0.76,0,0.24,1)] ${
                   phase === "curtain" ? "-translate-y-full" : ""
