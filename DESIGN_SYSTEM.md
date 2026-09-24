@@ -50,15 +50,25 @@ Archivo remains only inside the logo asset. Loaded via `next/font/google`, `disp
 
 ## Motion spec
 
-Global: Lenis `lerp: 0.1`, entrances `power3.out`. Zero empty-black viewports; reduced-motion collapses all of the below to opacity-only or static.
+Global: preserve the current visual identity and content; this motion-only revision follows the owner's 2026-09-24 brief. Lenis keeps native touch momentum and is disabled when reduced motion is requested. Existing layout and assets remain authoritative; no extra horizontal sections or pins are introduced.
+
+- Shared motion constants: `storefront/lib/motion.ts`. Micro-interactions 240ms, settle 450ms, reveals 850ms; transform/opacity only for continuous motion.
+- Existing hero: desktop retains its orbit/pin; mobile uses a shorter stable-viewport scroll range, no pointer parallax. Time-based camera damping works across refresh rates. Render only while visible and changing; cached scene shadows update only when lighting/geometry changes.
+- Loading does not lock navigation or impose a fake minimum wait. Keep server-rendered copy available; reveal the scene once ready. Failed imports, WebGL, model fetch or decoding fall back to an existing image without a tall empty pin.
+- Reduced motion: static, fitted vehicle view rendered after model load and on tint/resize changes; all hero copy in document flow, no cinematic pin. Preference changes apply live.
+- Section variety: accessible masked heading words, soft body entrances, directional image reveals followed by restrained desktop parallax. Revert split markup and GSAP contexts on unmount; no JavaScript means content stays visible.
+- Primary buttons attract at most 5px; selected cards tilt at most 1.2 degrees with a soft pointer highlight. Fine pointers only, no effect on keyboard/click target behavior; reset on leave, blur, route change and reduced motion.
+- Navbar retains its sticky position and mobile overlay; add active underline, focus handling and safe scroll-lock cleanup. Route entry is brief and never delays navigation, forms or browser history.
+- Scroll ownership: while the mobile menu holds `data-nav-scroll-lock` nothing else measures or moves the page, and `ScrollTrigger.refresh()` restores the position it found (its own start-of-document measuring can otherwise snap an anchor jump back to the top). A fragment jump is only handed to Lenis while Lenis' own media condition still matches, and the landed section keeps focus after the jump.
+- Verification uses real browser interactions, reduced-motion/error paths and desktop/mobile scroll captures. Performance is measured in the test environment; no triangle-count-based 60fps guarantee.
 
 - **MOT-1 Ghost echo:** GhostLayer crossfades per section (rAF live measurement), slight 0.9→1 scale drift on the active ghost.
-- **MOT-2 Entrances:** sections rise 24px + fade at `top 80%`; no clip-path (reference is softer).
-- **MOT-3 Marquee:** base drift 0.6px/frame + smoothed scroll velocity (max +4px/frame), wraps at half track.
-- **MOT-4 Cards:** hover lift (translateY -4px) + image scale 1.0→1.05; arrow chip nudges diagonally.
+- **MOT-2 Entrances:** existing Rise wrappers coordinate desktop masked headline words, soft body copy, alternating image directions and small buffered image parallax. SplitText markup reverts on completion/unmount; touch/reduced-motion use visible static content. Route entry is a short opacity change from 0.94 to 1, never a navigation-blocking exit.
+- **MOT-3 Marquee:** elapsed-time drift at 36px/s with a capped scroll-velocity boost; repeats at the measured offset between copies (including the gap). Stops offscreen, when the document is hidden, and on reduced-motion preference changes.
+- **MOT-4 Cards and buttons:** existing product/bento cards receive fine-pointer tilt capped at 1.2° plus a subtle highlight. Primary CTA movement is capped at 5px with separate icon follow-through; card movement disengages over nested controls. Touch and reduced motion retain existing static controls.
 - **MOT-5 Glow:** hero eclipse breathes (slow scale/opacity loop) behind the Studio Panel.
 - **MOT-6 Reduced motion:** static page, ghosts hidden, marquee static, hero renders a single static studio angle with all copy stacked.
-- **MOT-7 Orbit scrub:** hero pinned at 520vh; sticky stage + rAF live-measured progress (same pattern as MOT-1 originally). Camera: azimuth 200°→340°, radius `7.4 − 1.9·sin(pπ)` (×1.5 portrait), height dips mid-scrub, all lerped 0.09 for scrub feel; intro dolly mixes in after the preloader curtain. Velocity skew ±5° on act copy. Swatches dispatch `hero-tint` → rim spot + underglow recolor. three.js is dynamically imported so it never loads on server pages that don't need it; DPR capped (1.5 mobile / 2 desktop); model ≈3.3k triangles so 60fps holds on mobile hardware.
+- **MOT-7 Orbit scrub:** existing camera path remains 200°→340° with a mid-orbit dolly and height dip; elapsed-time damping replaces fixed per-frame lerps. Desktop scroll range 520svh, tablet 360svh, phone 320svh. Reduced motion or a scene failure removes the pin and exposes all existing copy. Hero headings reveal through line masks, supporting copy follows at lower depth, and skew is restrained to ±1.2° on fine-pointer desktops. Invisible controls are inert. Only critical model bytes preload; shaders/model are rendered before the curtain releases, with no artificial minimum wait. WebGL work pauses while settled/offscreen/hidden; resources and aborted requests are disposed on navigation. The compressed model still has ~394k triangles; frame-rate depends on device/GPU and is not guaranteed by file size.
 
 ## Imagery
 

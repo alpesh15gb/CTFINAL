@@ -11,6 +11,14 @@ Sequencing layer. Implements PRD.md requirements per ARCHITECTURE.md + DESIGN_SY
 | T-5 | /shop: listing, PDP, cart, Razorpay checkout, confirmation | REQ-SHOP-* | [x] |
 | T-6 | Prod Dockerfiles, compose services, nginx blocks, env templates, deploy runbook; end-to-end run + screenshot acceptance | REQ-INF-*, REQ-QUAL-* | [x] |
 
+## Motion enhancement — 2026-09-24
+
+- [x] Audit existing motion and preserve current presentation/content.
+- [x] Implement on-demand hero rendering, accessible loading/reduced motion, section reveals, subtle magnetic/card interaction, and navigation lifecycle fixes.
+- [x] Rehearse desktop/mobile, route history, menu/anchors, shopping actions and failed assets; run production build.
+  - 33 headless-browser assertions green (desktop + mobile + landscape + reduced motion + no-JS + blocked-model), production build clean.
+  - Gate: `storefront/.env.local` must hold a live `NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY` and the Medusa API must be up (`cd medusa && npm run dev`), or `/shop` renders its error state and the commerce assertions fail.
+
 ## Verification gates
 
 - G1 (T-2): **passed** — `/store/products` returns 14 seeded products with the Cartunez publishable key; payment providers `pp_razorpay_razorpay` + `pp_system_default` enabled on the India region; uploads serve at `/static` (200).

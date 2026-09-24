@@ -18,7 +18,7 @@ export default function BentoStats() {
 
         <div className="mt-14 grid gap-4 md:grid-cols-3">
           <Rise delay={0}>
-            <div className="panel h-full p-6">
+            <div data-motion-card className="panel h-full p-6">
               <h3 className="text-center text-base font-semibold tracking-tight">ECU & Performance</h3>
               <p className="mt-2 text-center text-[13px] leading-relaxed text-muted">
                 Custom dyno maps, intake and tune support.
@@ -37,7 +37,7 @@ export default function BentoStats() {
           </Rise>
 
           <Rise delay={60}>
-            <div className="panel flex h-full flex-col overflow-hidden p-0">
+            <div data-motion-card className="panel flex h-full flex-col overflow-hidden p-0">
               <div className="p-6 pb-4">
                 <h3 className="text-center text-base font-semibold tracking-tight">Interiors</h3>
                 <p className="mt-2 text-center text-[13px] leading-relaxed text-muted">

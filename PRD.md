@@ -43,6 +43,12 @@ Cartunez is a premium car customization studio — Shop 12 & 13, S.P. Road, Secu
 - **REQ-INF-2** System nginx server blocks for cartunez.in and api.cartunez.in (ADR-3).
 - **REQ-INF-3** Razorpay keys via env only, never committed.
 
+### Motion-only revision (owner brief, 2026-09-24)
+- Preserve the current content, imagery, palette, typography, layouts and commerce routes; improve the existing components rather than rebuilding them.
+- Keep the hero as the only cinematic pin. Shorten mobile motion, retain native touch scrolling, provide static reduced-motion behavior, and never block navigation for asset loading.
+- Add restrained magnetic primary CTAs, card depth, varied semantic text/image reveals and navigation feedback, with complete lifecycle cleanup and offscreen suspension.
+- Rehearse slow/failed media, reduced-motion toggles, viewport changes, anchors, menus, browser history and shopping interactions before acceptance.
+
 ### Quality gates
 - **REQ-QUAL-1** Zero empty-black viewports at any scroll position.
 - **REQ-QUAL-2** Screenshot-based visual acceptance before handoff (golden path + edge scroll positions).

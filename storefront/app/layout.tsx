@@ -4,6 +4,7 @@ import "./globals.css"
 import SmoothScroll from "@/components/SmoothScroll"
 import Navbar from "@/components/Navbar"
 import GhostLayer from "@/components/GhostLayer"
+import MotionEffects from "@/components/MotionEffects"
 
 const archivo = Archivo({
   subsets: ["latin"],
@@ -32,10 +33,11 @@ export default function RootLayout({
     <html lang="en" className={`${archivo.variable} ${inter.variable}`}>
       <body>
         <GhostLayer />
+        <MotionEffects />
         <SmoothScroll>
           <Navbar />
           {/* REF-1: the page presents as a floating rounded card over the backdrop */}
-          <div className="relative z-10 mx-2 my-2 overflow-clip rounded-[20px] border hairline bg-ink shadow-[0_0_80px_rgba(0,0,0,0.8)] md:mx-4 md:my-4 md:rounded-[28px]">
+          <div data-site-content className="relative z-10 mx-2 my-2 overflow-clip rounded-[20px] border hairline bg-ink shadow-[0_0_80px_rgba(0,0,0,0.8)] md:mx-4 md:my-4 md:rounded-[28px]">
             {children}
           </div>
         </SmoothScroll>

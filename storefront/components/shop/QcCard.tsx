@@ -34,7 +34,7 @@ export default function QcCard({ product }: { product: ShopProduct }) {
   }
 
   return (
-    <div className="group flex flex-col rounded-2xl border hairline bg-surface p-2.5 transition-colors hover:border-white/15">
+    <div data-motion-card className="group flex flex-col rounded-2xl border hairline bg-surface p-2.5 transition-colors hover:border-white/15">
       <Link href={`/shop/${product.handle}`} className="block overflow-hidden rounded-xl bg-surface-2">
         <img
           src={product.image}

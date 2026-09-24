@@ -41,7 +41,7 @@ export default function FeatureRows() {
               key={row.title}
               className="grid items-center gap-10 md:grid-cols-2 md:gap-14"
             >
-              <Rise className={i % 2 === 1 ? "md:order-2" : ""}>
+              <Rise variant="image" direction={i % 2 === 1 ? "right" : "left"} className={i % 2 === 1 ? "md:order-2" : ""}>
                 <div className="relative">
                   <div className="overflow-hidden rounded-[1.5rem] border hairline">
                     <img src={row.image} alt={row.alt} className="aspect-[4/3] w-full object-cover transition-transform duration-700 hover:scale-[1.04]" loading="lazy" />
@@ -53,7 +53,7 @@ export default function FeatureRows() {
                 </div>
               </Rise>
 
-              <Rise delay={80} className={i % 2 === 1 ? "md:order-1" : ""}>
+              <Rise variant="text" direction={i % 2 === 1 ? "left" : "right"} delay={80} className={i % 2 === 1 ? "md:order-1" : ""}>
                 <div className={i % 2 === 1 ? "md:pr-6" : "md:pl-6"}>
                   <h3 className="headline-2 !text-[clamp(1.5rem,2.2vw,2rem)]">{row.title}</h3>
                   <p className="mt-4 max-w-md text-[15px] leading-relaxed text-muted">{row.copy}</p>
